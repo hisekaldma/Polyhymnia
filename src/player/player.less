@@ -1,0 +1,220 @@
+@interaction-color: #ff884d;
+@active-color:      #e5004d;
+@highlight-color:   #ffffb3;
+@error-color:       #e5004d;
+
+.polyhymnia-player {
+  position: relative;
+  font-family: Inconsolata, Consolas, "Andale Mono", "Lucida Console", monospace;
+
+  /* Resets */
+
+  * {
+    box-sizing: border-box;
+  }
+
+  *:focus {
+    outline: none;
+  }
+
+
+  /* Code editor */
+
+  .code {
+    display: block;
+    width: 100%;
+    height: 500px;
+    padding: 24px;
+    resize: none;
+    border: none;
+    background: rgba(255,255,255,0.8);
+    border-top-left-radius: 3px;
+    border-top-right-radius: 3px;
+    font-size: 17px;
+    line-height: 1.4em;
+    white-space: pre;
+    color: rgba(0,0,0,0.7);
+    text-rendering: optimizeSpeed; /* Jumps otherwise */
+
+    .error-highlight { 
+      color: @error-color;
+      border-bottom: 2px solid @error-color;
+    }
+
+    .playing {
+      color: @highlight-color;
+    }
+  }
+
+
+  /* Error message */
+
+  .error {
+    position: absolute;
+    bottom: 64px;
+    width: 100%;
+    height: 40px;
+    padding: 12px 24px;
+    background: @error-color;
+    color: #ffffff;
+    font-size: 14px;
+    line-height: 1.4em;    
+  }
+
+
+  /* Controls */
+
+  .controls {
+    position: relative;
+    width: 100%;
+    height: 64px;
+    background: rgb(255,255,255);
+    border-bottom-left-radius: 3px;
+    border-bottom-right-radius: 3px;
+    color: @interaction-color;
+
+
+    /* Play/stop buttons */
+
+    .play,
+    .stop {
+      position: absolute;
+      top: 12px;
+      left: 16px;
+      width: 40px;
+      height: 40px;
+      border: 1px solid @interaction-color;
+      border-radius: 50%;
+      background: none;
+      cursor: pointer;
+
+      &:hover {
+        border-color: @active-color;
+      }
+
+      svg path,
+      svg rect {
+        stroke-width: 1;
+      }
+
+      &:hover {
+        svg path,
+        svg rect {
+          stroke: #e5004d;
+        }
+      }
+    }
+
+    .play svg {
+      position: absolute;
+      top: 10px;
+      left: 12px;
+    }
+
+    .stop svg {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+    }
+
+
+    /* Slider */
+
+    .slider {
+      position: absolute;
+      top: 0px;
+      left: 80px;
+      right: 32px;
+
+      .output {
+        position: absolute;
+        top: 3px;
+        left: -27px;
+        width: 70px;
+        font-size: 14px;
+        text-align: center;
+
+        &.hide {
+          opacity: 0;
+          transition: opacity 1s ease 1s;
+        }
+        &.show {
+          opacity: 1;
+          transition: opacity 0.2s ease;
+        }
+      }
+    
+      input {
+        -webkit-appearance: none;
+        display: block;
+        position: absolute;
+        top: 24px;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+
+        &::-webkit-slider-runnable-track {
+          height: 1px;
+          margin-top: 8px;
+          background: @interaction-color;
+        }
+
+        &::-webkit-slider-thumb {
+          -webkit-appearance: none;
+          position: relative;
+          top: -8px;
+          height: 16px;
+          width: 16px;
+          border: 1px solid @interaction-color;
+          background: #ffffff;
+          border-radius: 50%;
+
+          &:active {
+            border-color: @active-color;
+          }
+        }
+        
+        &::-moz-range-track {
+          height: 1px;
+          background: @interaction-color;
+          border: none;
+        }
+
+        &::-moz-range-thumb {
+          position: relative;
+          height: 16px;
+          width: 16px;
+          border: 1px solid @interaction-color;
+          background: #ffffff;
+          border-radius: 50%;
+
+          &:active {
+            border-color: @active-color;
+          }
+        }
+      }
+    }
+  }
+
+
+  /* Not supported message */
+
+  .not-supported {
+    position: relative;
+    width: 100%;
+    height: 64px;
+    background: rgb(255,255,255);
+    border-bottom-left-radius: 3px;
+    border-bottom-right-radius: 3px;
+    padding: 20px;
+    color: @interaction-color;
+    text-align: center;
+
+    a {
+      color: @interaction-color;
+      &:hover {
+        border-bottom-color: @interaction-color;
+      }
+    }
+  }
+}
