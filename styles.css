@@ -1,0 +1,110 @@
+/* Resets */
+
+html, body, div, span, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+abbr, address, cite, code, del, dfn, em, img, ins, kbd, q, samp,
+small, strong, sub, sup, var, b, i, dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td,
+article, aside, canvas, details, figcaption, figure,
+footer, header, hgroup, menu, nav, section, summary,
+time, mark, audio, video {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font-size: 100%;
+  font: inherit;
+  vertical-align: baseline;
+}
+article, aside, details, figcaption, figure,
+footer, header, hgroup, menu, nav, section {
+  display: block;
+}
+body { font:13px/1.231 sans-serif; *font-size:small; } 
+html { overflow-y: scroll; }
+a:hover, a:active { outline: none; }
+nav ul, nav li { margin: 0; list-style:none; list-style-image: none; }
+::-moz-selection{ background: #000; color:#fff; text-shadow: none; }
+::selection { background:#000; color:#fff; text-shadow: none; }
+a:link { -webkit-tap-highlight-color: transparent; }
+h1, h2, h3, h4, h5, h6 { font-weight: normal; }
+* { box-sizing: border-box; }
+
+
+/* Typography */
+
+body {
+  font: 400 17px/1.4rem "minion-pro", "Minion Pro", Times, "Times New Roman", serif;
+  color: #fff;
+  -webkit-text-size-adjust: none;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+h1, h2 {
+  font-size: 22px;
+}
+h1 {
+  font-weight: 600;
+  padding-top: 2.8rem;
+  padding-bottom: 0.7rem;
+}
+h3 {
+  font-size: 17px;
+  padding-top: 1.4rem;  
+}
+a, a:visited, a:hover {
+  border-bottom: 1px solid rgba(255, 217, 178, 0.5);
+  text-decoration: none;
+  color: #fff;
+}
+a:hover {
+  border-bottom: 1px solid #fff;
+}
+ul {
+  margin: 0;
+  padding: 0;
+}
+li {
+  list-style-type: none;
+}
+
+
+/* Design */
+
+html {
+  height: 100%;
+}
+
+body {
+  height: 100%;  
+  background: linear-gradient(175deg, #f03976, #ff7e73);
+}
+
+.contents {
+  width: 942px;
+  margin: 0 auto;
+  overflow: auto;
+}
+
+.editor {
+  width: 70%;
+  float: left;
+}
+
+.reference {
+  float: left;
+  padding-left: 50px;
+  width: 30%;
+}
+
+.reference ul {
+  color: rgba(255, 255, 255, 0.7);  
+  font-size: 15px;
+  font-family: Inconsolata, Consolas, "Andale Mono", "Lucida Console", monospace;
+}
+
+.line-above {
+  border-top: 1px solid rgba(255, 217, 178, 0.5);
+  margin-top: 2rem;
+  padding-top: 0.7rem;
+}

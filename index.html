@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Polyhymnia</title>
+    <link rel="stylesheet" type="text/css" href="http://fonts.googleapis.com/css?family=Inconsolata">
+    <link rel="stylesheet" type="text/css" href="polyhymnia.css">
+    <link rel="stylesheet" type="text/css" href="styles.css">
+    <script src="polyhymnia.min.js"></script>
+    <script type="text/javascript">
+    document.addEventListener('DOMContentLoaded', function() {
+      var context = new Polyhymnia.Context({
+        instruments: [
+          { name: 'Kick', samples: [{ url: 'audio/Kick.mp3' }] },
+          { name: 'Snare', samples: [{ url: 'audio/Snare.mp3' }] },
+          { name: 'Hihat', samples: [{ url: 'audio/Hihat.mp3' }] },
+          {
+            name: 'Pad',
+            samples: [
+              { root: 'C', octave: 1, url: 'audio/BreathC1.mp3' },
+              { root: 'C', octave: 2, url: 'audio/BreathC2.mp3' },
+              { root: 'C', octave: 3, url: 'audio/BreathC3.mp3' },
+              { root: 'C', octave: 4, url: 'audio/BreathC4.mp3' },
+              { root: 'C', octave: 5, url: 'audio/BreathC5.mp3' }
+            ]
+          }
+        ]
+      });
+      var player = new Polyhymnia.Player(document.querySelector('.editor'), context);
+    });
+    </script>
+    <script src="//use.typekit.net/oed5lor.js"></script>
+    <script>try{Typekit.load();}catch(e){}</script>
+  </head>
+  <body>
+    <div class="contents">
+      <h1>Polyhymnia</h1>
+      <div class="editor">Play -> A1 Drums A2 Drums Play
+
+A1 =>
+  Pad:           C
+  (x > 0.4) Pad: E
+  (x > 0.8) Pad: G
+
+A2 =>
+  Pad:           D
+  (x > 0.4) Pad: F
+  (x > 0.8) Pad: A
+
+Drums =>
+  Kick:            x _ _ _ _ _ x _ _ _ _ _ _ _ x _
+  (x > 0.2) Hihat: _ _ _ _ x _ _ _ _ _ x _ _ _ _ _
+  (x > 0.4) Kick:  _ _ _ _ _ _ _ _ _ _ _ _ x _ _ _
+  (x > 0.6) Hihat: x _ _ _ _ _ x _ x _ _ _ x x x x</div>
+      <div class="reference">
+        <h2>Reference</h2>
+        <h3>Instruments</h3>
+        <ul>
+          <li>Pad</li>
+          <li>Kick</li>
+          <li>Snare</li>
+          <li>Hihat</li>
+        </ul>
+        <h3>Sequences</h3>
+        <ul>
+          <li>Play -> Verse Chorus Play</li>
+          <li>Verse -> A1 A2 A1 A2</li>
+          <li>Chorus -> A3 A3</li>
+        </ul>
+        <h3>Patterns</h3>
+        <ul>
+          <li>A1 => Pad: C D# C D#</li>
+          <li>A2 => Pad: Cm _ Gdom7 _</li>
+          <li>A3 => Kick: x _ _ x _ _ x _</li>
+        </ul>
+        <h3>Conditions</h3>
+        <ul>
+          <li>A1 =><br>(x > 0.3) Pad: C _ C _<br>(0.6 > x > 0.3) Pad: _ D _ D</li>
+        </ul>
+      </div>
+    </div>
+    <div class="contents">
+      <div class="line-above">
+        <p>A project by <a href="http://hisekaldma.com">Jonathan Hise Kaldma</a>. Code on <a href="https://github.com/hisekaldma/Polyhymnia">Github</a>.</p>
+      </div>
+    </div>
+  </body>
+</html>

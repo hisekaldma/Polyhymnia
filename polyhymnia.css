@@ -1,0 +1,181 @@
+.polyhymnia-player {
+  position: relative;
+  font-family: Inconsolata, Consolas, "Andale Mono", "Lucida Console", monospace;
+  /* Resets */
+  /* Code editor */
+  /* Error message */
+  /* Controls */
+  /* Not supported message */
+}
+.polyhymnia-player * {
+  box-sizing: border-box;
+}
+.polyhymnia-player *:focus {
+  outline: none;
+}
+.polyhymnia-player .code {
+  display: block;
+  width: 100%;
+  height: 500px;
+  padding: 24px;
+  resize: none;
+  border: none;
+  background: rgba(255, 255, 255, 0.8);
+  border-top-left-radius: 3px;
+  border-top-right-radius: 3px;
+  font-size: 17px;
+  line-height: 1.4em;
+  white-space: pre;
+  color: rgba(0, 0, 0, 0.7);
+  text-rendering: optimizeSpeed;
+  /* Jumps otherwise */
+}
+.polyhymnia-player .code .error-highlight {
+  color: #e5004d;
+  border-bottom: 2px solid #e5004d;
+}
+.polyhymnia-player .code .playing {
+  color: #ffffb3;
+}
+.polyhymnia-player .error {
+  position: absolute;
+  bottom: 64px;
+  width: 100%;
+  height: 40px;
+  padding: 12px 24px;
+  background: #e5004d;
+  color: #ffffff;
+  font-size: 14px;
+  line-height: 1.4em;
+}
+.polyhymnia-player .controls {
+  position: relative;
+  width: 100%;
+  height: 64px;
+  background: #ffffff;
+  border-bottom-left-radius: 3px;
+  border-bottom-right-radius: 3px;
+  color: #ff884d;
+  /* Play/stop buttons */
+  /* Slider */
+}
+.polyhymnia-player .controls .play,
+.polyhymnia-player .controls .stop {
+  position: absolute;
+  top: 12px;
+  left: 16px;
+  width: 40px;
+  height: 40px;
+  border: 1px solid #ff884d;
+  border-radius: 50%;
+  background: none;
+  cursor: pointer;
+}
+.polyhymnia-player .controls .play:hover,
+.polyhymnia-player .controls .stop:hover {
+  border-color: #e5004d;
+}
+.polyhymnia-player .controls .play svg path,
+.polyhymnia-player .controls .stop svg path,
+.polyhymnia-player .controls .play svg rect,
+.polyhymnia-player .controls .stop svg rect {
+  stroke-width: 1;
+}
+.polyhymnia-player .controls .play:hover svg path,
+.polyhymnia-player .controls .stop:hover svg path,
+.polyhymnia-player .controls .play:hover svg rect,
+.polyhymnia-player .controls .stop:hover svg rect {
+  stroke: #e5004d;
+}
+.polyhymnia-player .controls .play svg {
+  position: absolute;
+  top: 10px;
+  left: 12px;
+}
+.polyhymnia-player .controls .stop svg {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+}
+.polyhymnia-player .controls .slider {
+  position: absolute;
+  top: 0px;
+  left: 80px;
+  right: 32px;
+}
+.polyhymnia-player .controls .slider .output {
+  position: absolute;
+  top: 3px;
+  left: -27px;
+  width: 70px;
+  font-size: 14px;
+  text-align: center;
+}
+.polyhymnia-player .controls .slider .output.hide {
+  opacity: 0;
+  transition: opacity 1s ease 1s;
+}
+.polyhymnia-player .controls .slider .output.show {
+  opacity: 1;
+  transition: opacity 0.2s ease;
+}
+.polyhymnia-player .controls .slider input {
+  -webkit-appearance: none;
+  display: block;
+  position: absolute;
+  top: 24px;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+.polyhymnia-player .controls .slider input::-webkit-slider-runnable-track {
+  height: 1px;
+  margin-top: 8px;
+  background: #ff884d;
+}
+.polyhymnia-player .controls .slider input::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  position: relative;
+  top: -8px;
+  height: 16px;
+  width: 16px;
+  border: 1px solid #ff884d;
+  background: #ffffff;
+  border-radius: 50%;
+}
+.polyhymnia-player .controls .slider input::-webkit-slider-thumb:active {
+  border-color: #e5004d;
+}
+.polyhymnia-player .controls .slider input::-moz-range-track {
+  height: 1px;
+  background: #ff884d;
+  border: none;
+}
+.polyhymnia-player .controls .slider input::-moz-range-thumb {
+  position: relative;
+  height: 16px;
+  width: 16px;
+  border: 1px solid #ff884d;
+  background: #ffffff;
+  border-radius: 50%;
+}
+.polyhymnia-player .controls .slider input::-moz-range-thumb:active {
+  border-color: #e5004d;
+}
+.polyhymnia-player .not-supported {
+  position: relative;
+  width: 100%;
+  height: 64px;
+  background: #ffffff;
+  border-bottom-left-radius: 3px;
+  border-bottom-right-radius: 3px;
+  padding: 20px;
+  color: #ff884d;
+  text-align: center;
+}
+.polyhymnia-player .not-supported a {
+  color: #ff884d;
+}
+.polyhymnia-player .not-supported a:hover {
+  border-bottom-color: #ff884d;
+}
