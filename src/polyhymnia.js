@@ -3,6 +3,7 @@ var Polyhymnia = Polyhymnia || {};
 Polyhymnia.getAudioContext = function() {
   'use strict';
   if (!Polyhymnia.audioContext) {
+    window.AudioContext = window.AudioContext || window.webkitAudioContext;
     Polyhymnia.audioContext = new AudioContext();
   }
   return Polyhymnia.audioContext;
@@ -10,6 +11,7 @@ Polyhymnia.getAudioContext = function() {
 
 Polyhymnia.isSupported = function() {
   'use strict';
+  window.AudioContext = window.AudioContext || window.webkitAudioContext;
   if (window.AudioContext) {
     return true;
   } else {
