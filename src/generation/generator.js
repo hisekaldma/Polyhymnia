@@ -6,6 +6,7 @@ Polyhymnia.Generator = function() {
   var self = this;
 
   this.instruments = {};
+  this.ended = false;
 
   var startRule = 'Play';
   var params = {};
@@ -62,6 +63,7 @@ Polyhymnia.Generator = function() {
       sequence: [startRule],
       index: -1
     };
+    self.ended = false;
   };
 
   function step() {
@@ -75,6 +77,8 @@ Polyhymnia.Generator = function() {
       if (parents.length > 0) {
         current = parents.pop();
         return step();
+      } else {
+        self.ended = true;
       }
     }
   }

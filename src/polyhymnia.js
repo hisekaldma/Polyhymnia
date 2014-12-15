@@ -62,11 +62,16 @@ Polyhymnia.Context = function(options) {
     sequencer.animCallback = callback;
   }
 
+  function setStopCallback(callback) {
+    metronome.stopCallback = callback;
+  }
+
   return {
     play: metronome.play,
     stop: metronome.stop,
     setParam: generator.setParam,
     setRules: generator.setRules,
-    setAnimCallback: setAnimCallback
+    setAnimCallback: setAnimCallback,
+    setStopCallback: setStopCallback
   };
 };
