@@ -10,11 +10,25 @@ Polyhymnia.getAudioContext = function() {
 
 Polyhymnia.isSupported = function() {
   'use strict';
-  return window.AudioContext !== undefined;
+  if (window.AudioContext) {
+    return true;
+  } else {
+    return false;
+  }
 };
 
 Polyhymnia.Context = function(options) {
   'use strict';
+
+  if (!Polyhymnia.isSupported()) {
+    return {
+      play: function() { },
+      stop: function() { },
+      setParam: function() { },
+      setRules: function() { },
+      setAnimCallback: function() { }
+    };
+  }
 
   // Generator
   var generator = new Polyhymnia.Generator();
