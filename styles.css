@@ -106,5 +106,5 @@ body {
 .line-above {
   border-top: 1px solid rgba(255, 217, 178, 0.5);
   margin-top: 2rem;
-  padding-top: 0.7rem;
+  padding: 0.7rem 0;
 }
