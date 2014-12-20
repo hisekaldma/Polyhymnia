@@ -1,10 +1,5 @@
 var Polyhymnia = Polyhymnia || {};
 
-Polyhymnia.ruleType = {
-  SEQUENCE:       'sequence',
-  PATTERN:        'pattern'
-};
-
 Polyhymnia.noteType = {
   PAUSE:          'pause',
   NOTE:           'note',
@@ -16,7 +11,6 @@ Polyhymnia.parse = function(tokensToParse) {
   'use strict';
 
   var tokenType = Polyhymnia.tokenType;
-  var ruleType = Polyhymnia.ruleType;
   var noteType = Polyhymnia.noteType;
 
   var currentToken;
@@ -40,7 +34,7 @@ Polyhymnia.parse = function(tokensToParse) {
     }
   }
 
-  // Name -> Definitions | Name => Definitions
+  // Name -> Definitions
   function parseRule() {
     var name = '';
     if (currentToken.type == tokenType.NAME) {
@@ -52,15 +46,11 @@ Polyhymnia.parse = function(tokensToParse) {
     nextToken(); // Name
 
     var type;
-    if (currentToken && currentToken.type == tokenType.SINGLE_ARROW) {
-      type = ruleType.SEQUENCE;
-    } else if (currentToken && currentToken.type == tokenType.DOUBLE_ARROW) {
-      type = ruleType.PATTERN;
-    } else {
-      // ERROR: Expected -> or =>
-      throw exception('Expected -> or =>');
+    if (!currentToken || currentToken.type !== tokenType.SINGLE_ARROW) {
+      // ERROR: Expected ->
+      throw exception('Expected ->');
     }
-    nextToken(); // -> =>
+    nextToken(); // ->
 
     var definitions = [];
     do {
@@ -71,23 +61,16 @@ Polyhymnia.parse = function(tokensToParse) {
           break;
         }
       }
-
-      var definition;
-      if (type == ruleType.SEQUENCE) {
-        definition = parseSequenceDefinition();
-      } else if (type == ruleType.PATTERN) {
-        definition = parsePatternDefinition();
-      }
-      definitions.push(definition);
+      definitions.push(parseDefinition());
     } while (currentToken);
 
     return { type: type, name: name, definitions: definitions };
   }
 
-  // (Condition) Sequence
-  function parseSequenceDefinition() {
+  // (Condition) Definition
+  function parseDefinition() {
     if (currentToken === undefined) {
-      throw exception('Expected a sequence');
+      throw exception('Expected a sequence or pattern');
     }
 
     var condition;
@@ -95,6 +78,20 @@ Polyhymnia.parse = function(tokensToParse) {
       condition = parseCondition();
     }
 
+    if (currentToken && currentToken.type == tokenType.INSTRUMENT) {
+      var pattern = parsePattern();
+      return { condition: condition, instrument: pattern.instrument, pattern: pattern.pattern };
+    } else if (currentToken && currentToken.type == tokenType.NAME) {
+      var sequence = parseSequence();
+      return { condition: condition, sequence: sequence };
+    } else {
+      // ERROR: Expected a sequence or pattern
+      throw exception('Expected a sequence or pattern');
+    }
+  }
+
+  // Sequence
+  function parseSequence() {
     var sequence = [];
     while (currentToken && currentToken.type !== tokenType.EOL) {
       if (currentToken.type == tokenType.NAME) {
@@ -105,21 +102,11 @@ Polyhymnia.parse = function(tokensToParse) {
       }
       nextToken();
     }
-
-    return { condition: condition, sequence: sequence };
+    return sequence;
   }
 
-  // (Condition) Instrument: Pattern
-  function parsePatternDefinition() {
-    if (currentToken === undefined) {
-      throw exception('Expected a pattern');
-    }
-
-    var condition;
-    if (currentToken.type == tokenType.LEFT_PAREN) {
-      condition = parseCondition();
-    }
-
+  // Instrument: Pattern
+  function parsePattern() {
     var instrument;
     if (currentToken && currentToken.type == tokenType.INSTRUMENT) {
       instrument = currentToken.value;
@@ -134,7 +121,7 @@ Polyhymnia.parse = function(tokensToParse) {
       pattern.push(parseNote());
     }
 
-    return { condition: condition, instrument: instrument, pattern: pattern };
+    return { instrument: instrument, pattern: pattern };
   }
 
   function parseNote() {
@@ -272,13 +259,12 @@ Polyhymnia.parse = function(tokensToParse) {
     skipEmptyLines();
   }
 
-
   // Check that all rule references have definitions
   for (var r = 0; r < rules.length; r++) {
     var rule = rules[r];
-    if (rule.type == ruleType.SEQUENCE) {
-      for (var d = 0; d < rule.definitions.length; d++) {
-        var sequence = rule.definitions[d].sequence;
+    for (var d = 0; d < rule.definitions.length; d++) {
+      var sequence = rule.definitions[d].sequence;
+      if (sequence) {
         for (var s = 0; s < sequence.length; s++) {
           var name = sequence[s];
           var found = false;

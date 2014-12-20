@@ -114,9 +114,10 @@ Polyhymnia.Player = function(element, context) {
     // Get all notes
     var notes = [];
     for (var r = 0; r < rules.length; r++) {
-      if (rules[r].type == Polyhymnia.ruleType.PATTERN) {
-        for (var d = 0; d < rules[r].definitions.length; d++) {
-          notes = notes.concat(rules[r].definitions[d].pattern);
+      for (var d = 0; d < rules[r].definitions.length; d++) {
+        var pattern = rules[r].definitions[d].pattern;
+        if (pattern) {
+          notes = notes.concat(pattern);
         }
       }
     }
