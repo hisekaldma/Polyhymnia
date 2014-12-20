@@ -17,10 +17,12 @@ Polyhymnia.Sequencer = function() {
     // Calculate where we're at
     var stepInBar = step % (self.stepsPerBeat * self.measure.num);
 
-    // Generate new patterns if we have to
+    // If we've reached the end of a bar, generate new patterns
     if (stepInBar === 0) {
-      var rule = self.generator.getNextRule();
-      patterns = rule ? rule.patterns : [];
+      if (step > 0) {
+        self.generator.step();
+      }
+      patterns = self.generator.getPatterns();
     }
 
     // Play the patterns

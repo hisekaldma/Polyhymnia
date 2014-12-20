@@ -8,7 +8,6 @@ Polyhymnia.Metronome = function() {
   this.interval = 25.0; // ms
   this.lookahead = 0.1; // s
   this.sequencer = null;
-  this.stopCallback = undefined;
 
   var isPlaying = false;
   var currentStep = 0;
@@ -38,12 +37,6 @@ Polyhymnia.Metronome = function() {
       // Schedule all beats to play during the lookahead    
       while (nextStepTime < audioContext.currentTime + self.lookahead) {
         self.sequencer.scheduleStep(currentStep, nextStepTime);
-        if (self.sequencer.generator.ended) {
-          stop();
-          if (self.stopCallback) {
-            self.stopCallback();
-          }
-        }
         step();
       }
     }

@@ -9,7 +9,6 @@ Polyhymnia.Player = function(element, context) {
   // Context
   var music = context;
   music.setAnimCallback(highlightNotes);
-  music.setStopCallback(stop);
 
   // Elements
   element.innerHTML = Polyhymnia.templates.player;

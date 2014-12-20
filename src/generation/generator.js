@@ -2,17 +2,14 @@ var Polyhymnia = Polyhymnia || {};
 
 Polyhymnia.Generator = function() {
   'use strict';
-  var ruleType = Polyhymnia.ruleType;
   var self = this;
 
   this.instruments = {};
-  this.ended = false;
 
   var startRule = 'Play';
   var params = {};
   var ruleDictionary = null;
-  var current = null;
-  var parents = [];
+  var ruleTree = null;
 
   this.setParam = function(name, value) {
     params[name] = value;
@@ -22,11 +19,12 @@ Polyhymnia.Generator = function() {
     return params[name] || 0.0;
   };
 
-  this.getNextRule = function() {
-    if (!ruleDictionary) {
-      return;
-    }
-    return step();
+  this.getPatterns = function() {
+    return getPatterns(ruleTree);
+  };
+
+  this.step = function() {
+    step(ruleTree);
   };
 
   this.setRules = function(rules) {
@@ -42,16 +40,6 @@ Polyhymnia.Generator = function() {
       }
       if (!hasStart)
         throw new Error('There is no rule named \'' + startRule + '\'');
-
-      // Check that all instruments exist
-      for (var r = 0; r < rules.length; r++) {
-        for (var d = 0; d < rules[r].definitions.length; d++) {
-          var instrument = rules[r].definitions[d].instrument;
-          if (instrument && !self.instruments[instrument]) {
-            throw new Error('There is no instrument named \'' + instrument + '\'');
-          }
-        }
-      }
     }
 
     // Prepare for playing
@@ -59,61 +47,71 @@ Polyhymnia.Generator = function() {
     for (var j = 0; j < rules.length; j++) {
       ruleDictionary[rules[j].name] = rules[j];
     }
-    current = {
-      sequence: [startRule],
-      index: -1
-    };
-    self.ended = false;
+    ruleTree = buildTree(ruleDictionary[startRule]);
   };
 
-  function step() {
-    current.index++;
-    if (current.index < current.sequence.length) {
-      // Still in sequence, evaluate the current rule
-      var rule = ruleDictionary[current.sequence[current.index]];
-      return evaluateRule(rule);
-    } else {
-      // We've reached the end of the sequence, go back up and step forward
-      if (parents.length > 0) {
-        current = parents.pop();
-        return step();
-      } else {
-        self.ended = true;
+  function buildTree(rule) {
+    var node = { name: rule.name, definitions: [] };
+
+    rule.definitions.forEach(function(definition) {
+      if (definition.sequence) {
+        // Sequence definition, find its children recursively
+        var children = [];
+        for (var i = 0; i < definition.sequence.length; i++) {
+          var rule = ruleDictionary[definition.sequence[i]];
+          children.push(buildTree(rule));
+        }
+        node.definitions.push({ condition: definition.condition, sequence: children, index: 0 });
+      } else if (definition.pattern) {
+        // Pattern definition, just add it
+        node.definitions.push({ condition: definition.condition, pattern: definition.pattern, instrument: definition.instrument });
       }
-    }
+    });
+
+    return node;
   }
 
-  function evaluateRule(rule) {
-    var validDefinitions = getValidDefinitions(rule.definitions);
-
-    if (rule.type == ruleType.SEQUENCE) {
-      // Sequence rule, prepare for evaluating it
-      if (current) {
-        parents.push(current);
+  function step(node) {
+    var finished = true;
+    node.definitions.forEach(function(definition) {
+      if (definition.sequence) {
+        // Sequence definition, step it's current child
+        var currentRule = definition.sequence[definition.index];
+        var currentFinished = step(currentRule);
+        if (currentFinished) {
+          definition.index++;
+        }
+        if (definition.index >= definition.sequence.length) {
+          definition.index = 0;          
+        } else {
+          finished = false;
+        }
+      } else if (definition.pattern) {
+        // Pattern definition, nothing to step
       }
+    });
+    return finished;
+  }
 
-      // Choose a sequence whose condition applies
-      var randomDefinition = getRandom(validDefinitions);
-      current = {
-        sequence: randomDefinition.sequence,
-        index: 0
-      };
+  function getPatterns(node) {
+    // Get all definitions whose conditions apply
+    var definitions = getValidDefinitions(node.definitions);
 
-      // Evaluate the first child
-      var child = ruleDictionary[current.sequence[current.index]];
-      return evaluateRule(child);
-    } else if (rule.type == ruleType.PATTERN) {
-      // Pattern rule, get all patterns whose conditions apply
-      var patterns = [];
-      validDefinitions.forEach(function(definition) {
+    // Go through all definitions and evaluate them
+    var patterns = [];
+    definitions.forEach(function(definition) {
+      if (definition.sequence) {
+        // Sequence definition
+        var childPatterns = getPatterns(definition.sequence[definition.index]);
+        childPatterns.forEach(function(p) { patterns.push(p); });
+      } else if (definition.pattern) {
+        // Pattern definition, get the patterns
         patterns.push({ instrument: definition.instrument, pattern: definition.pattern });
-      });
-      return {
-        name: rule.name,
-        patterns: patterns
-      };
-    }
-  }  
+      }
+    });
+
+    return patterns;
+  }
 
   function getValidDefinitions(definitions) {
     var validDefinitions = [];
