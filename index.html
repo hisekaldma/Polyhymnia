@@ -49,19 +49,21 @@
   <body>
     <div class="contents">
       <h1>Polyhymnia</h1>
-      <div class="editor">Play -> A1 Drums A2 Drums Play
+      <div class="editor">Play -> A1 A2
 
-A1 =>
-  Pad:           C
-  (x > 0.4) Pad: E
-  (x > 0.8) Pad: G
+A1 ->
+  Drums
+  (x > 0.3) Pad: C
+  (x > 0.5) Pad: E
+  (x > 0.7) Pad: G
 
-A2 =>
-  Pad:           D
-  (x > 0.4) Pad: F
-  (x > 0.8) Pad: A
+A2 ->
+  Drums
+  (x > 0.3) Pad: D
+  (x > 0.5) Pad: F
+  (x > 0.7) Pad: A
 
-Drums =>
+Drums ->
   Kick:            x _ _ _ _ _ x _ _ _ _ _ _ _ x _
   (x > 0.2) Hihat: _ _ _ _ x _ _ _ _ _ x _ _ _ _ _
   (x > 0.4) Kick:  _ _ _ _ _ _ _ _ _ _ _ _ x _ _ _
@@ -83,13 +85,13 @@ Drums =>
         </ul>
         <h3>Patterns</h3>
         <ul>
-          <li>A1 => Pad: C D# C D#</li>
-          <li>A2 => Pad: Cm _ Gdom7 _</li>
-          <li>A3 => Kick: x _ _ x _ _ x _</li>
+          <li>A1 -> Pad: C D# C D#</li>
+          <li>A2 -> Pad: Cm _ Gdom7 _</li>
+          <li>A3 -> Kick: x _ _ x _ _ x _</li>
         </ul>
         <h3>Conditions</h3>
         <ul>
-          <li>A1 =><br>(x > 0.3) Pad: C _ C _<br>(0.6 > x > 0.3) Pad: _ D _ D</li>
+          <li>A1 -><br>(x > 0.3) Pad: C _ C _<br>(0.6 > x > 0.3) Pad: _ D _ D</li>
         </ul>
       </div>
     </div>
