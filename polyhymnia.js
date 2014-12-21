@@ -4,7 +4,6 @@ var Polyhymnia = Polyhymnia || {};
 
 Polyhymnia.Generator = function() {
   'use strict';
-  var ruleType = Polyhymnia.ruleType;
   var self = this;
 
   this.instruments = {};
@@ -12,8 +11,7 @@ Polyhymnia.Generator = function() {
   var startRule = 'Play';
   var params = {};
   var ruleDictionary = null;
-  var current = null;
-  var parents = [];
+  var ruleTree = null;
 
   this.setParam = function(name, value) {
     params[name] = value;
@@ -23,11 +21,12 @@ Polyhymnia.Generator = function() {
     return params[name] || 0.0;
   };
 
-  this.getNextRule = function() {
-    if (!ruleDictionary) {
-      return;
-    }
-    return step();
+  this.getPatterns = function() {
+    return getPatterns(ruleTree);
+  };
+
+  this.step = function() {
+    step(ruleTree);
   };
 
   this.setRules = function(rules) {
@@ -43,16 +42,6 @@ Polyhymnia.Generator = function() {
       }
       if (!hasStart)
         throw new Error('There is no rule named \'' + startRule + '\'');
-
-      // Check that all instruments exist
-      for (var r = 0; r < rules.length; r++) {
-        for (var d = 0; d < rules[r].definitions.length; d++) {
-          var instrument = rules[r].definitions[d].instrument;
-          if (instrument && !self.instruments[instrument]) {
-            throw new Error('There is no instrument named \'' + instrument + '\'');
-          }
-        }
-      }
     }
 
     // Prepare for playing
@@ -60,58 +49,71 @@ Polyhymnia.Generator = function() {
     for (var j = 0; j < rules.length; j++) {
       ruleDictionary[rules[j].name] = rules[j];
     }
-    current = {
-      sequence: [startRule],
-      index: -1
-    };
+    ruleTree = buildTree(ruleDictionary[startRule]);
   };
 
-  function step() {
-    current.index++;
-    if (current.index < current.sequence.length) {
-      // Still in sequence, evaluate the current rule
-      var rule = ruleDictionary[current.sequence[current.index]];
-      return evaluateRule(rule);
-    } else {
-      // We've reached the end of the sequence, go back up and step forward
-      if (parents.length > 0) {
-        current = parents.pop();
-        return step();
+  function buildTree(rule) {
+    var node = { name: rule.name, definitions: [] };
+
+    rule.definitions.forEach(function(definition) {
+      if (definition.sequence) {
+        // Sequence definition, find its children recursively
+        var children = [];
+        for (var i = 0; i < definition.sequence.length; i++) {
+          var rule = ruleDictionary[definition.sequence[i]];
+          children.push(buildTree(rule));
+        }
+        node.definitions.push({ condition: definition.condition, sequence: children, index: 0 });
+      } else if (definition.pattern) {
+        // Pattern definition, just add it
+        node.definitions.push({ condition: definition.condition, pattern: definition.pattern, instrument: definition.instrument });
       }
-    }
+    });
+
+    return node;
   }
 
-  function evaluateRule(rule) {
-    var validDefinitions = getValidDefinitions(rule.definitions);
-
-    if (rule.type == ruleType.SEQUENCE) {
-      // Sequence rule, prepare for evaluating it
-      if (current) {
-        parents.push(current);
+  function step(node) {
+    var finished = true;
+    node.definitions.forEach(function(definition) {
+      if (definition.sequence) {
+        // Sequence definition, step it's current child
+        var currentRule = definition.sequence[definition.index];
+        var currentFinished = step(currentRule);
+        if (currentFinished) {
+          definition.index++;
+        }
+        if (definition.index >= definition.sequence.length) {
+          definition.index = 0;          
+        } else {
+          finished = false;
+        }
+      } else if (definition.pattern) {
+        // Pattern definition, nothing to step
       }
+    });
+    return finished;
+  }
 
-      // Choose a sequence whose condition applies
-      var randomDefinition = getRandom(validDefinitions);
-      current = {
-        sequence: randomDefinition.sequence,
-        index: 0
-      };
+  function getPatterns(node) {
+    // Get all definitions whose conditions apply
+    var definitions = getValidDefinitions(node.definitions);
 
-      // Evaluate the first child
-      var child = ruleDictionary[current.sequence[current.index]];
-      return evaluateRule(child);
-    } else if (rule.type == ruleType.PATTERN) {
-      // Pattern rule, get all patterns whose conditions apply
-      var patterns = [];
-      validDefinitions.forEach(function(definition) {
+    // Go through all definitions and evaluate them
+    var patterns = [];
+    definitions.forEach(function(definition) {
+      if (definition.sequence) {
+        // Sequence definition
+        var childPatterns = getPatterns(definition.sequence[definition.index]);
+        childPatterns.forEach(function(p) { patterns.push(p); });
+      } else if (definition.pattern) {
+        // Pattern definition, get the patterns
         patterns.push({ instrument: definition.instrument, pattern: definition.pattern });
-      });
-      return {
-        name: rule.name,
-        patterns: patterns
-      };
-    }
-  }  
+      }
+    });
+
+    return patterns;
+  }
 
   function getValidDefinitions(definitions) {
     var validDefinitions = [];
@@ -139,11 +141,6 @@ Polyhymnia.Generator = function() {
 };
 var Polyhymnia = Polyhymnia || {};
 
-Polyhymnia.ruleType = {
-  SEQUENCE:       'sequence',
-  PATTERN:        'pattern'
-};
-
 Polyhymnia.noteType = {
   PAUSE:          'pause',
   NOTE:           'note',
@@ -155,10 +152,10 @@ Polyhymnia.parse = function(tokensToParse) {
   'use strict';
 
   var tokenType = Polyhymnia.tokenType;
-  var ruleType = Polyhymnia.ruleType;
   var noteType = Polyhymnia.noteType;
 
   var currentToken;
+  var lookaheadToken;
   var tokens = tokensToParse.slice(0);
   var rules = [];
 
@@ -171,6 +168,7 @@ Polyhymnia.parse = function(tokensToParse) {
 
   function nextToken() {
     currentToken = tokens.length > 0 ? tokens.shift() : undefined;
+    lookaheadToken = tokens.length > 0 ? tokens[0] : undefined;
   }
 
   function skipEmptyLines() {
@@ -179,7 +177,19 @@ Polyhymnia.parse = function(tokensToParse) {
     }
   }
 
-  // Name -> Definitions | Name => Definitions
+  function endOfRule() {
+    if (!currentToken) {
+      return true;
+    } else if (currentToken.type == tokenType.EOL) {
+      return true;
+    } else if (currentToken.type == tokenType.NAME && lookaheadToken && lookaheadToken.type == tokenType.SINGLE_ARROW) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  // Name -> Definitions
   function parseRule() {
     var name = '';
     if (currentToken.type == tokenType.NAME) {
@@ -191,42 +201,29 @@ Polyhymnia.parse = function(tokensToParse) {
     nextToken(); // Name
 
     var type;
-    if (currentToken && currentToken.type == tokenType.SINGLE_ARROW) {
-      type = ruleType.SEQUENCE;
-    } else if (currentToken && currentToken.type == tokenType.DOUBLE_ARROW) {
-      type = ruleType.PATTERN;
-    } else {
-      // ERROR: Expected -> or =>
-      throw exception('Expected -> or =>');
+    if (!currentToken || currentToken.type !== tokenType.SINGLE_ARROW) {
+      // ERROR: Expected ->
+      throw exception('Expected ->');
     }
-    nextToken(); // -> =>
+    nextToken(); // ->
+
+    if (currentToken && currentToken.type == tokenType.EOL) {
+      nextToken(); // EOL
+    }
 
     var definitions = [];
     do {
-      if (currentToken && currentToken.type == tokenType.EOL) {
-        nextToken();
-        if (currentToken && currentToken.type == tokenType.EOL) {
-          nextToken();
-          break;
-        }
-      }
-
-      var definition;
-      if (type == ruleType.SEQUENCE) {
-        definition = parseSequenceDefinition();
-      } else if (type == ruleType.PATTERN) {
-        definition = parsePatternDefinition();
-      }
-      definitions.push(definition);
-    } while (currentToken);
+      definitions.push(parseDefinition());
+      nextToken();
+    } while (!endOfRule());
 
     return { type: type, name: name, definitions: definitions };
   }
 
-  // (Condition) Sequence
-  function parseSequenceDefinition() {
+  // (Condition) Definition
+  function parseDefinition() {
     if (currentToken === undefined) {
-      throw exception('Expected a sequence');
+      throw exception('Expected a sequence or pattern');
     }
 
     var condition;
@@ -234,6 +231,20 @@ Polyhymnia.parse = function(tokensToParse) {
       condition = parseCondition();
     }
 
+    if (currentToken && currentToken.type == tokenType.INSTRUMENT) {
+      var pattern = parsePattern();
+      return { condition: condition, instrument: pattern.instrument, pattern: pattern.pattern };
+    } else if (currentToken && currentToken.type == tokenType.NAME) {
+      var sequence = parseSequence();
+      return { condition: condition, sequence: sequence };
+    } else {
+      // ERROR: Expected a sequence or pattern
+      throw exception('Expected a sequence or pattern');
+    }
+  }
+
+  // Sequence
+  function parseSequence() {
     var sequence = [];
     while (currentToken && currentToken.type !== tokenType.EOL) {
       if (currentToken.type == tokenType.NAME) {
@@ -244,21 +255,11 @@ Polyhymnia.parse = function(tokensToParse) {
       }
       nextToken();
     }
-
-    return { condition: condition, sequence: sequence };
+    return sequence;
   }
 
-  // (Condition) Instrument: Pattern
-  function parsePatternDefinition() {
-    if (currentToken === undefined) {
-      throw exception('Expected a pattern');
-    }
-
-    var condition;
-    if (currentToken.type == tokenType.LEFT_PAREN) {
-      condition = parseCondition();
-    }
-
+  // Instrument: Pattern
+  function parsePattern() {
     var instrument;
     if (currentToken && currentToken.type == tokenType.INSTRUMENT) {
       instrument = currentToken.value;
@@ -273,7 +274,7 @@ Polyhymnia.parse = function(tokensToParse) {
       pattern.push(parseNote());
     }
 
-    return { condition: condition, instrument: instrument, pattern: pattern };
+    return { instrument: instrument, pattern: pattern };
   }
 
   function parseNote() {
@@ -411,13 +412,12 @@ Polyhymnia.parse = function(tokensToParse) {
     skipEmptyLines();
   }
 
-
   // Check that all rule references have definitions
   for (var r = 0; r < rules.length; r++) {
     var rule = rules[r];
-    if (rule.type == ruleType.SEQUENCE) {
-      for (var d = 0; d < rule.definitions.length; d++) {
-        var sequence = rule.definitions[d].sequence;
+    for (var d = 0; d < rule.definitions.length; d++) {
+      var sequence = rule.definitions[d].sequence;
+      if (sequence) {
         for (var s = 0; s < sequence.length; s++) {
           var name = sequence[s];
           var found = false;
@@ -867,9 +867,10 @@ Polyhymnia.Player = function(element, context) {
     // Get all notes
     var notes = [];
     for (var r = 0; r < rules.length; r++) {
-      if (rules[r].type == Polyhymnia.ruleType.PATTERN) {
-        for (var d = 0; d < rules[r].definitions.length; d++) {
-          notes = notes.concat(rules[r].definitions[d].pattern);
+      for (var d = 0; d < rules[r].definitions.length; d++) {
+        var pattern = rules[r].definitions[d].pattern;
+        if (pattern) {
+          notes = notes.concat(pattern);
         }
       }
     }
@@ -1138,10 +1139,12 @@ Polyhymnia.Sequencer = function() {
     // Calculate where we're at
     var stepInBar = step % (self.stepsPerBeat * self.measure.num);
 
-    // Generate new patterns if we have to
+    // If we've reached the end of a bar, generate new patterns
     if (stepInBar === 0) {
-      var rule = self.generator.getNextRule();
-      patterns = rule ? rule.patterns : [];
+      if (step > 0) {
+        self.generator.step();
+      }
+      patterns = self.generator.getPatterns();
     }
 
     // Play the patterns

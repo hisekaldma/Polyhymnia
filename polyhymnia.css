@@ -29,6 +29,7 @@
   color: rgba(0, 0, 0, 0.7);
   text-rendering: optimizeSpeed;
   /* Jumps otherwise */
+  overflow-y: scroll;
 }
 .polyhymnia-player .code .error-highlight {
   color: #e5004d;
