@@ -14,6 +14,7 @@ Polyhymnia.parse = function(tokensToParse) {
   var noteType = Polyhymnia.noteType;
 
   var currentToken;
+  var lookaheadToken;
   var tokens = tokensToParse.slice(0);
   var rules = [];
 
@@ -26,11 +27,24 @@ Polyhymnia.parse = function(tokensToParse) {
 
   function nextToken() {
     currentToken = tokens.length > 0 ? tokens.shift() : undefined;
+    lookaheadToken = tokens.length > 0 ? tokens[0] : undefined;
   }
 
   function skipEmptyLines() {
     while (currentToken && currentToken.type == tokenType.EOL) {
       nextToken();
+    }
+  }
+
+  function endOfRule() {
+    if (!currentToken) {
+      return true;
+    } else if (currentToken.type == tokenType.EOL) {
+      return true;
+    } else if (currentToken.type == tokenType.NAME && lookaheadToken && lookaheadToken.type == tokenType.SINGLE_ARROW) {
+      return true;
+    } else {
+      return false;
     }
   }
 
@@ -52,17 +66,15 @@ Polyhymnia.parse = function(tokensToParse) {
     }
     nextToken(); // ->
 
+    if (currentToken && currentToken.type == tokenType.EOL) {
+      nextToken(); // EOL
+    }
+
     var definitions = [];
     do {
-      if (currentToken && currentToken.type == tokenType.EOL) {
-        nextToken();
-        if (currentToken && currentToken.type == tokenType.EOL) {
-          nextToken();
-          break;
-        }
-      }
       definitions.push(parseDefinition());
-    } while (currentToken);
+      nextToken();
+    } while (!endOfRule());
 
     return { type: type, name: name, definitions: definitions };
   }
