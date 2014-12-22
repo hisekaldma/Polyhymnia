@@ -28,6 +28,7 @@ Polyhymnia.Context = function(options) {
       stop: function() { },
       setParam: function() { },
       setRules: function() { },
+      setTempo: function() { },
       setAnimCallback: function() { }
     };
   }
@@ -58,6 +59,10 @@ Polyhymnia.Context = function(options) {
     }
   }
 
+  function setTempo(tempo) {
+    metronome.tempo = tempo;
+  }
+
   function setAnimCallback(callback) {
     sequencer.animCallback = callback;
   }
@@ -67,6 +72,7 @@ Polyhymnia.Context = function(options) {
     stop: metronome.stop,
     setParam: generator.setParam,
     setRules: generator.setRules,
+    setTempo: setTempo,
     setAnimCallback: setAnimCallback
   };
 };

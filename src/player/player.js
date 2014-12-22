@@ -17,6 +17,7 @@ Polyhymnia.Player = function(element, context) {
   var stopButton = element.querySelector('.stop');
   var paramSlider = element.querySelector('.slider input');
   var paramOutput = element.querySelector('.slider .output');
+  var tempoInput = element.querySelector('.tempo input');
   var codeEditor = element.querySelector('.code');
   var errorMessage = element.querySelector('.error');
   var notSupportedMessage = element.querySelector('.not-supported');
@@ -85,6 +86,17 @@ Polyhymnia.Player = function(element, context) {
       codeEditor.innerHTML = code;
       resetCode();
     }, 1);
+  }
+
+  function changeTempo() {
+    if (tempoInput.value === '') {
+      tempoInput.value = 120;
+    } else if (tempoInput.value > parseInt(tempoInput.max)) {
+      tempoInput.value = tempoInput.max;
+    } else if (tempoInput.value < parseInt(tempoInput.min)) {
+      tempoInput.value = tempoInput.min;
+    }
+    music.setTempo(tempoInput.value);
   }
 
   function changeParam() {
@@ -202,6 +214,7 @@ Polyhymnia.Player = function(element, context) {
     stopButton.addEventListener('click', stop);
     paramSlider.addEventListener('input', changeParam);
     paramSlider.addEventListener('change', endChangeParam);
+    tempoInput.addEventListener('input', changeTempo);
     codeEditor.addEventListener('keydown', type);
     element.addEventListener ('paste', paste);
   } else {

@@ -17,6 +17,23 @@
     outline: none;
   }
 
+  input {
+    font-size: inherit;
+    font-weight: inherit;
+    font-family: inherit;
+    color: inherit;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  input[type=number] {
+    -moz-appearance: textfield;
+  }
+
+  input[type=number]::-webkit-inner-spin-button, 
+  input[type=number]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+  }
+  
 
   /* Code editor */
 
@@ -125,7 +142,7 @@
       position: absolute;
       top: 0px;
       left: 80px;
-      right: 32px;
+      right: 100px;
 
       .output {
         position: absolute;
@@ -193,6 +210,20 @@
             border-color: @active-color;
           }
         }
+      }
+    }
+
+    .tempo {
+      position: absolute;
+      top: 20px;
+      right: 18px;
+
+      input {
+        border: none;
+        width: 30px;
+        padding: 0;
+        margin-right: 8px;        
+        text-align: right;
       }
     }
   }
