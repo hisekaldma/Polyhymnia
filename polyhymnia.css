@@ -13,6 +13,20 @@
 .polyhymnia-player *:focus {
   outline: none;
 }
+.polyhymnia-player input {
+  font-size: inherit;
+  font-weight: inherit;
+  font-family: inherit;
+  color: inherit;
+  -webkit-font-smoothing: antialiased;
+}
+.polyhymnia-player input[type=number] {
+  -moz-appearance: textfield;
+}
+.polyhymnia-player input[type=number]::-webkit-inner-spin-button,
+.polyhymnia-player input[type=number]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+}
 .polyhymnia-player .code {
   display: block;
   width: 100%;
@@ -102,7 +116,7 @@
   position: absolute;
   top: 0px;
   left: 80px;
-  right: 32px;
+  right: 100px;
 }
 .polyhymnia-player .controls .slider .output {
   position: absolute;
@@ -162,6 +176,18 @@
 }
 .polyhymnia-player .controls .slider input::-moz-range-thumb:active {
   border-color: #e5004d;
+}
+.polyhymnia-player .controls .tempo {
+  position: absolute;
+  top: 20px;
+  right: 18px;
+}
+.polyhymnia-player .controls .tempo input {
+  border: none;
+  width: 30px;
+  padding: 0;
+  margin-right: 8px;
+  text-align: right;
 }
 .polyhymnia-player .not-supported {
   position: relative;

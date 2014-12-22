@@ -1,4 +1,4 @@
-var Polyhymnia = Polyhymnia || {}; Polyhymnia.templates = { 'player': '<div class="polyhymnia-player">    <div class="code" contenteditable></div>    <div class="controls">      <button class="play">     <svg x="0px" y="0px" width="18px" height="18px">       <path fill="none" stroke="#FF884D" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" d="M16,9L2,17V1L16,9z"/>     </svg>     </button>      <button class="stop" style="display: none">       <svg x="0px" y="0px" width="18px" height="18px">         <rect x="2" y="2" fill="none" stroke="#FF884D" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" width="14" height="14"/>       </svg>     </button>      <div class="slider">       <div class="output hide">x = 0</div>       <input type="range" min="0" max="1" value="0" step="0.01" />     </div>   </div>    <div class="error" style="display: none"></div>    <div class="not-supported" style="display: none">     Your browser doesn’t support web audio. Why don’t you try <a href="https://www.google.com/chrome/browser/desktop/">Chrome</a>?   </div> </div>' };
+var Polyhymnia = Polyhymnia || {}; Polyhymnia.templates = { 'player': '<div class="polyhymnia-player">    <div class="code" contenteditable></div>    <div class="controls">      <button class="play">       <svg x="0px" y="0px" width="18px" height="18px">         <path fill="none" stroke="#FF884D" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" d="M16,9L2,17V1L16,9z"/>       </svg>     </button>      <button class="stop" style="display: none">       <svg x="0px" y="0px" width="18px" height="18px">         <rect x="2" y="2" fill="none" stroke="#FF884D" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" width="14" height="14"/>       </svg>     </button>      <div class="slider">       <div class="output hide">x = 0</div>       <input type="range" min="0" max="1" value="0" step="0.01" />     </div>      <div class="tempo">       <input type="number" min="5" max="320" value="120" step="1" maxlength="3" /><label>bpm</label>     </div>   </div>    <div class="error" style="display: none"></div>    <div class="not-supported" style="display: none">     Your browser doesn’t support web audio. Why don’t you try <a href="https://www.google.com/chrome/browser/desktop/">Chrome</a>?   </div> </div>' };
 
 var Polyhymnia = Polyhymnia || {};
 
@@ -770,6 +770,7 @@ Polyhymnia.Player = function(element, context) {
   var stopButton = element.querySelector('.stop');
   var paramSlider = element.querySelector('.slider input');
   var paramOutput = element.querySelector('.slider .output');
+  var tempoInput = element.querySelector('.tempo input');
   var codeEditor = element.querySelector('.code');
   var errorMessage = element.querySelector('.error');
   var notSupportedMessage = element.querySelector('.not-supported');
@@ -838,6 +839,17 @@ Polyhymnia.Player = function(element, context) {
       codeEditor.innerHTML = code;
       resetCode();
     }, 1);
+  }
+
+  function changeTempo() {
+    if (tempoInput.value === '') {
+      tempoInput.value = 120;
+    } else if (tempoInput.value > parseInt(tempoInput.max)) {
+      tempoInput.value = tempoInput.max;
+    } else if (tempoInput.value < parseInt(tempoInput.min)) {
+      tempoInput.value = tempoInput.min;
+    }
+    music.setTempo(tempoInput.value);
   }
 
   function changeParam() {
@@ -955,6 +967,7 @@ Polyhymnia.Player = function(element, context) {
     stopButton.addEventListener('click', stop);
     paramSlider.addEventListener('input', changeParam);
     paramSlider.addEventListener('change', endChangeParam);
+    tempoInput.addEventListener('input', changeTempo);
     codeEditor.addEventListener('keydown', type);
     element.addEventListener ('paste', paste);
   } else {
@@ -1287,6 +1300,7 @@ Polyhymnia.Context = function(options) {
       stop: function() { },
       setParam: function() { },
       setRules: function() { },
+      setTempo: function() { },
       setAnimCallback: function() { }
     };
   }
@@ -1317,6 +1331,10 @@ Polyhymnia.Context = function(options) {
     }
   }
 
+  function setTempo(tempo) {
+    metronome.tempo = tempo;
+  }
+
   function setAnimCallback(callback) {
     sequencer.animCallback = callback;
   }
@@ -1326,6 +1344,7 @@ Polyhymnia.Context = function(options) {
     stop: metronome.stop,
     setParam: generator.setParam,
     setRules: generator.setRules,
+    setTempo: setTempo,
     setAnimCallback: setAnimCallback
   };
 };
