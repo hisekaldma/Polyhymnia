@@ -6,86 +6,55 @@ Polyhymnia.Player = function(element, context) {
   // Code
   var contents = element.textContent;
 
-  // Context
+  // Music
+  var rules = [];
   var music = context;
   music.setAnimCallback(highlightNotes);
 
   // Elements
   element.innerHTML = Polyhymnia.templates.player;
-  var controls = element.querySelector('.controls');
-  var playButton = element.querySelector('.play');
-  var stopButton = element.querySelector('.stop');
-  var paramSlider = element.querySelector('.slider input');
-  var paramOutput = element.querySelector('.slider .output');
-  var tempoInput = element.querySelector('.tempo input');
-  var codeEditor = element.querySelector('.code');
+  var controls =     element.querySelector('.controls');
+  var playButton =   element.querySelector('.play');
+  var stopButton =   element.querySelector('.stop');
+  var paramSlider =  element.querySelector('.slider input');
+  var paramOutput =  element.querySelector('.slider .output');
+  var tempoInput =   element.querySelector('.tempo input');
+  var codeEditor =   element.querySelector('.code .editor');
+  var codeDisplay =  element.querySelector('.code .display');
+  var codeText =     element.querySelector('.code .text');
+  var codeCursor =   element.querySelector('.code .cursor');
   var errorMessage = element.querySelector('.error');
   var notSupportedMessage = element.querySelector('.not-supported');
   var noteElems = [];
-  codeEditor.textContent = contents;
+  codeEditor.value = contents;
+
+  // Private vars
+  var cursorPos;
 
   // Functions
   function play() {
-    try {
-      // Parse
-      var code = codeEditor.textContent;
-      var tokens = Polyhymnia.tokenize(code);
-      var rules = Polyhymnia.parse(tokens);
-
-      // Play
-      music.setRules(rules);
-      music.play();
-      playButton.style.display = 'none';
-      stopButton.style.display = 'block';
-
-      // Clear error message
-      errorMessage.style.display = 'none';
-
-      // Prepare notes for highlight
-      resetCodeWithNotes(rules);
-    } catch(e) {
-      // Error message
-      errorMessage.textContent = e.message;
-      errorMessage.style.display = 'block';
-
-      // Highlight error
-      if (e.start && e.end) {
-        resetCodeWithError(e);
-      } else {
-        throw e;
-      }
-    }
+    parse();
+    music.play();
+    playButton.style.display = 'none';
+    stopButton.style.display = 'block';
   }
 
   function stop() {
     music.stop();
     playButton.style.display = 'block';
     stopButton.style.display = 'none';
-    resetCode();
+    highlightNotes([]);
   }
 
-  function type(e) {
-    if (e.keyCode === 13) {
-      var end = getCaret() == codeEditor.textContent.length;
+  function parse() {
+    // Parse rules
+    var code = codeEditor.value;
+    var tokens = Polyhymnia.tokenize(code);
+    rules = Polyhymnia.parse(tokens);
+    music.setRules(rules);
 
-      // Don't create junk <br> or <div> on enter – just create line break
-      document.execCommand('insertHTML', false, '\n');
-      if (end) {
-        // If at the end, insert an extra line break to get the desired effect
-        document.execCommand('insertHTML', false, '\n');
-      }
-      e.preventDefault();
-    }
-  }
-
-  function paste(e) {
-    // Wait for paste to finish, then clean input
-    setTimeout(function(){
-      var code = codeEditor.innerHTML;
-      code = code.replace(/<br.*?>/g, '\n'); // Preserve line breaks
-      codeEditor.innerHTML = code;
-      resetCode();
-    }, 1);
+    // Render the code
+    renderCode();
   }
 
   function changeTempo() {
@@ -119,9 +88,9 @@ Polyhymnia.Player = function(element, context) {
     paramOutput.classList.remove('show');
   }
 
-  function resetCodeWithNotes(rules) {
+  function renderCode() {
     // Get the code
-    var code = codeEditor.textContent;
+    var code = codeEditor.value;
 
     // Get all notes
     var notes = [];
@@ -136,52 +105,68 @@ Polyhymnia.Player = function(element, context) {
 
     // Wrap notes in spans
     var html = '';
-    if (notes.length > 0) {
-      var n = 0;
-      for (var i = 0; i < code.length; i++) {
-        if (notes[n] && notes[n].start == i) {
-          html += '<span class="note" data-start="' + notes[n].start + '">';
-        }
-        html += code.charAt(i);
-        if (notes[n] && notes[n].end == i + 1) {
-          html += '</span>';
-          n++;
-        }
+    var n = 0;
+    for (var i = 0; i < code.length; i++) {
+      if (n < notes.length && notes[n] && notes[n].start == i) {
+        html += '<span class="note" data-start="' + notes[n].start + '">';
+      }
+
+      html += code.charAt(i);
+
+      if (n < notes.length && notes[n] && notes[n].end == i + 1) {
+        html += '</span>';
+        n++;
       }
     }
 
-    // Replace contents of the code editor
-    codeEditor.innerHTML = html;
+    // Replace contents of the code display
+    codeText.innerHTML = html;
 
     // Get all note elements for later highlighting
     noteElems = [];
-    var elems = codeEditor.querySelectorAll('.note');
+    var elems = codeText.querySelectorAll('.note');
     for (var e = 0; e < elems.length; e++) {
       noteElems.push({ elem: elems[e], start: elems[e].dataset.start });
     }
   }
 
-  function resetCode() {
-    codeEditor.innerHTML = codeEditor.textContent;
-  }
+  function render() {
+    var newCursorPos = codeEditor.selectionDirection == 'forward' ? codeEditor.selectionEnd : codeEditor.selectionStart;
 
-  function resetCodeWithError(error) {
-    // Get the code
-    var code = codeEditor.textContent;
+    // Draw the cursor
+    if (document.activeElement === codeEditor) {
+      codeCursor.style.display = 'block';
 
-    // Wrap error in span
-    var html = '';
-    for (var i = 0; i < code.length; i++) {
-      if (i == error.start) {
-        html += '<span class="error-highlight">';
-      } else if (i == error.end) {
-        html += '</span>';
+      // Only redraw the cursor if it's moved
+      if (newCursorPos !== cursorPos) {
+        cursorPos = newCursorPos;
+
+        // Measure text sizes
+        var rect = codeCursor.getBoundingClientRect();
+        var lineHeight = rect.height - (codeCursor.offsetHeight - codeCursor.clientHeight);
+        var characterWidth = rect.width - (codeCursor.offsetWidth - codeCursor.clientWidth);
+
+        // Calculate position
+        var lines = codeEditor.value.substr(0, cursorPos).split('\n');
+        var top = (lines.length - 1) * lineHeight;
+        var left = lines[lines.length - 1].length * characterWidth;
+
+        // Move the cursor
+        codeCursor.classList.remove('blink');
+        codeCursor.style.top = top + 'px';
+        codeCursor.style.left = left - 1 + 'px';
+        var reflow = codeCursor.offsetWidth; // Trigger animation reset
+        codeCursor.classList.add('blink');
       }
-      html += code.charAt(i);
+    } else {
+      codeCursor.style.display = 'none';
     }
 
-    // Replace contents of the code editor
-    codeEditor.innerHTML = html;
+    // Sync scroll
+    codeDisplay.scrollTop = codeEditor.scrollTop;
+
+    // Repaint
+    window.requestAnimationFrame(render);    
   }
 
   function highlightNotes(notes) {
@@ -200,25 +185,20 @@ Polyhymnia.Player = function(element, context) {
     }
   }
 
-  function getCaret() {
-    var range = window.getSelection().getRangeAt(0);
-    var preCaretRange = range.cloneRange();
-    preCaretRange.selectNodeContents(codeEditor);
-    preCaretRange.setEnd(range.endContainer, range.endOffset);
-    return preCaretRange.toString().length;
-  }
-
   // Events
   if (Polyhymnia.isSupported()) {
-    playButton.addEventListener('click', play);
-    stopButton.addEventListener('click', stop);
-    paramSlider.addEventListener('input', changeParam);
-    paramSlider.addEventListener('change', endChangeParam);
-    tempoInput.addEventListener('input', changeTempo);
-    codeEditor.addEventListener('keydown', type);
-    element.addEventListener ('paste', paste);
+    playButton.addEventListener('click',     play);
+    stopButton.addEventListener('click',     stop);
+    paramSlider.addEventListener('input',    changeParam);
+    paramSlider.addEventListener('change',   endChangeParam);
+    tempoInput.addEventListener('input',     changeTempo);
+    codeEditor.addEventListener('input',     parse);
   } else {
     controls.style.display = 'none';
     notSupportedMessage.style.display = 'block';
   }
+
+  // Rendering
+  renderCode();
+  window.requestAnimationFrame(render);
 };
