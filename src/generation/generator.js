@@ -47,7 +47,13 @@ Polyhymnia.Generator = function() {
     for (var j = 0; j < rules.length; j++) {
       ruleDictionary[rules[j].name] = rules[j];
     }
+    var oldRuleTree = ruleTree;    
     ruleTree = buildTree(ruleDictionary[startRule]);
+
+    // Copy state to allow replacing the rules while playing
+    if (oldRuleTree) {
+      copyState(oldRuleTree, ruleTree);
+    }
   };
 
   function buildTree(rule) {
@@ -111,6 +117,19 @@ Polyhymnia.Generator = function() {
     });
 
     return patterns;
+  }
+
+  function copyState(oldNode, newNode) {
+    for (var i = 0; i < oldNode.definitions.length; i++) {
+      var oldDefinition = oldNode.definitions[i];
+      var newDefinition = newNode.definitions.length > i ? oldNode.definitions[i] : undefined;
+      if (oldDefinition && newDefinition && oldDefinition.sequence && newDefinition.sequence) {
+        newDefinition.index = oldDefinition.index;
+        var oldCurrent = oldDefinition.sequence[oldDefinition.index];
+        var newCurrent = newDefinition.sequence[newDefinition.index];
+        copyState(oldCurrent, newCurrent);
+      }
+    }
   }
 
   function getValidDefinitions(definitions) {
