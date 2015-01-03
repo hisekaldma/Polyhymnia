@@ -28,20 +28,6 @@ Polyhymnia.Generator = function() {
   };
 
   this.setRules = function(rules) {
-    // Check that there are rules
-    if (!rules || rules.length === 0) {
-      throw new Error('No rules to play');
-    } else {
-      // Check that the start rule exists
-      var hasStart = false;
-      for (var i = 0; i < rules.length; i++) {
-        if (rules[i].name == startRule)
-          hasStart = true;
-      }
-      if (!hasStart)
-        throw new Error('There is no rule named \'' + startRule + '\'');
-    }
-
     // Prepare for playing
     ruleDictionary = {};
     for (var j = 0; j < rules.length; j++) {
@@ -57,7 +43,12 @@ Polyhymnia.Generator = function() {
   };
 
   function buildTree(rule) {
-    var node = { name: rule.name, definitions: [] };
+    var node = { name: name || '', definitions: [] };
+
+    // If we can't find the rule, return an empty node, so we can keep playing
+    if (!rule) {
+      return node;
+    }
 
     rule.definitions.forEach(function(definition) {
       if (definition.sequence) {

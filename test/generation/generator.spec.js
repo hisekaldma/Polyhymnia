@@ -300,27 +300,4 @@ describe('Generator', function() {
     expect(patterns.length).toBe(1);
     expect(patterns[0].instrument).toBe('Synth');
   });
-
-  it('needs rules', function() {
-    var generator = new Polyhymnia.Generator();
-
-    expect(function() {
-      generator.setRules([]);
-    }).toThrowError('No rules to play');
-  });
-
-  it('needs a start rule', function() {
-    var generator = new Polyhymnia.Generator();
-
-    expect(function() {
-      generator.setRules([
-        { name: 'R0', definitions:
-          [
-            { instrument: 'Piano', condition: { param: 'x', min: 0.0 }, pattern: []},
-            { instrument: 'Conga', condition: { param: 'x', min: 0.5 }, pattern: []}
-          ]
-        }
-      ]);
-    }).toThrowError('There is no rule named \'Play\'');
-  });
 });
