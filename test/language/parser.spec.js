@@ -3,11 +3,11 @@ describe('Parser', function() {
   var noteType = Polyhymnia.noteType;
 
   it('can parse a simple sequence rule', function() {
-    var rules = Polyhymnia.parse(Polyhymnia.tokenize('R1 -> R2 R2\n\nR2 -> Piano: C'));
+    var rules = Polyhymnia.parse(Polyhymnia.tokenize('R1 -> R2 R3'));
 
     expect(rules[0].name).toBe('R1');
     expect(rules[0].definitions[0].sequence[0]).toBe('R2');
-    expect(rules[0].definitions[0].sequence[1]).toBe('R2');
+    expect(rules[0].definitions[0].sequence[1]).toBe('R3');
   });
 
   it('can parse a simple pattern rule', function() {
@@ -70,103 +70,104 @@ describe('Parser', function() {
   });
 
   it('doesn\'t parse rules that don\'t start with a name' , function() {
-    expect(function() {
-      Polyhymnia.parse(Polyhymnia.tokenize('x -> R2 R3'));
-    }).toThrowError('Rules must start with a name');
+    var rules = Polyhymnia.parse(Polyhymnia.tokenize('x -> R2 R3'));
+    expect(rules.errors[0].error).toBe('Rules must start with a name');
   });
 
   it('doesn\'t parse rules that don\'t have an arrow', function() {
-    expect(function() {
-      Polyhymnia.parse(Polyhymnia.tokenize('R1 R2 R3'));
-    }).toThrowError('Expected ->');
+    var rules = Polyhymnia.parse(Polyhymnia.tokenize('R1 R2 R3'));
+    expect(rules.errors[0].error).toBe('Expected ->');
   });
 
   it('doesn\'t parse conditions without numbers', function() {
-    expect(function() {
-      Polyhymnia.parse(Polyhymnia.tokenize('R1 -> (x > y) R1 R2'));
-    }).toThrowError('Expected a number');
+    var rules1 = Polyhymnia.parse(Polyhymnia.tokenize('R1 -> (x > y) R1 R2'));
+    expect(rules1.errors[0].error).toBe('Expected a number');
 
-    expect(function() {
-      Polyhymnia.parse(Polyhymnia.tokenize('R1 -> (x < y) R1 R2'));
-    }).toThrowError('Expected a number');
+    var rules2 = Polyhymnia.parse(Polyhymnia.tokenize('R1 -> (x < y) R1 R2'));
+    expect(rules2.errors[0].error).toBe('Expected a number');
 
-    expect(function() {
-      Polyhymnia.parse(Polyhymnia.tokenize('R1 -> (x < y < z) R1 R2'));
-    }).toThrowError('Expected a number');
+    var rules3 = Polyhymnia.parse(Polyhymnia.tokenize('R1 -> (x < y < z) R1 R2'));
+    expect(rules3.errors[0].error).toBe('Expected a number');
 
-    expect(function() {
-      Polyhymnia.parse(Polyhymnia.tokenize('R1 -> (x > y > z) R1 R2'));
-    }).toThrowError('Expected a number');
+    var rules4 = Polyhymnia.parse(Polyhymnia.tokenize('R1 -> (x > y > z) R1 R2'));
+    expect(rules4.errors[0].error).toBe('Expected a number');
   });
 
   it('doesn\'t parse conditions without parameters', function() {
-    expect(function() {
-      Polyhymnia.parse(Polyhymnia.tokenize('R1 -> (0.1 > 0.2) R1 R2'));
-    }).toThrowError('Expected a parameter');
+    var rules1 = Polyhymnia.parse(Polyhymnia.tokenize('R1 -> (0.1 > 0.2) R1 R2'));
+    expect(rules1.errors[0].error).toBe('Expected a parameter');
 
-    expect(function() {
-      Polyhymnia.parse(Polyhymnia.tokenize('R1 -> (0.1 < 0.2) R1 R2'));
-    }).toThrowError('Expected a parameter');
+    var rules2 = Polyhymnia.parse(Polyhymnia.tokenize('R1 -> (0.1 < 0.2) R1 R2'));
+    expect(rules2.errors[0].error).toBe('Expected a parameter');
 
-    expect(function() {
-      Polyhymnia.parse(Polyhymnia.tokenize('R1 -> (0.1 < 0.2 < 0.3) R1 R2'));
-    }).toThrowError('Expected a parameter');
+    var rules3 = Polyhymnia.parse(Polyhymnia.tokenize('R1 -> (0.1 < 0.2 < 0.3) R1 R2'));
+    expect(rules3.errors[0].error).toBe('Expected a parameter');
 
-    expect(function() {
-      Polyhymnia.parse(Polyhymnia.tokenize('R1 -> (0.3 > 0.2 > 0.1) R1 R2'));
-    }).toThrowError('Expected a parameter');
+    var rules4 = Polyhymnia.parse(Polyhymnia.tokenize('R1 -> (0.3 > 0.2 > 0.1) R1 R2'));
+    expect(rules4.errors[0].error).toBe('Expected a parameter');
   });
 
   it('doesn\'t parse conditions without < or >', function() {
-    expect(function() {
-      Polyhymnia.parse(Polyhymnia.tokenize('R1 -> (x == 0.1) R1 R2'));
-    }).toThrowError('Expected < or >');
+    var rules1 = Polyhymnia.parse(Polyhymnia.tokenize('R1 -> (x == 0.1) R1 R2'));
+    expect(rules1.errors[0].error).toBe('Expected < or >');
 
-    expect(function() {
-      Polyhymnia.parse(Polyhymnia.tokenize('R1 -> (0.1 == x) R1 R2'));
-    }).toThrowError('Expected < or >');
+    var rules2 = Polyhymnia.parse(Polyhymnia.tokenize('R1 -> (0.1 == x) R1 R2'));
+    expect(rules2.errors[0].error).toBe('Expected < or >');
   });
 
   it('doesn\'t parse conditions that don\'t end with )', function() {
-    expect(function() {
-      Polyhymnia.parse(Polyhymnia.tokenize('R1 -> (x > 0.1 R1 R2'));
-    }).toThrowError('Expected )');
+    var rules = Polyhymnia.parse(Polyhymnia.tokenize('R1 -> (x > 0.1 R1 R2'));
+    expect(rules.errors[0].error).toBe('Expected )');
   });
 
   it('doesn\'t parse conditions with other stuff than parameters or numbers', function() {
-    expect(function() {
-      Polyhymnia.parse(Polyhymnia.tokenize('R1 -> (R1 > 0.1) R1 R2'));
-    }).toThrowError('Expected a parameter or number');
+    var rules = Polyhymnia.parse(Polyhymnia.tokenize('R1 -> (R1 > 0.1) R1 R2'));
+    expect(rules.errors[0].error).toBe('Expected a parameter or number');
   });
 
   it('doesn\'t parse patterns with invalid notes', function() {
-    expect(function() {
-      Polyhymnia.parse(Polyhymnia.tokenize('R1 -> Piano: C / J Caug2'));
-    }).toThrowError('Expected a note, chord, drum symbol or pause');
+    var rules = Polyhymnia.parse(Polyhymnia.tokenize('R1 -> Piano: C / J Caug2'));
+    expect(rules.errors[0].error).toBe('Expected a note, chord, drum symbol or pause');
   });
 
-  it('doesn\'t parse sequences with missing rules', function() {
-    expect(function() {
-      Polyhymnia.parse(Polyhymnia.tokenize('R1 -> R2'));
-    }).toThrowError('There is no rule R2');
+  it('can parse incomplete rules', function() {
+    var rules = Polyhymnia.parse(Polyhymnia.tokenize('R1'));
+    expect(rules.length).toBe(1);
   });
 
-  it('doesn\'t parse incomplete rules', function() {
-    expect(function() {
-      Polyhymnia.parse(Polyhymnia.tokenize('R1'));
-    }).toThrowError('Expected ->');
+  it('can parse empty definitions', function() {
+    var rules1 = Polyhymnia.parse(Polyhymnia.tokenize('R1 ->'));
+    expect(rules1.length).toBe(1);
+
+    var rules2 = Polyhymnia.parse(Polyhymnia.tokenize('R1 ->\n'));
+    expect(rules2.length).toBe(1);
+
+    var rules3 = Polyhymnia.parse(Polyhymnia.tokenize('R1 ->\nR2 -> R3'));
+    expect(rules3[0].name).toBe('R1');
+    expect(rules3[1].name).toBe('R2');
+    expect(rules3[1].definitions[0].sequence[0]).toBe('R3');
+
+    var rules4 = Polyhymnia.parse(Polyhymnia.tokenize('R1 ->\n\nR2 -> R3'));
+    expect(rules4[0].name).toBe('R1');
+    expect(rules4[1].name).toBe('R2');
+    expect(rules4[1].definitions[0].sequence[0]).toBe('R3');
   });
 
-  it('doesn\'t parse empty rules', function() {
-    expect(function() {
-      Polyhymnia.parse(Polyhymnia.tokenize('R1 ->'));
-    }).toThrowError('Expected a sequence or pattern');
+  it('can parse empty definitions with condition', function() {
+    var rules = Polyhymnia.parse(Polyhymnia.tokenize('R1 -> (x > 0.3)'));
+    expect(rules[0].definitions[0]).toEqual({});
   });
 
-  it('doesn\'t parse definitions with condition but without definition', function() {
-    expect(function() {
-      Polyhymnia.parse(Polyhymnia.tokenize('R1 -> (x > 0.3)'));
-    }).toThrowError('Expected a sequence or pattern');
+  it('flags missing rules', function() {
+    var rules = Polyhymnia.parse(Polyhymnia.tokenize('R1 -> R2'));
+    expect(rules.errors[0].error).toBe('There is no rule R2');
+  });
+
+  it('ignores line breaks after arrow', function() {
+    var rules = Polyhymnia.parse(Polyhymnia.tokenize('R1 ->\nR2\nR3'));
+    expect(rules[0].name).toBe('R1');
+    expect(rules[0].definitions[0].sequence[0]).toBe('R2');
+    expect(rules[0].definitions[1].sequence[0]).toBe('R3');
   });
 
   it('ignores line breaks before the first rule', function() {

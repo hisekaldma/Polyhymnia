@@ -15,19 +15,30 @@ Polyhymnia.parse = function(tokensToParse) {
 
   var currentToken;
   var lookaheadToken;
+  var tokensLeft = true;
   var tokens = tokensToParse.slice(0);
   var rules = [];
+  var symbols = [];
+  var errors = [];
 
-  function exception(message) {
-    var error = new Error(message);
-    error.start = currentToken ? currentToken.start : 0;
-    error.end = currentToken ? currentToken.end : 0;
-    return error;
-  }
+  function error(message) {
+    errors.push({
+      error: message,
+      start: currentToken.start,
+      end:   currentToken.end
+    });
+    symbols.push({
+      type:  'error',
+      error: message,
+      start: currentToken.start,
+      end:   currentToken.end
+    });
+  }  
 
   function nextToken() {
-    currentToken = tokens.length > 0 ? tokens.shift() : undefined;
-    lookaheadToken = tokens.length > 0 ? tokens[0] : undefined;
+    tokensLeft     = tokens.length > 0;
+    currentToken   = tokens.length > 0 ? tokens.shift() : {};
+    lookaheadToken = tokens.length > 0 ? tokens[0] : {};
   }
 
   function skipEmptyLines() {
@@ -37,7 +48,7 @@ Polyhymnia.parse = function(tokensToParse) {
   }
 
   function endOfRule() {
-    if (!currentToken) {
+    if (!tokensLeft) {
       return true;
     } else if (currentToken.type == tokenType.EOL) {
       return true;
@@ -51,66 +62,65 @@ Polyhymnia.parse = function(tokensToParse) {
   // Name -> Definitions
   function parseRule() {
     var name = '';
+    var definitions = [];
+
     if (currentToken.type == tokenType.NAME) {
       name = currentToken.value;
     } else {
       // ERROR: Expected rule name
-      throw exception('Rules must start with a name');
+      error('Rules must start with a name');
     }
-    nextToken(); // Name
+    nextToken();
 
-    var type;
-    if (!currentToken || currentToken.type !== tokenType.SINGLE_ARROW) {
+    if (currentToken.type !== tokenType.SINGLE_ARROW) {
       // ERROR: Expected ->
-      throw exception('Expected ->');
+      error('Expected ->');
     }
-    nextToken(); // ->
+    nextToken();
 
-    if (currentToken && currentToken.type == tokenType.EOL) {
-      nextToken(); // EOL
+    if (currentToken.type == tokenType.EOL) {
+      nextToken();
     }
 
-    var definitions = [];
-    do {
+    while (!endOfRule()) {
       definitions.push(parseDefinition());
       nextToken();
-    } while (!endOfRule());
+    }
 
-    return { type: type, name: name, definitions: definitions };
+    return { name: name, definitions: definitions };
   }
 
   // (Condition) Definition
   function parseDefinition() {
-    if (currentToken === undefined) {
-      throw exception('Expected a sequence or pattern');
-    }
-
     var condition;
+
     if (currentToken.type == tokenType.LEFT_PAREN) {
       condition = parseCondition();
     }
 
-    if (currentToken && currentToken.type == tokenType.INSTRUMENT) {
+    if (currentToken.type == tokenType.INSTRUMENT) {
       var pattern = parsePattern();
       return { condition: condition, instrument: pattern.instrument, pattern: pattern.pattern };
-    } else if (currentToken && currentToken.type == tokenType.NAME) {
+    } else if (currentToken.type == tokenType.NAME) {
       var sequence = parseSequence();
       return { condition: condition, sequence: sequence };
     } else {
       // ERROR: Expected a sequence or pattern
-      throw exception('Expected a sequence or pattern');
+      error('Expected a sequence or pattern');
+      return {};
     }
   }
 
   // Sequence
   function parseSequence() {
     var sequence = [];
-    while (currentToken && currentToken.type !== tokenType.EOL) {
+    while (currentToken.type !== tokenType.EOL && tokensLeft) {
       if (currentToken.type == tokenType.NAME) {
         sequence.push(currentToken.value);
       } else {
         // ERROR: Expected rule name
-        throw exception('Expected a rule name');
+        error('Expected a rule name');
+        sequence.push('');
       }
       nextToken();
     }
@@ -119,17 +129,11 @@ Polyhymnia.parse = function(tokensToParse) {
 
   // Instrument: Pattern
   function parsePattern() {
-    var instrument;
-    if (currentToken && currentToken.type == tokenType.INSTRUMENT) {
-      instrument = currentToken.value;
-      nextToken();
-    } else {
-      // ERROR: Expected instrument
-      throw exception('Expected an instrument name');
-    }
+    var instrument = currentToken.value;
+    nextToken();
 
     var pattern = [];
-    while (currentToken && currentToken.type !== tokenType.EOL) {
+    while (currentToken.type !== tokenType.EOL && tokensLeft) {
       pattern.push(parseNote());
     }
 
@@ -141,6 +145,7 @@ Polyhymnia.parse = function(tokensToParse) {
     var value = '';
     var start = currentToken.start;
     var end = currentToken.end;
+    var valid = true;
 
     if (currentToken.type == tokenType.NOTE) {
       type = noteType.NOTE;
@@ -155,7 +160,13 @@ Polyhymnia.parse = function(tokensToParse) {
       type = noteType.PAUSE;
     } else {
       // ERROR: Expected note, chord, drum symbol or pause
-      throw exception('Expected a note, chord, drum symbol or pause');
+      error('Expected a note, chord, drum symbol or pause');
+      valid = false;
+      type = noteType.PAUSE;
+    }
+
+    if (valid) {
+      symbols.push({ type: 'note', start: start, end: end });
     }
 
     nextToken();
@@ -167,7 +178,7 @@ Polyhymnia.parse = function(tokensToParse) {
       nextToken();
     } else {
       // ERROR: Expected (
-      throw exception('Expected (');
+      error('Expected (');
     }
     
     var min;
@@ -183,7 +194,8 @@ Polyhymnia.parse = function(tokensToParse) {
           nextToken();
         } else {
           // ERROR: Expected number
-          throw exception('Expected a number');
+          error('Expected a number');
+          return undefined;
         }
       } else if (currentToken.type == tokenType.LESS_THAN) {
         nextToken();
@@ -192,11 +204,13 @@ Polyhymnia.parse = function(tokensToParse) {
           nextToken();
         } else {
           // ERROR: Expected number
-          throw exception('Expected a number');
+          error('Expected a number');
+          return undefined;
         }
       } else {
         // ERROR: Expected < or >
-        throw exception('Expected < or >');
+        error('Expected < or >');
+        return undefined;
       }
     } else if (currentToken.type == tokenType.NUMBER) {
       var number = currentToken.value;
@@ -215,12 +229,14 @@ Polyhymnia.parse = function(tokensToParse) {
               nextToken();
             } else {
               // ERROR: Expected number
-              throw exception('Expected a number');
+              error('Expected a number');
+              return undefined;
             }
           }
         } else {
           // ERROR: Expected parameter
-          throw exception('Expected a parameter');
+          error('Expected a parameter');
+          return undefined;
         }
       } else if (currentToken.type == tokenType.LESS_THAN) {
         min = number;
@@ -236,49 +252,50 @@ Polyhymnia.parse = function(tokensToParse) {
               nextToken();
             } else {
               // ERROR: Expected number
-              throw exception('Expected a number');
+              error('Expected a number');
+              return undefined;
             }
           }
         } else {
           // ERROR: Expected parameter
-          throw exception('Expected a parameter');
+          error('Expected a parameter');
+          return undefined;
         }
       } else {
         // ERROR: Expected < or >
-        throw exception('Expected < or >');
+        error('Expected < or >');
+        return undefined;
       }
     } else {
       // ERROR: Expected number or parameter
-      throw exception('Expected a parameter or number');
+      error('Expected a parameter or number');
+      return undefined;
     }
     
     if (currentToken.type == tokenType.RIGHT_PAREN) {
       nextToken();
     } else {
       // ERROR: Expected )
-      throw exception('Expected )');
+      error('Expected )');
+      return undefined;
     }
 
     return { param: param, min: min, max: max };
   }
 
-
   // Parse
   nextToken();
   skipEmptyLines();
-  while (currentToken) {
+  while (tokensLeft) {
     rules.push(parseRule());
     skipEmptyLines();
   }
 
   // Check that all rule references have definitions
-  for (var r = 0; r < rules.length; r++) {
-    var rule = rules[r];
-    for (var d = 0; d < rule.definitions.length; d++) {
-      var sequence = rule.definitions[d].sequence;
-      if (sequence) {
-        for (var s = 0; s < sequence.length; s++) {
-          var name = sequence[s];
+  rules.forEach(function(rule) {
+    rule.definitions.forEach(function(definition) {
+      if (definition.sequence) {
+        definition.sequence.forEach(function(name) {
           var found = false;
           for (var i = 0; i < rules.length; i++) {
             if (rules[i].name == name) {
@@ -286,12 +303,14 @@ Polyhymnia.parse = function(tokensToParse) {
             }
           }
           if (!found) {
-            throw new Error('There is no rule ' + name);
+            errors.push({ error: 'There is no rule ' + name });
           }
-        }
+        });
       }
-    }
-  }
+    });
+  });
 
-  return rules;
+  rules.symbols = symbols;
+  rules.errors = errors;
+  return rules;  
 };

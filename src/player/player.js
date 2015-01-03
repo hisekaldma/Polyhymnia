@@ -9,6 +9,7 @@ Polyhymnia.Player = function(element, context) {
   // Music
   var rules = [];
   var music = context;
+  var symbols = [];
   music.setAnimCallback(highlightNotes);
 
   // Elements
@@ -23,7 +24,6 @@ Polyhymnia.Player = function(element, context) {
   var codeDisplay =  element.querySelector('.code .display');
   var codeText =     element.querySelector('.code .text');
   var codeCursor =   element.querySelector('.code .cursor');
-  var errorMessage = element.querySelector('.error');
   var notSupportedMessage = element.querySelector('.not-supported');
   var noteElems = [];
   codeEditor.value = contents;
@@ -52,6 +52,7 @@ Polyhymnia.Player = function(element, context) {
     var tokens = Polyhymnia.tokenize(code);
     rules = Polyhymnia.parse(tokens);
     music.setRules(rules);
+    symbols = rules.symbols;
 
     // Render the code
     renderCode();
@@ -93,30 +94,19 @@ Polyhymnia.Player = function(element, context) {
     // Get the code
     var code = codeEditor.value;
 
-    // Get all notes
-    var notes = [];
-    for (var r = 0; r < rules.length; r++) {
-      for (var d = 0; d < rules[r].definitions.length; d++) {
-        var pattern = rules[r].definitions[d].pattern;
-        if (pattern) {
-          notes = notes.concat(pattern);
-        }
-      }
-    }
-
-    // Wrap notes in spans
+    // Wrap symbols in spans
     var html = '';
-    var n = 0;
+    var s = 0;
     for (var i = 0; i < code.length; i++) {
-      if (n < notes.length && notes[n] && notes[n].start == i) {
-        html += '<span class="note" data-start="' + notes[n].start + '">';
+      if (s < symbols.length && symbols[s].start == i) {
+        html += '<span class="' + symbols[s].type + '" data-start="' + symbols[s].start + '">';
       }
 
       html += code.charAt(i);
 
-      if (n < notes.length && notes[n] && notes[n].end == i + 1) {
+      if (s < symbols.length && symbols[s].end == i + 1) {
         html += '</span>';
-        n++;
+        s++;
       }
     }
 
