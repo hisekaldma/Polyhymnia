@@ -81,11 +81,12 @@ Polyhymnia.Player = function(element, context) {
     var pos = paramSlider.value / (paramSlider.max - paramSlider.min);
     var nudge = 8 * (1 - pos) - 8 * pos; // Offset for handle size 16px
     paramOutput.style.left = pos * paramSlider.offsetWidth - paramOutput.offsetWidth/2 + nudge + 'px';
-  }
 
-  function endChangeParam() {
-    paramOutput.classList.add('hide');
-    paramOutput.classList.remove('show');
+    // Hide the value again
+    setTimeout(function() {
+      paramOutput.classList.add('hide');
+      paramOutput.classList.remove('show');
+    }, 2000);
   }
 
   function renderCode() {
@@ -187,12 +188,11 @@ Polyhymnia.Player = function(element, context) {
 
   // Events
   if (Polyhymnia.isSupported()) {
-    playButton.addEventListener('click',     play);
-    stopButton.addEventListener('click',     stop);
-    paramSlider.addEventListener('input',    changeParam);
-    paramSlider.addEventListener('change',   endChangeParam);
-    tempoInput.addEventListener('input',     changeTempo);
-    codeEditor.addEventListener('input',     parse);
+    playButton.addEventListener('click',  play);
+    stopButton.addEventListener('click',  stop);
+    paramSlider.addEventListener('input', changeParam);
+    tempoInput.addEventListener('input',  changeTempo);
+    codeEditor.addEventListener('input',  parse);
   } else {
     controls.style.display = 'none';
     notSupportedMessage.style.display = 'block';
