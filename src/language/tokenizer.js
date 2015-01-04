@@ -25,18 +25,21 @@ Polyhymnia.tokenize = function(textToTokenize) {
 
   var tokenType = Polyhymnia.tokenType;
 
-  var NAME_PATTERN =            '[A-Z][a-zA-Z0-9_]+';
-  var PARAM_PATTERN =           '[a-z][a-zA-Z0-9_]*';
-  var INSTRUMENT_PATTERN =      NAME_PATTERN + ':';
-  var NUMBER_PATTERN =          '-?(([1-9][0-9]*)|0)\\.[0-9]+';
-  var NOTE_PATTERN =            '[CDEFGAB][#b]?';
-  var CHORD_PATTERN =           NOTE_PATTERN + '(M|m|dom|aug|dim)7?';
-  var DRUM_PATTERN =            '[xX]';
+  var NAME_PATTERN        = '[A-Z][a-zA-Z0-9_]+';
+  var PARAM_PATTERN       = '[a-z][a-zA-Z0-9_]*';
+  var INSTRUMENT_PATTERN  = NAME_PATTERN + ':';
+  var NUMBER_PATTERN      = '-?(([1-9][0-9]*)|0)\\.[0-9]+';
+  var NOTE_PATTERN        = '[CDEFGAB][#b]?';
+  var CHORD_PATTERN       = NOTE_PATTERN + '(M|m|dom|aug|dim)7?';
+  var DRUM_PATTERN        = '[xX]';
 
-  var NEWLINE = '\n';
-  var SPACE = ' ';
-  var TAB = '\t';
+  var NEWLINE    = '\n';
+  var SPACE      = ' ';
+  var TAB        = '\t';
   var DELIMITERS = '()\n\t ';
+
+  var CTX_DEFAULT   = 'sequence';
+  var CTX_CONDITION = 'condition';
 
   var namePattern           = new RegExp('^' + NAME_PATTERN + '$');
   var paramPattern          = new RegExp('^' + PARAM_PATTERN + '$');
@@ -84,7 +87,7 @@ Polyhymnia.tokenize = function(textToTokenize) {
   var token;
   var lineBeforeReading;
   var positionBeforeReading;
-  var parens = 0;
+  var context = CTX_DEFAULT;
   var str;
 
   while (moreToRead) {
@@ -96,20 +99,21 @@ Polyhymnia.tokenize = function(textToTokenize) {
     if (currentChar == NEWLINE) {
       line++;
       token = { type: tokenType.EOL };
+      context = CTX_DEFAULT;
       nextChar();
     } else if (currentChar == SPACE || currentChar == TAB) {
       nextChar();
     } else if (currentChar == '(') {
       token = { type: tokenType.LEFT_PAREN };
-      parens++;
+      context = CTX_CONDITION;
       nextChar();
     } else if (currentChar == ')') {
       token = { type: tokenType.RIGHT_PAREN };
-      parens--;
+      context = CTX_DEFAULT;
       nextChar();
     } else {
       str = readText();
-      if (parens > 0 && str.match(paramPattern)) {
+      if (context == CTX_CONDITION && str.match(paramPattern)) {
         token = { type: tokenType.PARAM, value: str };
       } else if (str == '->') {
         token = { type: tokenType.SINGLE_ARROW };
