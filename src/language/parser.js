@@ -21,17 +21,17 @@ Polyhymnia.parse = function(tokensToParse) {
   var symbols = [];
   var errors = [];
 
-  function error(message) {
+  function error(message, start, end) {
     errors.push({
       error: message,
-      start: currentToken.start,
-      end:   currentToken.end
+      start: start || currentToken.start,
+      end:   end   || currentToken.end
     });
     symbols.push({
       type:  'error',
       error: message,
-      start: currentToken.start,
-      end:   currentToken.end
+      start: start || currentToken.start,
+      end:   end   || currentToken.end
     });
   }  
 
@@ -174,109 +174,85 @@ Polyhymnia.parse = function(tokensToParse) {
   }
 
   function parseCondition() {
-    if (currentToken.type == tokenType.LEFT_PAREN) {
+    var start = currentToken.start;
+    var end = currentToken.end;
+    var condition = [];
+    while (tokensLeft && currentToken.type !== tokenType.EOL) {
+      condition.push(currentToken);
+      end = currentToken.end;
+      if (currentToken.type == tokenType.RIGHT_PAREN) {
+        nextToken();
+        break;
+      }
       nextToken();
-    } else {
-      // ERROR: Expected (
-      error('Expected (');
     }
     
     var min;
     var max;
     var param;
-    if (currentToken.type == tokenType.PARAM) {
-      param = currentToken.value;
-      nextToken();
-      if (currentToken.type == tokenType.GREATER_THAN) {
-        nextToken();
-        if (currentToken.type == tokenType.NUMBER) {
-          min = currentToken.value;
-          nextToken();
-        } else {
-          // ERROR: Expected number
-          error('Expected a number');
-          return undefined;
-        }
-      } else if (currentToken.type == tokenType.LESS_THAN) {
-        nextToken();
-        if (currentToken.type == tokenType.NUMBER) {
-          max = currentToken.value;
-          nextToken();
-        } else {
-          // ERROR: Expected number
-          error('Expected a number');
-          return undefined;
-        }
-      } else {
-        // ERROR: Expected < or >
-        error('Expected < or >');
-        return undefined;
-      }
-    } else if (currentToken.type == tokenType.NUMBER) {
-      var number = currentToken.value;
-      nextToken();
-      if (currentToken.type == tokenType.GREATER_THAN) {
-        max = number;
-        nextToken();
-        if (currentToken.type == tokenType.PARAM) {
-          param = currentToken.value;
-          nextToken();
-          if (currentToken.type == tokenType.GREATER_THAN) {
-            
-            nextToken();
-            if (currentToken.type == tokenType.NUMBER) {
-              min = currentToken.value;
-              nextToken();
-            } else {
-              // ERROR: Expected number
-              error('Expected a number');
-              return undefined;
-            }
-          }
-        } else {
-          // ERROR: Expected parameter
-          error('Expected a parameter');
-          return undefined;
-        }
-      } else if (currentToken.type == tokenType.LESS_THAN) {
-        min = number;
-        nextToken();
-        if (currentToken.type == tokenType.PARAM) {
-          param = currentToken.value;
-          nextToken();
-          if (currentToken.type == tokenType.LESS_THAN) {
-
-            nextToken();
-            if (currentToken.type == tokenType.NUMBER) {
-              max = currentToken.value;
-              nextToken();
-            } else {
-              // ERROR: Expected number
-              error('Expected a number');
-              return undefined;
-            }
-          }
-        } else {
-          // ERROR: Expected parameter
-          error('Expected a parameter');
-          return undefined;
-        }
-      } else {
-        // ERROR: Expected < or >
-        error('Expected < or >');
-        return undefined;
-      }
-    } else {
-      // ERROR: Expected number or parameter
-      error('Expected a parameter or number');
-      return undefined;
+    if (condition.length == 5 &&
+        condition[0].type == tokenType.LEFT_PAREN &&
+        condition[1].type == tokenType.NUMBER &&
+        condition[2].type == tokenType.GREATER_THAN &&
+        condition[3].type == tokenType.PARAM &&
+        condition[4].type == tokenType.RIGHT_PAREN) {
+      max   = condition[1].value;
+      param = condition[3].value;
     }
-    
-    if (currentToken.type == tokenType.RIGHT_PAREN) {
-      nextToken();
-    } else {
-      // ERROR: Expected )
-      error('Expected )');
+    else if (condition.length == 5 &&
+        condition[0].type == tokenType.LEFT_PAREN &&
+        condition[1].type == tokenType.NUMBER &&
+        condition[2].type == tokenType.LESS_THAN &&
+        condition[3].type == tokenType.PARAM &&
+        condition[4].type == tokenType.RIGHT_PAREN) {
+      min   = condition[1].value;
+      param = condition[3].value;
+    }
+    else if (condition.length == 5 &&
+        condition[0].type == tokenType.LEFT_PAREN &&
+        condition[1].type == tokenType.PARAM &&
+        condition[2].type == tokenType.GREATER_THAN &&
+        condition[3].type == tokenType.NUMBER &&
+        condition[4].type == tokenType.RIGHT_PAREN) {
+      param = condition[1].value;
+      min   = condition[3].value;
+    }
+    else if (condition.length == 5 &&
+        condition[0].type == tokenType.LEFT_PAREN &&
+        condition[1].type == tokenType.PARAM &&
+        condition[2].type == tokenType.LESS_THAN &&
+        condition[3].type == tokenType.NUMBER &&
+        condition[4].type == tokenType.RIGHT_PAREN) {
+      param = condition[1].value;
+      max   = condition[3].value;
+    }
+    else if (condition.length == 7 &&
+        condition[0].type == tokenType.LEFT_PAREN &&
+        condition[1].type == tokenType.NUMBER &&
+        condition[2].type == tokenType.LESS_THAN &&
+        condition[3].type == tokenType.PARAM &&
+        condition[4].type == tokenType.LESS_THAN &&
+        condition[5].type == tokenType.NUMBER &&
+        condition[6].type == tokenType.RIGHT_PAREN) {
+      min   = condition[1].value;
+      param = condition[3].value;
+      max   = condition[5].value;
+    }
+    else if (condition.length == 7 &&
+        condition[0].type == tokenType.LEFT_PAREN &&
+        condition[1].type == tokenType.NUMBER &&
+        condition[2].type == tokenType.GREATER_THAN &&
+        condition[3].type == tokenType.PARAM &&
+        condition[4].type == tokenType.GREATER_THAN &&
+        condition[5].type == tokenType.NUMBER &&
+        condition[6].type == tokenType.RIGHT_PAREN) {
+      max   = condition[1].value;
+      param = condition[3].value;
+      min   = condition[5].value;
+    }
+    else {
+      // ERROR: Expected condition
+      error('Expected a condition', start, end);
       return undefined;
     }
 
