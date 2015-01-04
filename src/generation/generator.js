@@ -113,7 +113,7 @@ Polyhymnia.Generator = function() {
   function copyState(oldNode, newNode) {
     for (var i = 0; i < oldNode.definitions.length; i++) {
       var oldDefinition = oldNode.definitions[i];
-      var newDefinition = newNode.definitions.length > i ? oldNode.definitions[i] : undefined;
+      var newDefinition = newNode.definitions.length > i ? newNode.definitions[i] : undefined;
       if (oldDefinition && newDefinition && oldDefinition.sequence && newDefinition.sequence) {
         newDefinition.index = oldDefinition.index;
         var oldCurrent = oldDefinition.sequence[oldDefinition.index];
