@@ -21,6 +21,38 @@ Polyhymnia.parse = function(tokensToParse) {
   var symbols = [];
   var errors = [];
 
+  // Parse
+  nextToken();
+  skipEmptyLines();
+  while (tokensLeft) {
+    rules.push(parseRule());
+    skipEmptyLines();
+  }
+
+  // Check that all rule references have definitions
+  rules.forEach(function(rule) {
+    rule.definitions.forEach(function(definition) {
+      if (definition.sequence) {
+        definition.sequence.forEach(function(name) {
+          var found = false;
+          for (var i = 0; i < rules.length; i++) {
+            if (rules[i].name == name) {
+              found = true;
+            }
+          }
+          if (!found) {
+            errors.push({ error: 'There is no rule ' + name });
+          }
+        });
+      }
+    });
+  });
+
+  rules.symbols = symbols;
+  rules.errors = errors;
+  return rules;
+
+
   function error(message, start, end) {
     errors.push({
       error: message,
@@ -111,7 +143,7 @@ Polyhymnia.parse = function(tokensToParse) {
     }
   }
 
-  // Sequence
+  // A1 A2 A3
   function parseSequence() {
     var sequence = [];
     while (currentToken.type !== tokenType.EOL && tokensLeft) {
@@ -140,6 +172,7 @@ Polyhymnia.parse = function(tokensToParse) {
     return { instrument: instrument, pattern: pattern };
   }
 
+  // C# | Cm7 | x | _
   function parseNote() {
     var type;
     var value = '';
@@ -173,6 +206,7 @@ Polyhymnia.parse = function(tokensToParse) {
     return { type: type, value: value, start: start, end: end };
   }
 
+  // (x > 0) | (0 > x) | (0 > x > 0) | (x < 0) | (0 < x) | (0 < x < 0)
   function parseCondition() {
     var start = currentToken.start;
     var end = currentToken.end;
@@ -257,36 +291,5 @@ Polyhymnia.parse = function(tokensToParse) {
     }
 
     return { param: param, min: min, max: max };
-  }
-
-  // Parse
-  nextToken();
-  skipEmptyLines();
-  while (tokensLeft) {
-    rules.push(parseRule());
-    skipEmptyLines();
-  }
-
-  // Check that all rule references have definitions
-  rules.forEach(function(rule) {
-    rule.definitions.forEach(function(definition) {
-      if (definition.sequence) {
-        definition.sequence.forEach(function(name) {
-          var found = false;
-          for (var i = 0; i < rules.length; i++) {
-            if (rules[i].name == name) {
-              found = true;
-            }
-          }
-          if (!found) {
-            errors.push({ error: 'There is no rule ' + name });
-          }
-        });
-      }
-    });
-  });
-
-  rules.symbols = symbols;
-  rules.errors = errors;
-  return rules;  
+  } 
 };
