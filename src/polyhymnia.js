@@ -53,7 +53,7 @@ Polyhymnia.Context = function(options) {
   if (options && options.instruments) {
     for (var i = 0; i < options.instruments.length; i++) {
       var instrument = options.instruments[i];
-      generator.instruments[instrument.name] = new Polyhymnia.Sampler({
+      sequencer.instruments[instrument.name] = new Polyhymnia.Sampler({
         samples: instrument.samples
       });
     }

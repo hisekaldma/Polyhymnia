@@ -4,7 +4,8 @@ Polyhymnia.Sequencer = function() {
   'use strict';
   var noteType = Polyhymnia.noteType;
   var self = this;
-
+  
+  this.instruments = {};
   this.measure = { num: 4, den: 4 };
   this.stepsPerBeat = 16;
   this.generator = null;
@@ -78,7 +79,9 @@ Polyhymnia.Sequencer = function() {
     }
 
     // Play notes
-    self.generator.instruments[instrument].scheduleNotes(midiNumbers, time);
+    if (self.instruments[instrument]) {
+      self.instruments[instrument].scheduleNotes(midiNumbers, time);
+    }
   }
 
   function getNoteLength(patternLength) {

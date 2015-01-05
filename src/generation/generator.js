@@ -4,8 +4,6 @@ Polyhymnia.Generator = function() {
   'use strict';
   var self = this;
 
-  this.instruments = {};
-
   var startRule = 'Play';
   var params = {};
   var ruleDictionary = null;
