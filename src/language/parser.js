@@ -7,7 +7,7 @@ Polyhymnia.noteType = {
   DRUM:           'drum'
 };
 
-Polyhymnia.parse = function(tokensToParse) {
+Polyhymnia.parse = function(tokensToParse, instruments) {
   'use strict';
 
   var tokenType = Polyhymnia.tokenType;
@@ -122,7 +122,7 @@ Polyhymnia.parse = function(tokensToParse) {
     return { name: name, definitions: definitions };
   }
 
-  // (Condition) Definition
+  // (Condition) Sequence | Pattern
   function parseDefinition() {
     var condition;
 
@@ -143,7 +143,7 @@ Polyhymnia.parse = function(tokensToParse) {
     }
   }
 
-  // A1 A2 A3
+  // A1 A2 A3 *
   function parseSequence() {
     var sequence = [];
     while (currentToken.type !== tokenType.EOL && tokensLeft) {
@@ -159,9 +159,14 @@ Polyhymnia.parse = function(tokensToParse) {
     return sequence;
   }
 
-  // Instrument: Pattern
+  // Instrument: Note Note Note Note *
   function parsePattern() {
     var instrument = currentToken.value;
+
+    // Check that instrument exists
+    if (instruments && !instruments[instrument]) {
+      error('There is no instrument ' + instrument );
+    }
     nextToken();
 
     var pattern = [];

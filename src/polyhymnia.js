@@ -59,6 +59,13 @@ Polyhymnia.Context = function(options) {
     }
   }
 
+  function parse(code) {
+    var tokens = Polyhymnia.tokenize(code);
+    var rules = Polyhymnia.parse(tokens, sequencer.instruments);
+    generator.setRules(rules);
+    return rules;
+  }
+
   function setTempo(tempo) {
     metronome.tempo = tempo;
   }
@@ -68,10 +75,10 @@ Polyhymnia.Context = function(options) {
   }
 
   return {
+    parse: parse,
     play: metronome.play,
     stop: metronome.stop,
     setParam: generator.setParam,
-    setRules: generator.setRules,
     setTempo: setTempo,
     setAnimCallback: setAnimCallback
   };

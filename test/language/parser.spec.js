@@ -158,11 +158,6 @@ describe('Parser', function() {
     expect(rules[0].definitions[0]).toEqual({});
   });
 
-  it('flags missing rules', function() {
-    var rules = Polyhymnia.parse(Polyhymnia.tokenize('R1 -> R2'));
-    expect(rules.errors[0].error).toBe('There is no rule R2');
-  });
-
   it('ignores line breaks after arrow', function() {
     var rules = Polyhymnia.parse(Polyhymnia.tokenize('R1 ->\nR2\nR3'));
     expect(rules[0].name).toBe('R1');
@@ -184,5 +179,15 @@ describe('Parser', function() {
     var rules = Polyhymnia.parse(Polyhymnia.tokenize('R1 -> R2 R2\n\n\n\nR2 -> Piano: C'));
     expect(rules[0].name).toBe('R1');
     expect(rules[1].name).toBe('R2');
+  });
+
+  it('flags missing rules', function() {
+    var rules = Polyhymnia.parse(Polyhymnia.tokenize('R1 -> R2'));
+    expect(rules.errors[0].error).toBe('There is no rule R2');
+  });
+
+  it('flags missing instruments', function() {
+    var rules = Polyhymnia.parse(Polyhymnia.tokenize('R1 -> Piano: C'), {});
+    expect(rules.errors[0].error).toBe('There is no instrument Piano');
   });
 });

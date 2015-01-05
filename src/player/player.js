@@ -48,10 +48,7 @@ Polyhymnia.Player = function(element, context) {
 
   function parse() {
     // Parse rules
-    var code = codeEditor.value;
-    var tokens = Polyhymnia.tokenize(code);
-    rules = Polyhymnia.parse(tokens);
-    music.setRules(rules);
+    var rules = music.parse(codeEditor.value);
     symbols = rules.symbols;
 
     // Render the code
