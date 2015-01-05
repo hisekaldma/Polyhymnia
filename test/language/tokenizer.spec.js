@@ -75,7 +75,7 @@ describe('Tokenizer', function() {
   });
 
   it('can tokenize numbers', function() {
-    var tokens = Polyhymnia.tokenize('1.0 0.2 3.14 100.001 0.0');
+    var tokens = Polyhymnia.tokenize('1.0 0.2 3.14 100.001 0.0 1 0');
     
     expect(tokens[0].value).toBe('1.0');
     expect(tokens[0].type).toBe(tokenType.NUMBER);
@@ -87,14 +87,19 @@ describe('Tokenizer', function() {
     expect(tokens[3].type).toBe(tokenType.NUMBER);
     expect(tokens[4].value).toBe('0.0');
     expect(tokens[4].type).toBe(tokenType.NUMBER);
+    expect(tokens[5].value).toBe('1');
+    expect(tokens[5].type).toBe(tokenType.NUMBER);
+    expect(tokens[6].value).toBe('0');
+    expect(tokens[6].type).toBe(tokenType.NUMBER);
   });
 
   it('can\'t tokenize invalid numbers', function() {
-    var tokens = Polyhymnia.tokenize('0 00.2 001.0');
+    var tokens = Polyhymnia.tokenize('00 00.2 001.0 1.0.0');
 
     expect(tokens[0].type).toBe(tokenType.ERROR);
     expect(tokens[1].type).toBe(tokenType.ERROR);
-    expect(tokens[1].type).toBe(tokenType.ERROR);
+    expect(tokens[2].type).toBe(tokenType.ERROR);
+    expect(tokens[3].type).toBe(tokenType.ERROR);
   });
   
   it('can tokenize line breaks', function() {
