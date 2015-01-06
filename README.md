@@ -3,6 +3,8 @@ Polyhymnia
 
 Polyhymnia is a programming language for generative, interactive music. It lets you write rules that evaluate to sequences and patterns of notes, chords and drums.
 
+**Polyhymnia is still in the design stage. Some things will change. Some things won’t.**
+
 ```
 Play -> A1 A2
 
@@ -19,8 +21,6 @@ Drums ->
   (x > 3) Hihat: _ _ _ _ x _ _ _ _ _ x _ x x x x
   (x > 6) Snare: _ _ _ x _ _ x _ _ _ _ _ x _ _ _
 ```
-
-**Polyhymnia is still in the design stage. Some things will change. Some things won’t.**
 
 ## Getting started
 
