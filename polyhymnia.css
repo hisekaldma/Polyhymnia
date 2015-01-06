@@ -53,7 +53,7 @@
 .polyhymnia-player .code .editor,
 .polyhymnia-player .code .text {
   padding: 24px;
-  white-space: pre;
+  white-space: pre-wrap;
   text-rendering: optimizeSpeed;
   /* Jumps otherwise */
 }
