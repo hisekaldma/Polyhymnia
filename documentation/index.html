@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="author" content="Jonathan Hise Kaldma"> 
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
+  
+  <title>Documentation</title>
+
+  <link rel="stylesheet" type="text/css" href="http://fonts.googleapis.com/css?family=Inconsolata">
+  <link rel="stylesheet" type="text/css" href="../styles.css">
+  
+  <!-- Typekit -->
+  <script src="//use.typekit.net/oed5lor.js"></script>
+  <script>try{Typekit.load();}catch(e){}</script>
+
+  <!-- Analytics -->
+  <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-6682557-7', 'auto');
+    ga('send', 'pageview');
+
+  </script>
+</head>
+<body class="documentation">
+  <header>
+    <div class="contents">
+      <div class="whole">
+        <h1><a href="../">Polyhymnia</a></h1>
+        <nav>
+          <ul>
+            <li><a href="">Documentation</a></li>
+            <li><a href="https://github.com/hisekaldma/Polyhymnia">Download</a></li>
+          </ul>
+        </nav>
+      </div>
+    </div>
+  </header>
+  <section>
+    <div class="contents">
+      <div class="twothirds">
+        <h1>Documentation</h1>
+        <p>Polyhymnia is a live programming language for making generative and interactive music. It is a so-called context-free grammar, meaning that it lets you write rules that map to other rules. The rules can contain sequences and patterns that play music. They can also take user input into account, making it easy to write music that reacts to what the user does in a game or interactive artwork.</p>
+        <p><em>Polyhymnia is still in the design stage. Some things will change. Some things won’t.</em></p>
+
+        <h2>Rules</h2>
+        <p>The basic unit in Polyhymnia is a rule:</p>
+
+        <pre><code>R1 <span class="arrow">-></span> Piano: C D C G</code></pre>
+
+        <p>On the left hand side is the name of the rule, and on the right hand side is its definition. The definition can be either a sequence of other rules, or a note pattern to be played on an instrument:</p>
+
+        <pre><code>R1 <span class="arrow">-></span> R2 R3
+R2 <span class="arrow">-></span> Piano: C D C G</code></pre>
+
+        <p>Rule names have to start with an <em>uppercase letter</em>. The starting rule is always called <code>Play</code>.</p>
+
+        <pre><code>Play <span class="arrow">-></span> R2 R3</code></pre>
+
+        <h2>Sequences</h2>
+        <p>A sequence is simply a list of rules to be played in order. They are how you string patterns together to make something more than just a short loop.</p>
+
+        <pre><code>R1 <span class="arrow">-></span> R2 R3
+R2 <span class="arrow">-></span> R4 R4 R4 R4</code></pre>
+
+        <h2>Patterns</h2>
+        <p>A pattern consists of an instrument and a succession of notes to play on that instrument. And it doesn’t have to be notes. Patterns can contain chords and drum symbols too:</p>
+
+        <pre><code>R1 <span class="arrow">-></span> Piano: C D C E
+R2 <span class="arrow">-></span> Synth: CM Dm Caug Edom7
+R3 <span class="arrow">-></span> Hihat: x _ x _</code></pre>
+
+        <p>A pattern is always one bar long, no matter how many notes are in it. For example, in 4/4 time signature, if a pattern is four notes long, they will be interpreted as fourths. If a pattern is eight notes long, they will be interpreted as eights, etc.</p>
+
+        <pre><code>R1 <span class="arrow">-></span> Kick:  x x x x
+R2 <span class="arrow">-></span> Snare: _ x _ _ _ x _ _
+R3 <span class="arrow">-></span> Hihat: _ _ _ _ _ _ _ _ _ _ _ _ x x x x</code></pre>
+
+        <p>If the pattern length isn’t divisible by the bar length, the pattern will simply round down to the nearest length it can be, and skip any notes that overshoot that length.</p>
+
+        <h2>Polyphony</h2>
+        <p>All the rules we’ve looked at so far have only had one definition. But rules can actually have multiple definitions, each written on its own line. When a rule has multiple definitions, they are played in parallel:</p>
+
+        <pre><code>R1 <span class="arrow">-></span>
+  Base:  x _ x _
+  Hihat: _ _ x _</code></pre>
+
+        <p>You can even mix sequences and patterns in the same rule:</p>
+
+        <pre><code>R1 <span class="arrow">-></span>
+  Drums1 Drums2
+  Synth: C D C G
+  Pad:   C _ _ _
+
+Drums1 <span class="arrow">-></span> Kick:  x _ x _
+Drums2 <span class="arrow">-></span> Kick:  x x x x</code></pre>
+
+        <p>It’s a good idea to indent the definitions for readability, but you don’t have to.</p>
+
+        <h2>Conditions</h2>
+        <p>To make the music interactive, you can write conditions that have to be true for a definition to be played. A condition consists of a parameter and a comparison with one or two numbers:</p>
+
+        <pre><code>R1 <span class="arrow">-></span>
+  <span class="condition">(x &lt; 1)</span>     Synth: C C C C
+  <span class="condition">(1 &lt; x &lt; 2)</span> Synth: G G G G
+  <span class="condition">(x > 2)</span>     Synth: D D D D</code></pre>
+
+        <p>Parameter names have to start with a <em>lowercase letter</em>, and numbers can be either <em>integers</em> or <em>decimals</em>. The allowed comparisons are <code>&lt;</code> and <code>&gt;</code>, and they are inclusive, because that is what you want most of the time. Other comparisons, like <code>==</code> and <code>!=</code>, aren’t supported. The idea isn’t to check for specific values, but to react to changing inputs.</p>
+
+        <p>Conditions are evaluated at the start of a new bar. This means that even if a condition becomes valid in the middle of a bar, new patterns won’t start playing until the next bar, which is what you want musically.</p>
+      </div>
+    </div>
+  </section>
+  <footer>
+    <div class="contents">
+      <div class="whole">
+        <p class="line-above">Created by <a href="http://hisekaldma.com">Jonathan Hise Kaldma</a></p>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>

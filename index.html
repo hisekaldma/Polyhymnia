@@ -1,55 +1,73 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="UTF-8">
-    <title>Polyhymnia</title>
-    <link rel="stylesheet" type="text/css" href="http://fonts.googleapis.com/css?family=Inconsolata">
-    <link rel="stylesheet" type="text/css" href="polyhymnia.css">
-    <link rel="stylesheet" type="text/css" href="styles.css">
-    <script src="polyhymnia.min.js"></script>
-    <script type="text/javascript">
-    document.addEventListener('DOMContentLoaded', function() {
-      var context = new Polyhymnia.Context({
-        instruments: [
-          { name: 'Kick', samples: [{ url: 'audio/Kick.mp3' }] },
-          { name: 'Snare', samples: [{ url: 'audio/Snare.mp3' }] },
-          { name: 'Hihat', samples: [{ url: 'audio/Hihat.mp3' }] },
-          {
-            name: 'Pad',
-            samples: [
-              { root: 'C', octave: 1, url: 'audio/BreathC1.mp3' },
-              { root: 'C', octave: 2, url: 'audio/BreathC2.mp3' },
-              { root: 'C', octave: 3, url: 'audio/BreathC3.mp3' },
-              { root: 'C', octave: 4, url: 'audio/BreathC4.mp3' },
-              { root: 'C', octave: 5, url: 'audio/BreathC5.mp3' }
-            ]
-          }
-        ]
-      });
-      var player = new Polyhymnia.Player(document.querySelector('.editor'), context);
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="author" content="Jonathan Hise Kaldma"> 
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
+
+  <title>Polyhymnia</title>
+  
+  <link rel="stylesheet" type="text/css" href="http://fonts.googleapis.com/css?family=Inconsolata">
+  <link rel="stylesheet" type="text/css" href="polyhymnia.css">
+  <link rel="stylesheet" type="text/css" href="styles.css">
+  <script src="polyhymnia.min.js"></script>
+  <script type="text/javascript">
+  document.addEventListener('DOMContentLoaded', function() {
+    var context = new Polyhymnia.Context({
+      instruments: [
+        { name: 'Kick', samples: [{ url: 'audio/Kick.mp3' }] },
+        { name: 'Snare', samples: [{ url: 'audio/Snare.mp3' }] },
+        { name: 'Hihat', samples: [{ url: 'audio/Hihat.mp3' }] },
+        {
+          name: 'Pad',
+          samples: [
+            { root: 'C', octave: 1, url: 'audio/BreathC1.mp3' },
+            { root: 'C', octave: 2, url: 'audio/BreathC2.mp3' },
+            { root: 'C', octave: 3, url: 'audio/BreathC3.mp3' },
+            { root: 'C', octave: 4, url: 'audio/BreathC4.mp3' },
+            { root: 'C', octave: 5, url: 'audio/BreathC5.mp3' }
+          ]
+        }
+      ]
     });
-    </script>
-    
-    <!-- Typekit -->
-    <script src="//use.typekit.net/oed5lor.js"></script>
-    <script>try{Typekit.load();}catch(e){}</script>
+    var player = new Polyhymnia.Player(document.querySelector('.editor'), context);
+  });
+  </script>
+  
+  <!-- Typekit -->
+  <script src="//use.typekit.net/oed5lor.js"></script>
+  <script>try{Typekit.load();}catch(e){}</script>
 
-    <!-- Analytics -->
-    <script>
-      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-      })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+  <!-- Analytics -->
+  <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
 
-      ga('create', 'UA-6682557-7', 'auto');
-      ga('send', 'pageview');
+    ga('create', 'UA-6682557-7', 'auto');
+    ga('send', 'pageview');
 
-    </script>
-  </head>
-  <body>
+  </script>
+</head>
+<body class="playground">
+  <header>
     <div class="contents">
-      <h1>Polyhymnia</h1>
-      <div class="editor">Play -> A1 A2
+      <div class="whole">
+        <h1><a href="">Polyhymnia</a></h1>
+        <nav>
+          <ul>
+            <li><a href="documentation/">Documentation</a></li>
+            <li><a href="https://github.com/hisekaldma/Polyhymnia">Download</a></li>
+          </ul>
+        </nav>
+      </div>
+    </div>
+  </header>
+  <section>
+    <div class="contents">
+      <div class="editor twothirds">Play -> A1 A2
 
 A1 ->
   Drums
@@ -68,37 +86,41 @@ Drums ->
   (x > 0.2) Hihat: _ _ _ _ x _ _ _ _ _ x _ _ _ _ _
   (x > 0.4) Kick:  _ _ _ _ _ _ _ _ _ _ _ _ x _ _ _
   (x > 0.6) Hihat: x _ _ _ _ _ x _ x _ _ _ x x x x</div>
-      <div class="reference">
+      <div class="reference third">
         <h2>Reference</h2>
         <h3>Instruments</h3>
         <ul>
-          <li>Pad</li>
-          <li>Kick</li>
-          <li>Snare</li>
-          <li>Hihat</li>
+          <li><code>Pad</code></li>
+          <li><code>Kick</code></li>
+          <li><code>Snare</code></li>
+          <li><code>Hihat</code></li>
         </ul>
         <h3>Sequences</h3>
         <ul>
-          <li>Play -> Verse Chorus</li>
-          <li>Verse -> A1 A2 A1 A2</li>
-          <li>Chorus -> A3 A3</li>
+          <li><code>Play -> Verse Chorus</code></li>
+          <li><code>Verse -> A1 A2 A1 A2</code></li>
+          <li><code>Chorus -> A3 A3</code></li>
         </ul>
         <h3>Patterns</h3>
         <ul>
-          <li>A1 -> Pad: C D# C D#</li>
-          <li>A2 -> Pad: Cm _ Gdom7 _</li>
-          <li>A3 -> Kick: x _ _ x _ _ x _</li>
+          <li><code>A1 -> Pad: C D# C D#</code></li>
+          <li><code>A2 -> Pad: Cm _ Gdom7 _</code></li>
+          <li><code>A3 -> Kick: x _ x _</code></li>
         </ul>
         <h3>Conditions</h3>
         <ul>
-          <li>A1 -><br>(x > 0.3) Pad: C _ C _<br>(0.6 > x > 0.3) Pad: _ D _ D</li>
+          <li><code>(x > 0.3) Pad: C _ C _</code></li>
+          <li><code>(0.6 > x > 0.3) Pad: _ D _ D</code></li>
         </ul>
       </div>
     </div>
+  </section>
+  <footer>
     <div class="contents">
-      <div class="line-above">
-        <p>A project by <a href="http://hisekaldma.com">Jonathan Hise Kaldma</a>. Code on <a href="https://github.com/hisekaldma/Polyhymnia">Github</a>.</p>
+      <div class="whole">
+        <p class="line-above">Created by <a href="http://hisekaldma.com">Jonathan Hise Kaldma</a></p>
       </div>
     </div>
-  </body>
+  </footer>
+</body>
 </html>
