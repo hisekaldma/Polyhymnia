@@ -51,7 +51,7 @@ module.exports = function(grunt) {
       src: '**/*'
     },
     watch: {
-      files: [src, tests, less],
+      files: ['src/**/*', 'test/**/*'],
       tasks: ['build', 'test']
     }
   });
@@ -66,9 +66,9 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-gh-pages');
 
   // Register tasks
-  grunt.registerTask('test',    ['jasmine']);
   grunt.registerTask('build',   ['jshint', 'concat', 'uglify', 'less']);
-  grunt.registerTask('default', ['build', 'test', 'watch']);
+  grunt.registerTask('test',    ['jasmine']);
+  grunt.registerTask('default', ['build', 'test']);
   grunt.registerTask('pages',   ['build', 'test', 'gh-pages']);
 
   function makeTemplates() {
