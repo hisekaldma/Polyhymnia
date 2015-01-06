@@ -1,12 +1,10 @@
-var Polyhymnia = Polyhymnia || {}; Polyhymnia.templates = { 'player': '<div class="polyhymnia-player">    <div class="code" contenteditable></div>    <div class="controls">      <button class="play">       <svg x="0px" y="0px" width="18px" height="18px">         <path fill="none" stroke="#FF884D" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" d="M16,9L2,17V1L16,9z"/>       </svg>     </button>      <button class="stop" style="display: none">       <svg x="0px" y="0px" width="18px" height="18px">         <rect x="2" y="2" fill="none" stroke="#FF884D" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" width="14" height="14"/>       </svg>     </button>      <div class="slider">       <div class="output hide">x = 0</div>       <input type="range" min="0" max="1" value="0" step="0.01" />     </div>      <div class="tempo">       <input type="number" min="5" max="320" value="120" step="1" maxlength="3" /><label>bpm</label>     </div>   </div>    <div class="error" style="display: none"></div>    <div class="not-supported" style="display: none">     Your browser doesn’t support web audio. Why don’t you try <a href="https://www.google.com/chrome/browser/desktop/">Chrome</a>?   </div> </div>' };
+var Polyhymnia = Polyhymnia || {}; Polyhymnia.templates = { 'player': '<div class="polyhymnia-player">    <div class="code">     <div class="display">       <div class="text"></div>       <div class="cursor-layer">         <div class="cursor blink">&nbsp;</div>       </div>     </div>     <textarea class="editor"></textarea>   </div>    <div class="controls">      <button class="play">       <svg x="0px" y="0px" width="18px" height="18px">         <path fill="none" stroke="#FF884D" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" d="M16,9L2,17V1L16,9z"/>       </svg>     </button>      <button class="stop" style="display: none">       <svg x="0px" y="0px" width="18px" height="18px">         <rect x="2" y="2" fill="none" stroke="#FF884D" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" width="14" height="14"/>       </svg>     </button>      <div class="slider">       <div class="output hide">x = 0</div>       <input type="range" min="0" max="10" value="0" step="0.1" />     </div>      <div class="tempo">       <input type="number" min="1" max="320" value="120" step="1" maxlength="3" /><label>bpm</label>     </div>   </div>    <div class="not-supported" style="display: none">     Your browser doesn’t support web audio. Why don’t you try <a href="https://www.google.com/chrome/browser/desktop/">Chrome</a>?   </div> </div>' };
 
 var Polyhymnia = Polyhymnia || {};
 
 Polyhymnia.Generator = function() {
   'use strict';
   var self = this;
-
-  this.instruments = {};
 
   var startRule = 'Play';
   var params = {};
@@ -30,30 +28,27 @@ Polyhymnia.Generator = function() {
   };
 
   this.setRules = function(rules) {
-    // Check that there are rules
-    if (!rules || rules.length === 0) {
-      throw new Error('No rules to play');
-    } else {
-      // Check that the start rule exists
-      var hasStart = false;
-      for (var i = 0; i < rules.length; i++) {
-        if (rules[i].name == startRule)
-          hasStart = true;
-      }
-      if (!hasStart)
-        throw new Error('There is no rule named \'' + startRule + '\'');
-    }
-
     // Prepare for playing
     ruleDictionary = {};
     for (var j = 0; j < rules.length; j++) {
       ruleDictionary[rules[j].name] = rules[j];
     }
+    var oldRuleTree = ruleTree;    
     ruleTree = buildTree(ruleDictionary[startRule]);
+
+    // Copy state to allow replacing the rules while playing
+    if (oldRuleTree) {
+      copyState(oldRuleTree, ruleTree);
+    }
   };
 
   function buildTree(rule) {
-    var node = { name: rule.name, definitions: [] };
+    var node = { name: name || '', definitions: [] };
+
+    // If we can't find the rule, return an empty node, so we can keep playing
+    if (!rule) {
+      return node;
+    }
 
     rule.definitions.forEach(function(definition) {
       if (definition.sequence) {
@@ -115,6 +110,19 @@ Polyhymnia.Generator = function() {
     return patterns;
   }
 
+  function copyState(oldNode, newNode) {
+    for (var i = 0; i < oldNode.definitions.length; i++) {
+      var oldDefinition = oldNode.definitions[i];
+      var newDefinition = newNode.definitions.length > i ? newNode.definitions[i] : undefined;
+      if (oldDefinition && newDefinition && oldDefinition.sequence && newDefinition.sequence) {
+        newDefinition.index = oldDefinition.index;
+        var oldCurrent = oldDefinition.sequence[oldDefinition.index];
+        var newCurrent = newDefinition.sequence[newDefinition.index];
+        copyState(oldCurrent, newCurrent);
+      }
+    }
+  }
+
   function getValidDefinitions(definitions) {
     var validDefinitions = [];
     definitions.forEach(function(definition) {
@@ -148,7 +156,7 @@ Polyhymnia.noteType = {
   DRUM:           'drum'
 };
 
-Polyhymnia.parse = function(tokensToParse) {
+Polyhymnia.parse = function(tokensToParse, instruments) {
   'use strict';
 
   var tokenType = Polyhymnia.tokenType;
@@ -156,19 +164,62 @@ Polyhymnia.parse = function(tokensToParse) {
 
   var currentToken;
   var lookaheadToken;
+  var tokensLeft = true;
   var tokens = tokensToParse.slice(0);
   var rules = [];
+  var symbols = [];
+  var errors = [];
 
-  function exception(message) {
-    var error = new Error(message);
-    error.start = currentToken ? currentToken.start : 0;
-    error.end = currentToken ? currentToken.end : 0;
-    return error;
+  // Parse
+  nextToken();
+  skipEmptyLines();
+  while (tokensLeft) {
+    rules.push(parseRule());
+    skipEmptyLines();
   }
 
+  // Check that all rule references have definitions
+  rules.forEach(function(rule) {
+    rule.definitions.forEach(function(definition) {
+      if (definition.sequence) {
+        definition.sequence.forEach(function(name) {
+          var found = false;
+          for (var i = 0; i < rules.length; i++) {
+            if (rules[i].name == name) {
+              found = true;
+            }
+          }
+          if (!found) {
+            errors.push({ error: 'There is no rule ' + name });
+          }
+        });
+      }
+    });
+  });
+
+  rules.symbols = symbols;
+  rules.errors = errors;
+  return rules;
+
+
+  function error(message, start, end) {
+    errors.push({
+      error: message,
+      start: start || currentToken.start,
+      end:   end   || currentToken.end
+    });
+    symbols.push({
+      type:  'error',
+      error: message,
+      start: start || currentToken.start,
+      end:   end   || currentToken.end
+    });
+  }  
+
   function nextToken() {
-    currentToken = tokens.length > 0 ? tokens.shift() : undefined;
-    lookaheadToken = tokens.length > 0 ? tokens[0] : undefined;
+    tokensLeft     = tokens.length > 0;
+    currentToken   = tokens.length > 0 ? tokens.shift() : {};
+    lookaheadToken = tokens.length > 0 ? tokens[0] : {};
   }
 
   function skipEmptyLines() {
@@ -178,7 +229,7 @@ Polyhymnia.parse = function(tokensToParse) {
   }
 
   function endOfRule() {
-    if (!currentToken) {
+    if (!tokensLeft) {
       return true;
     } else if (currentToken.type == tokenType.EOL) {
       return true;
@@ -192,96 +243,96 @@ Polyhymnia.parse = function(tokensToParse) {
   // Name -> Definitions
   function parseRule() {
     var name = '';
+    var definitions = [];
+
     if (currentToken.type == tokenType.NAME) {
       name = currentToken.value;
     } else {
       // ERROR: Expected rule name
-      throw exception('Rules must start with a name');
+      error('Rules must start with a name');
     }
-    nextToken(); // Name
+    nextToken();
 
-    var type;
-    if (!currentToken || currentToken.type !== tokenType.SINGLE_ARROW) {
+    if (currentToken.type !== tokenType.SINGLE_ARROW) {
       // ERROR: Expected ->
-      throw exception('Expected ->');
+      error('Expected ->');
     }
-    nextToken(); // ->
+    nextToken();
 
-    if (currentToken && currentToken.type == tokenType.EOL) {
-      nextToken(); // EOL
+    if (currentToken.type == tokenType.EOL) {
+      nextToken();
     }
 
-    var definitions = [];
-    do {
+    while (!endOfRule()) {
       definitions.push(parseDefinition());
       nextToken();
-    } while (!endOfRule());
-
-    return { type: type, name: name, definitions: definitions };
-  }
-
-  // (Condition) Definition
-  function parseDefinition() {
-    if (currentToken === undefined) {
-      throw exception('Expected a sequence or pattern');
     }
 
+    return { name: name, definitions: definitions };
+  }
+
+  // (Condition) Sequence | Pattern
+  function parseDefinition() {
     var condition;
+
     if (currentToken.type == tokenType.LEFT_PAREN) {
       condition = parseCondition();
     }
 
-    if (currentToken && currentToken.type == tokenType.INSTRUMENT) {
+    if (currentToken.type == tokenType.INSTRUMENT) {
       var pattern = parsePattern();
       return { condition: condition, instrument: pattern.instrument, pattern: pattern.pattern };
-    } else if (currentToken && currentToken.type == tokenType.NAME) {
+    } else if (currentToken.type == tokenType.NAME) {
       var sequence = parseSequence();
       return { condition: condition, sequence: sequence };
     } else {
       // ERROR: Expected a sequence or pattern
-      throw exception('Expected a sequence or pattern');
+      error('Expected a sequence or pattern');
+      return {};
     }
   }
 
-  // Sequence
+  // A1 A2 A3 *
   function parseSequence() {
     var sequence = [];
-    while (currentToken && currentToken.type !== tokenType.EOL) {
+    while (currentToken.type !== tokenType.EOL && tokensLeft) {
       if (currentToken.type == tokenType.NAME) {
         sequence.push(currentToken.value);
       } else {
         // ERROR: Expected rule name
-        throw exception('Expected a rule name');
+        error('Expected a rule name');
+        sequence.push('');
       }
       nextToken();
     }
     return sequence;
   }
 
-  // Instrument: Pattern
+  // Instrument: Note Note Note Note *
   function parsePattern() {
-    var instrument;
-    if (currentToken && currentToken.type == tokenType.INSTRUMENT) {
-      instrument = currentToken.value;
-      nextToken();
-    } else {
-      // ERROR: Expected instrument
-      throw exception('Expected an instrument name');
+    var instrument = currentToken.value;
+
+    // Check that instrument exists
+    if (instruments && !instruments[instrument]) {
+      error('There is no instrument ' + instrument );
     }
+    nextToken();
 
     var pattern = [];
-    while (currentToken && currentToken.type !== tokenType.EOL) {
+    while (currentToken.type !== tokenType.EOL && tokensLeft) {
       pattern.push(parseNote());
     }
 
     return { instrument: instrument, pattern: pattern };
   }
 
+  // C# | Cm7 | x | _
   function parseNote() {
     var type;
     var value = '';
     var start = currentToken.start;
     var end = currentToken.end;
+    var valid = true;
 
     if (currentToken.type == tokenType.NOTE) {
       type = noteType.NOTE;
@@ -296,145 +347,105 @@ Polyhymnia.parse = function(tokensToParse) {
       type = noteType.PAUSE;
     } else {
       // ERROR: Expected note, chord, drum symbol or pause
-      throw exception('Expected a note, chord, drum symbol or pause');
+      error('Expected a note, chord, drum symbol or pause');
+      valid = false;
+      type = noteType.PAUSE;
+    }
+
+    if (valid) {
+      symbols.push({ type: 'note', start: start, end: end });
     }
 
     nextToken();
     return { type: type, value: value, start: start, end: end };
   }
 
+  // (x > 0) | (0 > x) | (0 > x > 0) | (x < 0) | (0 < x) | (0 < x < 0)
   function parseCondition() {
-    if (currentToken.type == tokenType.LEFT_PAREN) {
+    var start = currentToken.start;
+    var end = currentToken.end;
+    var condition = [];
+    while (tokensLeft && currentToken.type !== tokenType.EOL) {
+      condition.push(currentToken);
+      end = currentToken.end;
+      if (currentToken.type == tokenType.RIGHT_PAREN) {
+        nextToken();
+        break;
+      }
       nextToken();
-    } else {
-      // ERROR: Expected (
-      throw exception('Expected (');
     }
     
     var min;
     var max;
     var param;
-    if (currentToken.type == tokenType.PARAM) {
-      param = currentToken.value;
-      nextToken();
-      if (currentToken.type == tokenType.GREATER_THAN) {
-        nextToken();
-        if (currentToken.type == tokenType.NUMBER) {
-          min = currentToken.value;
-          nextToken();
-        } else {
-          // ERROR: Expected number
-          throw exception('Expected a number');
-        }
-      } else if (currentToken.type == tokenType.LESS_THAN) {
-        nextToken();
-        if (currentToken.type == tokenType.NUMBER) {
-          max = currentToken.value;
-          nextToken();
-        } else {
-          // ERROR: Expected number
-          throw exception('Expected a number');
-        }
-      } else {
-        // ERROR: Expected < or >
-        throw exception('Expected < or >');
-      }
-    } else if (currentToken.type == tokenType.NUMBER) {
-      var number = currentToken.value;
-      nextToken();
-      if (currentToken.type == tokenType.GREATER_THAN) {
-        max = number;
-        nextToken();
-        if (currentToken.type == tokenType.PARAM) {
-          param = currentToken.value;
-          nextToken();
-          if (currentToken.type == tokenType.GREATER_THAN) {
-            
-            nextToken();
-            if (currentToken.type == tokenType.NUMBER) {
-              min = currentToken.value;
-              nextToken();
-            } else {
-              // ERROR: Expected number
-              throw exception('Expected a number');
-            }
-          }
-        } else {
-          // ERROR: Expected parameter
-          throw exception('Expected a parameter');
-        }
-      } else if (currentToken.type == tokenType.LESS_THAN) {
-        min = number;
-        nextToken();
-        if (currentToken.type == tokenType.PARAM) {
-          param = currentToken.value;
-          nextToken();
-          if (currentToken.type == tokenType.LESS_THAN) {
-
-            nextToken();
-            if (currentToken.type == tokenType.NUMBER) {
-              max = currentToken.value;
-              nextToken();
-            } else {
-              // ERROR: Expected number
-              throw exception('Expected a number');
-            }
-          }
-        } else {
-          // ERROR: Expected parameter
-          throw exception('Expected a parameter');
-        }
-      } else {
-        // ERROR: Expected < or >
-        throw exception('Expected < or >');
-      }
-    } else {
-      // ERROR: Expected number or parameter
-      throw exception('Expected a parameter or number');
+    if (condition.length == 5 &&
+        condition[0].type == tokenType.LEFT_PAREN &&
+        condition[1].type == tokenType.NUMBER &&
+        condition[2].type == tokenType.GREATER_THAN &&
+        condition[3].type == tokenType.PARAM &&
+        condition[4].type == tokenType.RIGHT_PAREN) {
+      max   = condition[1].value;
+      param = condition[3].value;
     }
-    
-    if (currentToken.type == tokenType.RIGHT_PAREN) {
-      nextToken();
-    } else {
-      // ERROR: Expected )
-      throw exception('Expected )');
+    else if (condition.length == 5 &&
+        condition[0].type == tokenType.LEFT_PAREN &&
+        condition[1].type == tokenType.NUMBER &&
+        condition[2].type == tokenType.LESS_THAN &&
+        condition[3].type == tokenType.PARAM &&
+        condition[4].type == tokenType.RIGHT_PAREN) {
+      min   = condition[1].value;
+      param = condition[3].value;
+    }
+    else if (condition.length == 5 &&
+        condition[0].type == tokenType.LEFT_PAREN &&
+        condition[1].type == tokenType.PARAM &&
+        condition[2].type == tokenType.GREATER_THAN &&
+        condition[3].type == tokenType.NUMBER &&
+        condition[4].type == tokenType.RIGHT_PAREN) {
+      param = condition[1].value;
+      min   = condition[3].value;
+    }
+    else if (condition.length == 5 &&
+        condition[0].type == tokenType.LEFT_PAREN &&
+        condition[1].type == tokenType.PARAM &&
+        condition[2].type == tokenType.LESS_THAN &&
+        condition[3].type == tokenType.NUMBER &&
+        condition[4].type == tokenType.RIGHT_PAREN) {
+      param = condition[1].value;
+      max   = condition[3].value;
+    }
+    else if (condition.length == 7 &&
+        condition[0].type == tokenType.LEFT_PAREN &&
+        condition[1].type == tokenType.NUMBER &&
+        condition[2].type == tokenType.LESS_THAN &&
+        condition[3].type == tokenType.PARAM &&
+        condition[4].type == tokenType.LESS_THAN &&
+        condition[5].type == tokenType.NUMBER &&
+        condition[6].type == tokenType.RIGHT_PAREN) {
+      min   = condition[1].value;
+      param = condition[3].value;
+      max   = condition[5].value;
+    }
+    else if (condition.length == 7 &&
+        condition[0].type == tokenType.LEFT_PAREN &&
+        condition[1].type == tokenType.NUMBER &&
+        condition[2].type == tokenType.GREATER_THAN &&
+        condition[3].type == tokenType.PARAM &&
+        condition[4].type == tokenType.GREATER_THAN &&
+        condition[5].type == tokenType.NUMBER &&
+        condition[6].type == tokenType.RIGHT_PAREN) {
+      max   = condition[1].value;
+      param = condition[3].value;
+      min   = condition[5].value;
+    }
+    else {
+      // ERROR: Expected condition
+      error('Expected a condition', start, end);
+      return undefined;
     }
 
     return { param: param, min: min, max: max };
-  }
-
-
-  // Parse
-  nextToken();
-  skipEmptyLines();
-  while (currentToken) {
-    rules.push(parseRule());
-    skipEmptyLines();
-  }
-
-  // Check that all rule references have definitions
-  for (var r = 0; r < rules.length; r++) {
-    var rule = rules[r];
-    for (var d = 0; d < rule.definitions.length; d++) {
-      var sequence = rule.definitions[d].sequence;
-      if (sequence) {
-        for (var s = 0; s < sequence.length; s++) {
-          var name = sequence[s];
-          var found = false;
-          for (var i = 0; i < rules.length; i++) {
-            if (rules[i].name == name) {
-              found = true;
-            }
-          }
-          if (!found) {
-            throw new Error('There is no rule ' + name);
-          }
-        }
-      }
-    }
-  }
-
-  return rules;
+  } 
 };
 var Polyhymnia = Polyhymnia || {};
 
@@ -463,18 +474,21 @@ Polyhymnia.tokenize = function(textToTokenize) {
 
   var tokenType = Polyhymnia.tokenType;
 
-  var NAME_PATTERN =            '[A-Z][a-zA-Z0-9_]+';
-  var PARAM_PATTERN =           '[a-z][a-zA-Z0-9_]*';
-  var INSTRUMENT_PATTERN =      NAME_PATTERN + ':';
-  var NUMBER_PATTERN =          '-?(([1-9][0-9]*)|0)\\.[0-9]+';
-  var NOTE_PATTERN =            '[CDEFGAB][#b]?';
-  var CHORD_PATTERN =           NOTE_PATTERN + '(M|m|dom|aug|dim)7?';
-  var DRUM_PATTERN =            '[xX]';
+  var NAME_PATTERN        = '[A-Z][a-zA-Z0-9_]+';
+  var PARAM_PATTERN       = '[a-z][a-zA-Z0-9_]*';
+  var INSTRUMENT_PATTERN  = NAME_PATTERN + ':';
+  var NUMBER_PATTERN      = '-?(([1-9][0-9]*)|0)(\\.[0-9]*)?';
+  var NOTE_PATTERN        = '[CDEFGAB][#b]?';
+  var CHORD_PATTERN       = NOTE_PATTERN + '(M|m|dom|aug|dim)7?';
+  var DRUM_PATTERN        = '[xX]';
 
-  var NEWLINE = '\n';
-  var SPACE = ' ';
-  var TAB = '\t';
+  var NEWLINE    = '\n';
+  var SPACE      = ' ';
+  var TAB        = '\t';
   var DELIMITERS = '()\n\t ';
+
+  var CTX_DEFAULT   = 'sequence';
+  var CTX_CONDITION = 'condition';
 
   var namePattern           = new RegExp('^' + NAME_PATTERN + '$');
   var paramPattern          = new RegExp('^' + PARAM_PATTERN + '$');
@@ -522,7 +536,7 @@ Polyhymnia.tokenize = function(textToTokenize) {
   var token;
   var lineBeforeReading;
   var positionBeforeReading;
-  var parens = 0;
+  var context = CTX_DEFAULT;
   var str;
 
   while (moreToRead) {
@@ -534,20 +548,21 @@ Polyhymnia.tokenize = function(textToTokenize) {
     if (currentChar == NEWLINE) {
       line++;
       token = { type: tokenType.EOL };
+      context = CTX_DEFAULT;
       nextChar();
     } else if (currentChar == SPACE || currentChar == TAB) {
       nextChar();
     } else if (currentChar == '(') {
       token = { type: tokenType.LEFT_PAREN };
-      parens++;
+      context = CTX_CONDITION;
       nextChar();
     } else if (currentChar == ')') {
       token = { type: tokenType.RIGHT_PAREN };
-      parens--;
+      context = CTX_DEFAULT;
       nextChar();
     } else {
       str = readText();
-      if (parens > 0 && str.match(paramPattern)) {
+      if (context == CTX_CONDITION && str.match(paramPattern)) {
         token = { type: tokenType.PARAM, value: str };
       } else if (str == '->') {
         token = { type: tokenType.SINGLE_ARROW };
@@ -759,86 +774,53 @@ Polyhymnia.Player = function(element, context) {
   // Code
   var contents = element.textContent;
 
-  // Context
+  // Music
+  var rules = [];
   var music = context;
+  var symbols = [];
   music.setAnimCallback(highlightNotes);
 
   // Elements
   element.innerHTML = Polyhymnia.templates.player;
-  var controls = element.querySelector('.controls');
-  var playButton = element.querySelector('.play');
-  var stopButton = element.querySelector('.stop');
-  var paramSlider = element.querySelector('.slider input');
-  var paramOutput = element.querySelector('.slider .output');
-  var tempoInput = element.querySelector('.tempo input');
-  var codeEditor = element.querySelector('.code');
-  var errorMessage = element.querySelector('.error');
+  var controls =     element.querySelector('.controls');
+  var playButton =   element.querySelector('.play');
+  var stopButton =   element.querySelector('.stop');
+  var paramSlider =  element.querySelector('.slider input');
+  var paramOutput =  element.querySelector('.slider .output');
+  var tempoInput =   element.querySelector('.tempo input');
+  var codeEditor =   element.querySelector('.code .editor');
+  var codeDisplay =  element.querySelector('.code .display');
+  var codeText =     element.querySelector('.code .text');
+  var codeCursor =   element.querySelector('.code .cursor');
   var notSupportedMessage = element.querySelector('.not-supported');
   var noteElems = [];
-  codeEditor.textContent = contents;
+  codeEditor.value = contents;
+
+  // Private vars
+  var cursorPos;
 
   // Functions
   function play() {
-    try {
-      // Parse
-      var code = codeEditor.textContent;
-      var tokens = Polyhymnia.tokenize(code);
-      var rules = Polyhymnia.parse(tokens);
-
-      // Play
-      music.setRules(rules);
-      music.play();
-      playButton.style.display = 'none';
-      stopButton.style.display = 'block';
-
-      // Clear error message
-      errorMessage.style.display = 'none';
-
-      // Prepare notes for highlight
-      resetCodeWithNotes(rules);
-    } catch(e) {
-      // Error message
-      errorMessage.textContent = e.message;
-      errorMessage.style.display = 'block';
-
-      // Highlight error
-      if (e.start && e.end) {
-        resetCodeWithError(e);
-      } else {
-        throw e;
-      }
-    }
+    parse();
+    music.play();
+    playButton.style.display = 'none';
+    stopButton.style.display = 'block';
   }
 
   function stop() {
     music.stop();
     playButton.style.display = 'block';
     stopButton.style.display = 'none';
-    resetCode();
+    highlightNotes([]);
   }
 
-  function type(e) {
-    if (e.keyCode === 13) {
-      var end = getCaret() == codeEditor.textContent.length;
+  function parse() {
+    // Parse rules
+    var rules = music.parse(codeEditor.value);
+    symbols = rules.symbols;
 
-      // Don't create junk <br> or <div> on enter – just create line break
-      document.execCommand('insertHTML', false, '\n');
-      if (end) {
-        // If at the end, insert an extra line break to get the desired effect
-        document.execCommand('insertHTML', false, '\n');
-      }
-      e.preventDefault();
-    }
-  }
-
-  function paste(e) {
-    // Wait for paste to finish, then clean input
-    setTimeout(function(){
-      var code = codeEditor.innerHTML;
-      code = code.replace(/<br.*?>/g, '\n'); // Preserve line breaks
-      codeEditor.innerHTML = code;
-      resetCode();
-    }, 1);
+    // Render the code
+    renderCode();
   }
 
   function changeTempo() {
@@ -854,7 +836,7 @@ Polyhymnia.Player = function(element, context) {
 
   function changeParam() {
     // Update the value
-    music.setParam('x', paramSlider.value);
+    music.setParam('x', paramSlider.valueAsNumber);
 
     // Show the value
     paramOutput.textContent = 'x = ' + paramSlider.value;
@@ -865,76 +847,82 @@ Polyhymnia.Player = function(element, context) {
     var pos = paramSlider.value / (paramSlider.max - paramSlider.min);
     var nudge = 8 * (1 - pos) - 8 * pos; // Offset for handle size 16px
     paramOutput.style.left = pos * paramSlider.offsetWidth - paramOutput.offsetWidth/2 + nudge + 'px';
+
+    // Hide the value again
+    setTimeout(function() {
+      paramOutput.classList.add('hide');
+      paramOutput.classList.remove('show');
+    }, 2000);
   }
 
-  function endChangeParam() {
-    paramOutput.classList.add('hide');
-    paramOutput.classList.remove('show');
-  }
-
-  function resetCodeWithNotes(rules) {
+  function renderCode() {
     // Get the code
-    var code = codeEditor.textContent;
+    var code = codeEditor.value;
 
-    // Get all notes
-    var notes = [];
-    for (var r = 0; r < rules.length; r++) {
-      for (var d = 0; d < rules[r].definitions.length; d++) {
-        var pattern = rules[r].definitions[d].pattern;
-        if (pattern) {
-          notes = notes.concat(pattern);
-        }
-      }
-    }
-
-    // Wrap notes in spans
+    // Wrap symbols in spans
     var html = '';
-    if (notes.length > 0) {
-      var n = 0;
-      for (var i = 0; i < code.length; i++) {
-        if (notes[n] && notes[n].start == i) {
-          html += '<span class="note" data-start="' + notes[n].start + '">';
-        }
-        html += code.charAt(i);
-        if (notes[n] && notes[n].end == i + 1) {
-          html += '</span>';
-          n++;
-        }
+    var s = 0;
+    for (var i = 0; i < code.length; i++) {
+      if (s < symbols.length && symbols[s].start == i) {
+        html += '<span class="' + symbols[s].type + '" data-start="' + symbols[s].start + '">';
+      }
+
+      html += code.charAt(i);
+
+      if (s < symbols.length && symbols[s].end == i + 1) {
+        html += '</span>';
+        s++;
       }
     }
 
-    // Replace contents of the code editor
-    codeEditor.innerHTML = html;
+    // Replace contents of the code display
+    codeText.innerHTML = html;
 
     // Get all note elements for later highlighting
     noteElems = [];
-    var elems = codeEditor.querySelectorAll('.note');
+    var elems = codeText.querySelectorAll('.note');
     for (var e = 0; e < elems.length; e++) {
       noteElems.push({ elem: elems[e], start: elems[e].dataset.start });
     }
   }
 
-  function resetCode() {
-    codeEditor.innerHTML = codeEditor.textContent;
-  }
+  function render() {
+    var newCursorPos = codeEditor.selectionDirection == 'forward' ? codeEditor.selectionEnd : codeEditor.selectionStart;
 
-  function resetCodeWithError(error) {
-    // Get the code
-    var code = codeEditor.textContent;
+    // Draw the cursor
+    if (document.activeElement === codeEditor) {
+      codeCursor.style.display = 'block';
 
-    // Wrap error in span
-    var html = '';
-    for (var i = 0; i < code.length; i++) {
-      if (i == error.start) {
-        html += '<span class="error-highlight">';
-      } else if (i == error.end) {
-        html += '</span>';
+      // Only redraw the cursor if it's moved
+      if (newCursorPos !== cursorPos) {
+        cursorPos = newCursorPos;
+
+        // Measure text sizes
+        var rect = codeCursor.getBoundingClientRect();
+        var lineHeight = rect.height - (codeCursor.offsetHeight - codeCursor.clientHeight);
+        var characterWidth = rect.width - (codeCursor.offsetWidth - codeCursor.clientWidth);
+
+        // Calculate position
+        var lines = codeEditor.value.substr(0, cursorPos).split('\n');
+        var top = (lines.length - 1) * lineHeight;
+        var left = lines[lines.length - 1].length * characterWidth;
+
+        // Move the cursor
+        codeCursor.classList.remove('blink');
+        codeCursor.style.top = top + 'px';
+        codeCursor.style.left = left - 1 + 'px';
+        var reflow = codeCursor.offsetWidth; // Trigger animation reset
+        codeCursor.classList.add('blink');
       }
-      html += code.charAt(i);
+    } else {
+      codeCursor.style.display = 'none';
     }
 
-    // Replace contents of the code editor
-    codeEditor.innerHTML = html;
+    // Sync scroll
+    codeDisplay.scrollTop = codeEditor.scrollTop;
+
+    // Repaint
+    window.requestAnimationFrame(render);    
   }
 
   function highlightNotes(notes) {
@@ -953,27 +941,21 @@ Polyhymnia.Player = function(element, context) {
     }
   }
 
-  function getCaret() {
-    var range = window.getSelection().getRangeAt(0);
-    var preCaretRange = range.cloneRange();
-    preCaretRange.selectNodeContents(codeEditor);
-    preCaretRange.setEnd(range.endContainer, range.endOffset);
-    return preCaretRange.toString().length;
-  }
-
   // Events
   if (Polyhymnia.isSupported()) {
-    playButton.addEventListener('click', play);
-    stopButton.addEventListener('click', stop);
+    playButton.addEventListener('click',  play);
+    stopButton.addEventListener('click',  stop);
     paramSlider.addEventListener('input', changeParam);
-    paramSlider.addEventListener('change', endChangeParam);
-    tempoInput.addEventListener('input', changeTempo);
-    codeEditor.addEventListener('keydown', type);
-    element.addEventListener ('paste', paste);
+    tempoInput.addEventListener('input',  changeTempo);
+    codeEditor.addEventListener('input',  parse);
   } else {
     controls.style.display = 'none';
     notSupportedMessage.style.display = 'block';
   }
+
+  // Rendering
+  renderCode();
+  window.requestAnimationFrame(render);
 };
 var Polyhymnia = Polyhymnia || {};
 
@@ -1064,14 +1046,19 @@ Polyhymnia.Sampler = function(options) {
       audioContext.decodeAudioData(request.response, function(buffer) {
         console.log('Loaded ' + url);
         buffers[midiNumber] = buffer;
-        loaded++;
-        if (loaded == total) {
-          fillSampleTable();
-        }
+        always();
       }, function(e) {
         console.log('Error decoding audio file: ' + url);
+        always();
       });
     };
+
+    function always() {
+      loaded++;
+      if (loaded >= total) {
+        fillSampleTable();
+      }
+    }    
 
     request.send();
   }
@@ -1139,7 +1126,8 @@ Polyhymnia.Sequencer = function() {
   'use strict';
   var noteType = Polyhymnia.noteType;
   var self = this;
-
+  
+  this.instruments = {};
   this.measure = { num: 4, den: 4 };
   this.stepsPerBeat = 16;
   this.generator = null;
@@ -1213,7 +1201,9 @@ Polyhymnia.Sequencer = function() {
     }
 
     // Play notes
-    self.generator.instruments[instrument].scheduleNotes(midiNumbers, time);
+    if (self.instruments[instrument]) {
+      self.instruments[instrument].scheduleNotes(midiNumbers, time);
+    }
   }
 
   function getNoteLength(patternLength) {
@@ -1325,10 +1315,17 @@ Polyhymnia.Context = function(options) {
   if (options && options.instruments) {
     for (var i = 0; i < options.instruments.length; i++) {
       var instrument = options.instruments[i];
-      generator.instruments[instrument.name] = new Polyhymnia.Sampler({
+      sequencer.instruments[instrument.name] = new Polyhymnia.Sampler({
         samples: instrument.samples
       });
     }
+  }
+
+  function parse(code) {
+    var tokens = Polyhymnia.tokenize(code);
+    var rules = Polyhymnia.parse(tokens, sequencer.instruments);
+    generator.setRules(rules);
+    return rules;
   }
 
   function setTempo(tempo) {
@@ -1340,10 +1337,10 @@ Polyhymnia.Context = function(options) {
   }
 
   return {
+    parse: parse,
     play: metronome.play,
     stop: metronome.stop,
     setParam: generator.setParam,
-    setRules: generator.setRules,
     setTempo: setTempo,
     setAnimCallback: setAnimCallback
   };
