@@ -33,14 +33,19 @@ Polyhymnia.Sampler = function(options) {
       audioContext.decodeAudioData(request.response, function(buffer) {
         console.log('Loaded ' + url);
         buffers[midiNumber] = buffer;
-        loaded++;
-        if (loaded == total) {
-          fillSampleTable();
-        }
+        always();
       }, function(e) {
         console.log('Error decoding audio file: ' + url);
+        always();
       });
     };
+
+    function always() {
+      loaded++;
+      if (loaded >= total) {
+        fillSampleTable();
+      }
+    }    
 
     request.send();
   }
