@@ -68,7 +68,7 @@ Polyhymnia.Player = function(element, context) {
 
   function changeParam() {
     // Update the value
-    music.setParam('x', paramSlider.value);
+    music.setParam('x', paramSlider.valueAsNumber);
 
     // Show the value
     paramOutput.textContent = 'x = ' + paramSlider.value;
