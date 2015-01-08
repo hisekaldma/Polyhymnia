@@ -186,6 +186,6 @@ Polyhymnia.Player = function(element, context) {
   }
 
   // Rendering
-  renderCode();
+  parse();
   window.requestAnimationFrame(render);
 };
