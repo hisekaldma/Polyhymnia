@@ -208,15 +208,15 @@ footer p {
 
 /* Playground */
 
-.playground .reference {
+.playground .ref {
   padding-left: 5%;
 }
 @media screen and (max-width: 590px) {
-  .playground .reference {
+  .playground .ref {
     padding: 0 2%;
   }
 }
-.playground .reference code {
+.playground .ref code {
   font-size: 15px;
   color: rgba(255, 255, 255, 0.7);
 }
