@@ -1,4 +1,4 @@
-var Polyhymnia = Polyhymnia || {}; Polyhymnia.templates = { 'player': '<div class="polyhymnia-player">    <div class="code">     <div class="display">       <div class="text"></div>       <div class="cursor-layer">         <div class="cursor blink">&nbsp;</div>       </div>     </div>     <textarea class="editor"></textarea>   </div>    <div class="controls">      <button class="play">       <svg x="0px" y="0px" width="18px" height="18px">         <path fill="none" stroke="#FF884D" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" d="M16,9L2,17V1L16,9z"/>       </svg>     </button>      <button class="stop" style="display: none">       <svg x="0px" y="0px" width="18px" height="18px">         <rect x="2" y="2" fill="none" stroke="#FF884D" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" width="14" height="14"/>       </svg>     </button>      <div class="slider">       <div class="output hide">x = 0</div>       <input type="range" min="0" max="10" value="0" step="0.1" />     </div>      <div class="tempo">       <input type="number" min="1" max="320" value="120" step="1" maxlength="3" /><label>bpm</label>     </div>   </div>    <div class="not-supported" style="display: none">     Your browser doesn’t support web audio. Why don’t you try <a href="https://www.google.com/chrome/browser/desktop/">Chrome</a>?   </div> </div>' };
+var Polyhymnia = Polyhymnia || {}; Polyhymnia.templates = { 'player': '<div class="polyhymnia-player">    <div class="code">     <div class="display">       <div class="text"></div>       <div class="cursor-layer">         <div class="cursor blink">&nbsp;</div>       </div>     </div>     <textarea class="editor" spellcheck="false"></textarea>   </div>    <div class="controls">      <button class="play">       <svg x="0px" y="0px" width="18px" height="18px">         <path fill="none" stroke="#FF884D" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" d="M16,9L2,17V1L16,9z"/>       </svg>     </button>      <button class="stop" style="display: none">       <svg x="0px" y="0px" width="18px" height="18px">         <rect x="2" y="2" fill="none" stroke="#FF884D" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" width="14" height="14"/>       </svg>     </button>      <div class="slider">       <div class="output hide">x = 0</div>       <input type="range" min="0" max="10" value="0" step="0.1" />     </div>      <div class="tempo">       <input type="number" min="1" max="320" value="120" step="1" maxlength="3" /><label>bpm</label>     </div>   </div>    <div class="not-supported" style="display: none">     Your browser doesn’t support web audio. Why don’t you try <a href="https://www.google.com/chrome/browser/desktop/">Chrome</a>?   </div> </div>' };
 
 var Polyhymnia = Polyhymnia || {};
 
@@ -150,10 +150,19 @@ Polyhymnia.Generator = function() {
 var Polyhymnia = Polyhymnia || {};
 
 Polyhymnia.noteType = {
-  PAUSE:          'pause',
-  NOTE:           'note',
-  CHORD:          'chord',
-  DRUM:           'drum'
+  PAUSE: 'pause',
+  NOTE:  'note',
+  CHORD: 'chord',
+  DRUM:  'drum'
+};
+
+Polyhymnia.symbolType = {
+  NAME:       'name',
+  ARROW:      'arrow',
+  REFERENCE:  'reference',
+  INSTRUMENT: 'instrument',
+  NOTE:       'note',
+  CONDITION:  'condition'
 };
 
 Polyhymnia.parse = function(tokensToParse, instruments) {
@@ -161,6 +170,7 @@ Polyhymnia.parse = function(tokensToParse, instruments) {
 
   var tokenType = Polyhymnia.tokenType;
   var noteType = Polyhymnia.noteType;
+  var symbolType = Polyhymnia.symbolType;
 
   var currentToken;
   var lookaheadToken;
@@ -201,6 +211,13 @@ Polyhymnia.parse = function(tokensToParse, instruments) {
   rules.errors = errors;
   return rules;
 
+  function symbol(type, start, end) {
+    symbols.push({
+      type:  type,
+      start: start || currentToken.start,
+      end:   end   || currentToken.end
+    });
+  }
 
   function error(message, start, end) {
     errors.push({
@@ -214,7 +231,7 @@ Polyhymnia.parse = function(tokensToParse, instruments) {
       start: start || currentToken.start,
       end:   end   || currentToken.end
     });
-  }  
+  }
 
   function nextToken() {
     tokensLeft     = tokens.length > 0;
@@ -247,13 +264,16 @@ Polyhymnia.parse = function(tokensToParse, instruments) {
 
     if (currentToken.type == tokenType.NAME) {
       name = currentToken.value;
+      symbol(symbolType.NAME);
     } else {
       // ERROR: Expected rule name
       error('Rules must start with a name');
     }
     nextToken();
 
-    if (currentToken.type !== tokenType.SINGLE_ARROW) {
+    if (currentToken.type == tokenType.SINGLE_ARROW) {
+      symbol(symbolType.ARROW);
+    } else {
       // ERROR: Expected ->
       error('Expected ->');
     }
@@ -298,6 +318,7 @@ Polyhymnia.parse = function(tokensToParse, instruments) {
     while (currentToken.type !== tokenType.EOL && tokensLeft) {
       if (currentToken.type == tokenType.NAME) {
         sequence.push(currentToken.value);
+        symbol(symbolType.REFERENCE);
       } else {
         // ERROR: Expected rule name
         error('Expected a rule name');
@@ -315,6 +336,8 @@ Polyhymnia.parse = function(tokensToParse, instruments) {
     // Check that instrument exists
     if (instruments && !instruments[instrument]) {
       error('There is no instrument ' + instrument );
+    } else {
+      symbol(symbolType.INSTRUMENT);
     }
     nextToken();
 
@@ -353,7 +376,7 @@ Polyhymnia.parse = function(tokensToParse, instruments) {
     }
 
     if (valid) {
-      symbols.push({ type: 'note', start: start, end: end });
+      symbol(symbolType.NOTE);
     }
 
     nextToken();
@@ -444,6 +467,7 @@ Polyhymnia.parse = function(tokensToParse, instruments) {
       return undefined;
     }
 
+    symbol(symbolType.CONDITION, start, end);
     return { param: param, min: min, max: max };
   } 
 };
@@ -954,7 +978,7 @@ Polyhymnia.Player = function(element, context) {
   }
 
   // Rendering
-  renderCode();
+  parse();
   window.requestAnimationFrame(render);
 };
 var Polyhymnia = Polyhymnia || {};

@@ -78,11 +78,23 @@
   width: 100%;
   color: rgba(0, 0, 0, 0.7);
 }
-.polyhymnia-player .code .display .text .error {
-  color: #e5004d;
-  border-bottom: 2px solid #e5004d;
+.polyhymnia-player .code .display .text span.error {
+  color: #ff323c;
+  border-bottom: 2px solid #ff323c;
 }
-.polyhymnia-player .code .display .text .playing {
+.polyhymnia-player .code .display .text span.arrow {
+  color: #f03a76;
+}
+.polyhymnia-player .code .display .text span.reference {
+  color: #815ccc;
+}
+.polyhymnia-player .code .display .text span.note {
+  color: #3399ff;
+}
+.polyhymnia-player .code .display .text span.condition {
+  color: #ff854c;
+}
+.polyhymnia-player .code .display .text span.playing {
   color: #ffffb3;
 }
 .polyhymnia-player .code .display .cursor-layer {
@@ -206,6 +218,7 @@
   width: 100%;
   margin: 0;
   padding: 0;
+  background: transparent;
 }
 .polyhymnia-player .controls .slider input::-webkit-slider-runnable-track {
   height: 1px;
@@ -252,6 +265,7 @@
   padding: 0;
   margin-right: 8px;
   text-align: right;
+  background: transparent;
 }
 .polyhymnia-player .not-supported {
   position: relative;
