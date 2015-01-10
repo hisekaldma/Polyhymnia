@@ -1,7 +1,7 @@
 @interaction-color: rgb(255, 136, 77);
 @active-color:      rgb(229, 0, 77);
 @highlight-color:   rgb(255, 255, 179);
-@error-color:       rgb(229, 0, 77);
+@error-color:       rgb(255, 50, 60);
 @selection-color:   rgba(229, 0, 77, 0.2);
 
 .polyhymnia-player {
@@ -93,12 +93,28 @@
         width: 100%;
         color: rgba(0,0,0,0.7);
 
-        .error { 
+        span.error { 
           color: @error-color;
           border-bottom: 2px solid @error-color;
         }
 
-        .playing {
+        span.arrow {
+          color: #f03a76;
+        }
+
+        span.reference {
+          color: #815ccc;
+        }
+
+        span.note {
+          color: #3399ff;
+        }
+
+        span.condition {
+          color: #ff854c;
+        }
+
+        span.playing {
           color: @highlight-color;
         }
       }
@@ -230,6 +246,7 @@
         width: 100%;
         margin: 0;
         padding: 0;
+        background: transparent;
 
         &::-webkit-slider-runnable-track {
           height: 1px;
@@ -284,6 +301,7 @@
         padding: 0;
         margin-right: 8px;        
         text-align: right;
+        background: transparent;
       }
     }
   }
