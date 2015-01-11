@@ -124,7 +124,7 @@ Polyhymnia.tokenize = function(textToTokenize) {
         } else if (str.match(paramPattern)) {
           token = { type: tokenType.PARAM, value: str };
         } else if (str.match(numberPattern)) {
-          token = { type: tokenType.NUMBER, value: str };
+          token = { type: tokenType.NUMBER, value: parseFloat(str) };
         } else {
           token = { type: tokenType.ERROR, value: str };
         }

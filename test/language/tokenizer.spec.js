@@ -86,19 +86,19 @@ describe('Tokenizer', function() {
   it('can tokenize numbers', function() {
     var tokens = Polyhymnia.tokenize('(1.0 0.2 3.14 100.001 0.0 1 0)');
     
-    expect(tokens[1].value).toBe('1.0');
+    expect(tokens[1].value).toBe(1.0);
     expect(tokens[1].type).toBe(tokenType.NUMBER);
-    expect(tokens[2].value).toBe('0.2');
+    expect(tokens[2].value).toBe(0.2);
     expect(tokens[2].type).toBe(tokenType.NUMBER);
-    expect(tokens[3].value).toBe('3.14');
+    expect(tokens[3].value).toBe(3.14);
     expect(tokens[3].type).toBe(tokenType.NUMBER);
-    expect(tokens[4].value).toBe('100.001');
+    expect(tokens[4].value).toBe(100.001);
     expect(tokens[4].type).toBe(tokenType.NUMBER);
-    expect(tokens[5].value).toBe('0.0');
+    expect(tokens[5].value).toBe(0.0);
     expect(tokens[5].type).toBe(tokenType.NUMBER);
-    expect(tokens[6].value).toBe('1');
+    expect(tokens[6].value).toBe(1);
     expect(tokens[6].type).toBe(tokenType.NUMBER);
-    expect(tokens[7].value).toBe('0');
+    expect(tokens[7].value).toBe(0);
     expect(tokens[7].type).toBe(tokenType.NUMBER);
   });
 

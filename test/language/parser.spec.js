@@ -29,44 +29,44 @@ describe('Parser', function() {
     var rules = Polyhymnia.parse(Polyhymnia.tokenize('R1 -> (var > 0.1) Piano: C D E F'));
 
     expect(rules[0].definitions[0].condition.param).toBe('var');
-    expect(rules[0].definitions[0].condition.min).toBe('0.1');
+    expect(rules[0].definitions[0].condition.min).toBe(0.1);
   });
   
   it('can parse max conditions', function() {
     var rules = Polyhymnia.parse(Polyhymnia.tokenize('R1 -> (var < 1.0) Piano: C D E F'));
 
     expect(rules[0].definitions[0].condition.param).toBe('var');
-    expect(rules[0].definitions[0].condition.max).toBe('1.0');
+    expect(rules[0].definitions[0].condition.max).toBe(1.0);
   });
 
   it('can parse between conditions', function() {
     var rules = Polyhymnia.parse(Polyhymnia.tokenize('R1 -> (0.5 < var < 1.0) Piano: C D E F'));
 
     expect(rules[0].definitions[0].condition.param).toBe('var');
-    expect(rules[0].definitions[0].condition.min).toBe('0.5');
-    expect(rules[0].definitions[0].condition.max).toBe('1.0');
+    expect(rules[0].definitions[0].condition.min).toBe(0.5);
+    expect(rules[0].definitions[0].condition.max).toBe(1.0);
   });
 
   it('can parse reverse min conditions', function() {
     var rules = Polyhymnia.parse(Polyhymnia.tokenize('R1 -> (0.1 < var) Piano: C D E F'));
 
     expect(rules[0].definitions[0].condition.param).toBe('var');
-    expect(rules[0].definitions[0].condition.min).toBe('0.1');
+    expect(rules[0].definitions[0].condition.min).toBe(0.1);
   });
   
   it('can parse reverse max conditions', function() {
     var rules = Polyhymnia.parse(Polyhymnia.tokenize('R1 -> (1.0 > var) Piano: C D E F'));
 
     expect(rules[0].definitions[0].condition.param).toBe('var');
-    expect(rules[0].definitions[0].condition.max).toBe('1.0');
+    expect(rules[0].definitions[0].condition.max).toBe(1.0);
   });
 
   it('can parse reverse between conditions', function() {
     var rules = Polyhymnia.parse(Polyhymnia.tokenize('R1 -> (1.0 > var > 0.5) Piano: C D E F'));
 
     expect(rules[0].definitions[0].condition.param).toBe('var');
-    expect(rules[0].definitions[0].condition.min).toBe('0.5');
-    expect(rules[0].definitions[0].condition.max).toBe('1.0');
+    expect(rules[0].definitions[0].condition.min).toBe(0.5);
+    expect(rules[0].definitions[0].condition.max).toBe(1.0);
   });
 
   it('doesn\'t parse rules that don\'t start with a name' , function() {
