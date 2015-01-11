@@ -15,13 +15,13 @@ describe('Parser', function() {
     
     expect(rules[0].name).toBe('R1');
     expect(rules[0].definitions[0].instrument).toBe('Piano');
-    expect(rules[0].definitions[0].pattern[0].value).toBe('C');
+    expect(rules[0].definitions[0].pattern[0].value).toEqual({ note: 'C', octave: undefined });
     expect(rules[0].definitions[0].pattern[0].type).toBe(noteType.NOTE);
-    expect(rules[0].definitions[0].pattern[1].value).toBe('D');
+    expect(rules[0].definitions[0].pattern[1].value).toEqual({ note: 'D', octave: undefined });
     expect(rules[0].definitions[0].pattern[1].type).toBe(noteType.NOTE);
-    expect(rules[0].definitions[0].pattern[2].value).toBe('E');
+    expect(rules[0].definitions[0].pattern[2].value).toEqual({ note: 'E', octave: undefined });
     expect(rules[0].definitions[0].pattern[2].type).toBe(noteType.NOTE);
-    expect(rules[0].definitions[0].pattern[3].value).toBe('F');
+    expect(rules[0].definitions[0].pattern[3].value).toEqual({ note: 'F', octave: undefined });
     expect(rules[0].definitions[0].pattern[3].type).toBe(noteType.NOTE);
   });
 

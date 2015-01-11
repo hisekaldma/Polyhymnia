@@ -59,18 +59,10 @@ Polyhymnia.Sequencer = function() {
     // Convert value to relative midi numbers
     var midiNumbers = [];
     if (type == noteType.NOTE) {
-      midiNumbers = [Polyhymnia.Notes.fromName(value)];
+      midiNumbers = [Polyhymnia.Notes.fromName(value.note, value.octave)];
     } else if (type == noteType.CHORD) {
-      var intonation = value.substr(1,1);
-      var root, chord;
-      if (intonation == '#' || intonation == 'b') {
-        root = Polyhymnia.Notes.fromName(value.substr(0,2));
-        chord = Polyhymnia.Chords.fromName(value.substr(2));
-      } else {
-        root = Polyhymnia.Notes.fromName(value.substr(0,1));
-        chord = Polyhymnia.Chords.fromName(value.substr(1));
-      }
-
+      var root = Polyhymnia.Notes.fromName(value.note, value.octave);
+      var chord = Polyhymnia.Chords.fromName(value.chord);
       midiNumbers = chord.map(function(note) {
         return note + root;
       });

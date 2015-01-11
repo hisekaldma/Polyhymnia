@@ -30,37 +30,48 @@ describe('Tokenizer', function() {
   });
   
   it('can tokenize notes', function() {
-    var tokens = Polyhymnia.tokenize('Piano: C D E# F G Ab B');
+    var tokens = Polyhymnia.tokenize('Piano: C D# Eb F3 G#3 A-1 Bb-1');
 
-    expect(tokens[1].value).toBe('C');
+    expect(tokens[1].value).toEqual({ note: 'C', octave: undefined });
     expect(tokens[1].type).toBe(tokenType.NOTE);
-    expect(tokens[2].value).toBe('D');
+    expect(tokens[2].value).toEqual({ note: 'D#', octave: undefined });
     expect(tokens[2].type).toBe(tokenType.NOTE);
-    expect(tokens[3].value).toBe('E#');
+    expect(tokens[3].value).toEqual({ note: 'Eb', octave: undefined });
     expect(tokens[3].type).toBe(tokenType.NOTE);
-    expect(tokens[4].value).toBe('F');
+    expect(tokens[4].value).toEqual({ note: 'F', octave: 3 });
     expect(tokens[4].type).toBe(tokenType.NOTE);
-    expect(tokens[5].value).toBe('G');
+    expect(tokens[5].value).toEqual({ note: 'G#', octave: 3 });
     expect(tokens[5].type).toBe(tokenType.NOTE);
-    expect(tokens[6].value).toBe('Ab');
+    expect(tokens[6].value).toEqual({ note: 'A', octave: -1 });
     expect(tokens[6].type).toBe(tokenType.NOTE);
-    expect(tokens[7].value).toBe('B');
+    expect(tokens[7].value).toEqual({ note: 'Bb', octave: -1 });
     expect(tokens[7].type).toBe(tokenType.NOTE);
   });
   
   it('can tokenize chords', function() {
-    var tokens = Polyhymnia.tokenize('Piano: CM Dm E#dom Fbaug7 Gdim7');
+    var tokens = Polyhymnia.tokenize('Piano: CM Dm E#dom Fbaug7 Gdim7 C3M D-1m E#4dom Fb-1aug7 G0dim7');
     
-    expect(tokens[1].value).toBe('CM');
+    expect(tokens[1].value).toEqual({ note: 'C', octave: undefined, chord: 'M' });
     expect(tokens[1].type).toBe(tokenType.CHORD);
-    expect(tokens[2].value).toBe('Dm');
+    expect(tokens[2].value).toEqual({ note: 'D', octave: undefined, chord: 'm' });
     expect(tokens[2].type).toBe(tokenType.CHORD);
-    expect(tokens[3].value).toBe('E#dom');
+    expect(tokens[3].value).toEqual({ note: 'E#', octave: undefined, chord: 'dom' });
     expect(tokens[3].type).toBe(tokenType.CHORD);
-    expect(tokens[4].value).toBe('Fbaug7');
+    expect(tokens[4].value).toEqual({ note: 'Fb', octave: undefined, chord: 'aug7' });
     expect(tokens[4].type).toBe(tokenType.CHORD);
-    expect(tokens[5].value).toBe('Gdim7');
+    expect(tokens[5].value).toEqual({ note: 'G', octave: undefined, chord: 'dim7' });
     expect(tokens[5].type).toBe(tokenType.CHORD);
+
+    expect(tokens[6].value).toEqual({ note: 'C', octave: 3, chord: 'M' });
+    expect(tokens[6].type).toBe(tokenType.CHORD);
+    expect(tokens[7].value).toEqual({ note: 'D', octave: -1, chord: 'm' });
+    expect(tokens[7].type).toBe(tokenType.CHORD);
+    expect(tokens[8].value).toEqual({ note: 'E#', octave: 4, chord: 'dom' });
+    expect(tokens[8].type).toBe(tokenType.CHORD);
+    expect(tokens[9].value).toEqual({ note: 'Fb', octave: -1, chord: 'aug7' });
+    expect(tokens[9].type).toBe(tokenType.CHORD);
+    expect(tokens[10].value).toEqual({ note: 'G', octave: 0, chord: 'dim7' });
+    expect(tokens[10].type).toBe(tokenType.CHORD);    
   });
 
   it('can tokenize drums', function() {

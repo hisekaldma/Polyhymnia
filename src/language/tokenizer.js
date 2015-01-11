@@ -28,8 +28,9 @@ Polyhymnia.tokenize = function(textToTokenize) {
   var PARAM_PATTERN       = '[a-z][a-zA-Z0-9_]*';
   var INSTRUMENT_PATTERN  = NAME_PATTERN + ':';
   var NUMBER_PATTERN      = '-?(([1-9][0-9]*)|0)(\\.[0-9]*)?';
-  var NOTE_PATTERN        = '[CDEFGAB][#b]?';
-  var CHORD_PATTERN       = NOTE_PATTERN + '(M|m|dom|aug|dim)7?';
+  var NOTE_PATTERN        = '([CDEFGAB][#b]?)';
+  var OCTAVE_PATTERN      = '(-2|-1|[0-8])?';
+  var CHORD_PATTERN       = '((M|m|dom|aug|dim)7?)';
   var DRUM_PATTERN        = '[xX]';
 
   var NEWLINE    = '\n';
@@ -45,8 +46,8 @@ Polyhymnia.tokenize = function(textToTokenize) {
   var paramPattern          = new RegExp('^' + PARAM_PATTERN + '$');
   var instrumentPattern     = new RegExp('^' + INSTRUMENT_PATTERN + '$');
   var numberPattern         = new RegExp('^' + NUMBER_PATTERN + '$');
-  var notePattern           = new RegExp('^' + NOTE_PATTERN + '$');
-  var chordPattern          = new RegExp('^' + CHORD_PATTERN + '$');
+  var notePattern           = new RegExp('^' + NOTE_PATTERN + OCTAVE_PATTERN + '$');
+  var chordPattern          = new RegExp('^' + NOTE_PATTERN + OCTAVE_PATTERN + CHORD_PATTERN + '$');
   var drumPattern           = new RegExp('^' + DRUM_PATTERN + '$');
 
   var text = textToTokenize.replace('\r', ''); // Handle weird Windows newlines
@@ -89,6 +90,7 @@ Polyhymnia.tokenize = function(textToTokenize) {
   var positionBeforeReading;
   var context = CTX_DEFAULT;
   var str;
+  var matches, octave;
 
   while (moreToRead) {
     str = undefined;
@@ -133,9 +135,13 @@ Polyhymnia.tokenize = function(textToTokenize) {
         } else if (str.match(drumPattern)) {
           token = { type: tokenType.DRUM_TRIGGER, value: str };
         } else if (str.match(notePattern)) {
-          token = { type: tokenType.NOTE, value: str };
+          matches = str.match(notePattern);
+          octave = matches[2] ? parseInt(matches[2]) : undefined;
+          token = { type: tokenType.NOTE, value: { note: matches[1], octave: octave }};
         } else if (str.match(chordPattern)) {
-          token = { type: tokenType.CHORD, value: str };
+          matches = str.match(chordPattern);
+          octave = matches[2] ? parseInt(matches[2]) : undefined;
+          token = { type: tokenType.CHORD, value: { note: matches[1], octave: octave, chord: matches[3] }};
         } else {
           token = { type: tokenType.ERROR, value: str };
         }
