@@ -25,7 +25,7 @@ Polyhymnia.tokenize = function(textToTokenize) {
 
   var tokenType = Polyhymnia.tokenType;
 
-  var NAME_PATTERN        = '[A-Z][a-zA-Z0-9_]+';
+  var NAME_PATTERN        = '[A-Z][a-zA-Z0-9_]*';
   var PARAM_PATTERN       = '[a-z][a-zA-Z0-9_]*';
   var INSTRUMENT_PATTERN  = NAME_PATTERN + ':';
   var NUMBER_PATTERN      = '-?(([1-9][0-9]*)|0)(\\.[0-9]*)?';

@@ -112,6 +112,11 @@ describe('Tokenizer', function() {
     expect(tokens[0].type).toBe(tokenType.NAME);
   });
 
+  it('names can be one letter', function() {
+    var tokens = Polyhymnia.tokenize('T');
+    expect(tokens[0].type).toBe(tokenType.NAME);
+  });
+
   it('params start with lowercase', function() {
     var tokens = Polyhymnia.tokenize('(testName1)');
     expect(tokens[1].type).toBe(tokenType.PARAM);
