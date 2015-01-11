@@ -1,6 +1,6 @@
 var Polyhymnia = Polyhymnia || {};
 
-Polyhymnia.Player = function(element, context) {
+Polyhymnia.Editor = function(element, context) {
   'use strict';
 
   // Code
@@ -13,7 +13,7 @@ Polyhymnia.Player = function(element, context) {
   music.setAnimCallback(highlightNotes);
 
   // Elements
-  element.innerHTML = Polyhymnia.templates.player;
+  element.innerHTML = Polyhymnia.templates.editor;
   var controls =     element.querySelector('.controls');
   var playButton =   element.querySelector('.play');
   var stopButton =   element.querySelector('.stop');

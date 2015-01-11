@@ -72,9 +72,9 @@ module.exports = function(grunt) {
   grunt.registerTask('pages',   ['build', 'test', 'gh-pages']);
 
   function makeTemplates() {
-    var str = grunt.file.read('src/player/player.html');
+    var str = grunt.file.read('src/editor/editor.html');
     str = str.replace(/\n/g, ' ');
-    str = 'var Polyhymnia = Polyhymnia || {}; Polyhymnia.templates = { \'player\': \'' + str + '\' };\n\n';
+    str = 'var Polyhymnia = Polyhymnia || {}; Polyhymnia.templates = { \'editor\': \'' + str + '\' };\n\n';
     return str;
   }
 };
