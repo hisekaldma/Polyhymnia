@@ -19,7 +19,8 @@ Polyhymnia.Editor = function(element, context) {
   var stopButton =   element.querySelector('.stop');
   var paramSlider =  element.querySelector('.slider input');
   var paramOutput =  element.querySelector('.slider .output');
-  var tempoInput =   element.querySelector('.tempo input');
+  var tempoInput =   element.querySelector('.settings .tempo');
+  var timeInput =    element.querySelector('.settings .time');
   var codeEditor =   element.querySelector('.code .editor');
   var codeDisplay =  element.querySelector('.code .display');
   var codeText =     element.querySelector('.code .text');
@@ -53,6 +54,13 @@ Polyhymnia.Editor = function(element, context) {
 
     // Render the code
     renderCode();
+  }
+
+  function changeTimeSignature() {
+    var val = timeInput.value.split('/');
+    var num = parseInt(val[0]);
+    var den = parseInt(val[1]);
+    music.setTimeSignature(num, den);
   }
 
   function changeTempo() {
@@ -179,6 +187,7 @@ Polyhymnia.Editor = function(element, context) {
     stopButton.addEventListener('click',  stop);
     paramSlider.addEventListener('input', changeParam);
     tempoInput.addEventListener('input',  changeTempo);
+    timeInput.addEventListener('input',   changeTimeSignature);
     codeEditor.addEventListener('input',  parse);
   } else {
     controls.style.display = 'none';

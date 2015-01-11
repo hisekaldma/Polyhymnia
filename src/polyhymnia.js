@@ -70,6 +70,11 @@ Polyhymnia.Context = function(options) {
     metronome.tempo = tempo;
   }
 
+  function setTimeSignature(numerator, denominator) {
+    sequencer.timeSignature.num = numerator;
+    sequencer.timeSignature.den = denominator;
+  }
+
   function setAnimCallback(callback) {
     sequencer.animCallback = callback;
   }
@@ -80,6 +85,7 @@ Polyhymnia.Context = function(options) {
     stop: metronome.stop,
     setParam: generator.setParam,
     setTempo: setTempo,
+    setTimeSignature: setTimeSignature,
     setAnimCallback: setAnimCallback
   };
 };

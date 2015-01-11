@@ -6,7 +6,7 @@ Polyhymnia.Sequencer = function() {
   var self = this;
   
   this.instruments = {};
-  this.measure = { num: 4, den: 4 };
+  this.timeSignature = { num: 4, den: 4 };
   this.stepsPerBeat = 16;
   this.generator = null;
   this.animCallback = undefined;
@@ -16,7 +16,7 @@ Polyhymnia.Sequencer = function() {
 
   this.scheduleStep = function(step, time) {
     // Calculate where we're at
-    var stepInBar = step % (self.stepsPerBeat * self.measure.num);
+    var stepInBar = step % (self.stepsPerBeat * self.timeSignature.num);
 
     // If we've reached the end of a bar, generate new patterns
     if (stepInBar === 0) {
@@ -88,7 +88,7 @@ Polyhymnia.Sequencer = function() {
     var noteLengths = [1, 2, 4, 8, 16, 32, 64];
     var noteLength = self.stepsPerBeat;
     for (var n = 0; n < noteLengths.length; n++) {
-      if (patternLength < self.measure.num * noteLengths[n] / 4) {
+      if (patternLength < self.timeSignature.num * noteLengths[n] / 4) {
         break;
       }
       noteLength = self.stepsPerBeat * 4 / noteLengths[n];

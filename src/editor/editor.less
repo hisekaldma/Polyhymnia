@@ -18,11 +18,16 @@
     outline: none;
   }
 
-  input {
+  input, select {
     font-size: inherit;
     font-weight: inherit;
     font-family: inherit;
     color: inherit;
+    background: none;
+    border: 0;
+    padding: 0;
+    margin: 0;
+    -webkit-appearance: none;
     -webkit-font-smoothing: antialiased;
   }
 
@@ -218,7 +223,7 @@
       position: absolute;
       top: 0px;
       left: 80px;
-      right: 100px;
+      right: 140px;
 
       .output {
         position: absolute;
@@ -239,14 +244,10 @@
       }
     
       input {
-        -webkit-appearance: none;
         display: block;
         position: absolute;
         top: 24px;
         width: 100%;
-        margin: 0;
-        padding: 0;
-        background: transparent;
 
         &::-webkit-slider-runnable-track {
           height: 1px;
@@ -290,19 +291,22 @@
       }
     }
 
-    .tempo {
+
+    /* Settings */
+
+    .settings {
       position: absolute;
       top: 20px;
       right: 18px;
 
       input {
-        border: none;
-        width: 30px;
-        padding: 0;
         margin-right: 8px;        
         text-align: right;
-        background: transparent;
       }
+
+      select {
+        margin-left: 8px;
+      }      
     }
   }
 
