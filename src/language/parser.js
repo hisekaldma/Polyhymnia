@@ -101,7 +101,7 @@ Polyhymnia.parse = function(tokensToParse, instruments) {
       return true;
     } else if (currentToken.type == tokenType.EOL) {
       return true;
-    } else if (currentToken.type == tokenType.NAME && lookaheadToken && lookaheadToken.type == tokenType.SINGLE_ARROW) {
+    } else if (currentToken.type == tokenType.NAME && lookaheadToken && lookaheadToken.type == tokenType.ARROW) {
       return true;
     } else {
       return false;
@@ -122,7 +122,7 @@ Polyhymnia.parse = function(tokensToParse, instruments) {
     }
     nextToken();
 
-    if (currentToken.type == tokenType.SINGLE_ARROW) {
+    if (currentToken.type == tokenType.ARROW) {
       symbol(symbolType.ARROW);
     } else {
       // ERROR: Expected ->

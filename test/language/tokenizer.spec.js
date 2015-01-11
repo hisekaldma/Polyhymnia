@@ -16,11 +16,9 @@ describe('Tokenizer', function() {
     expect(tokens[1].type).toBe(tokenType.NAME);
   });
   
-  it('can tokenize arrows', function() {
-    var tokens = Polyhymnia.tokenize('-> =>');
-
-    expect(tokens[0].type).toBe(tokenType.SINGLE_ARROW);
-    expect(tokens[1].type).toBe(tokenType.DOUBLE_ARROW);
+  it('can tokenize arrow', function() {
+    var tokens = Polyhymnia.tokenize('->');
+    expect(tokens[0].type).toBe(tokenType.ARROW);
   });
   
   it('can tokenize symbols', function() {

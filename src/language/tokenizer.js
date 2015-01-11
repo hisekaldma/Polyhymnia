@@ -8,8 +8,7 @@ Polyhymnia.tokenType = {
   NOTE:           'note',
   CHORD:          'chord',
   DRUM_TRIGGER:   'drum trigger',
-  SINGLE_ARROW:   'single arrow',
-  DOUBLE_ARROW:   'double arrow',
+  ARROW:          'arrow',
   LEFT_PAREN:     'left paren',
   RIGHT_PAREN:    'right paren',
   PARAM:          'param',
@@ -143,9 +142,7 @@ Polyhymnia.tokenize = function(textToTokenize) {
       } else {
         // Not inside a condition or pattern
         if (str == '->') {
-          token = { type: tokenType.SINGLE_ARROW };
-        } else if (str == '=>') {
-          token = { type: tokenType.DOUBLE_ARROW };
+          token = { type: tokenType.ARROW };
         } else if (str.match(namePattern)) {
           token = { type: tokenType.NAME, value: str };
         } else if (str.match(instrumentPattern)) {
