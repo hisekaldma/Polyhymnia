@@ -31,6 +31,7 @@ Polyhymnia.Editor = function(element, context) {
 
   // Private vars
   var cursorPos;
+  var isPlaying = false;
 
   // Functions
   function play() {
@@ -38,12 +39,14 @@ Polyhymnia.Editor = function(element, context) {
     music.play();
     playButton.style.display = 'none';
     stopButton.style.display = 'block';
+    isPlaying = true;
   }
 
   function stop() {
     music.stop();
     playButton.style.display = 'block';
     stopButton.style.display = 'none';
+    isPlaying = false;
     highlightNotes([]);
   }
 
@@ -173,7 +176,7 @@ Polyhymnia.Editor = function(element, context) {
           highlight = true;
         }
       }
-      if (highlight) {
+      if (isPlaying && highlight) {
         noteElems[i].elem.className = 'playing';
       } else {
         noteElems[i].elem.className = 'note';
