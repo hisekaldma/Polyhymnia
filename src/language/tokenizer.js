@@ -39,6 +39,7 @@ Polyhymnia.tokenize = function(textToTokenize) {
   var DELIMITERS = '()\n\t ';
 
   var CTX_DEFAULT   = 'sequence';
+  var CTX_PATTERN   = 'pattern';
   var CTX_CONDITION = 'condition';
 
   var namePattern           = new RegExp('^' + NAME_PATTERN + '$');
@@ -113,34 +114,46 @@ Polyhymnia.tokenize = function(textToTokenize) {
       nextChar();
     } else {
       str = readText();
-      if (context == CTX_CONDITION && str.match(paramPattern)) {
-        token = { type: tokenType.PARAM, value: str };
-      } else if (str == '->') {
-        token = { type: tokenType.SINGLE_ARROW };
-      } else if (str == '=>') {
-        token = { type: tokenType.DOUBLE_ARROW };
-      } else if (str == '>') {
-        token = { type: tokenType.GREATER_THAN };
-      } else if (str == '<') {
-        token = { type: tokenType.LESS_THAN };
-      } else if (str == '_') {
-        token = { type: tokenType.PAUSE };
-      } else if (str.match(drumPattern)) {
-        token = { type: tokenType.DRUM_TRIGGER, value: str };
-      } else if (str.match(notePattern)) {
-        token = { type: tokenType.NOTE, value: str };
-      } else if (str.match(chordPattern)) {
-        token = { type: tokenType.CHORD, value: str };
-      } else if (str.match(instrumentPattern)) {
-        token = { type: tokenType.INSTRUMENT, value: str.substr(0, str.length - 1) };
-      } else if (str.match(numberPattern)) {
-        token = { type: tokenType.NUMBER, value: str };
-      } else if (str.match(namePattern)) {
-        token = { type: tokenType.NAME, value: str };
-      } else if (str.match(paramPattern)) {
-        token = { type: tokenType.PARAM, value: str };
+      if (context == CTX_CONDITION) {
+        // Inside a condition
+        if (str == '>') {
+          token = { type: tokenType.GREATER_THAN };
+        } else if (str == '<') {
+          token = { type: tokenType.LESS_THAN };
+        } else if (str.match(paramPattern)) {
+          token = { type: tokenType.PARAM, value: str };
+        } else if (str.match(numberPattern)) {
+          token = { type: tokenType.NUMBER, value: str };
+        } else {
+          token = { type: tokenType.ERROR, value: str };
+        }
+      } else if (context == CTX_PATTERN) {
+        // Inside a pattern
+        if (str == '_') {
+          token = { type: tokenType.PAUSE };
+        } else if (str.match(drumPattern)) {
+          token = { type: tokenType.DRUM_TRIGGER, value: str };
+        } else if (str.match(notePattern)) {
+          token = { type: tokenType.NOTE, value: str };
+        } else if (str.match(chordPattern)) {
+          token = { type: tokenType.CHORD, value: str };
+        } else {
+          token = { type: tokenType.ERROR, value: str };
+        }
       } else {
-        token = { type: tokenType.ERROR, value: str };
+        // Not inside a condition or pattern
+        if (str == '->') {
+          token = { type: tokenType.SINGLE_ARROW };
+        } else if (str == '=>') {
+          token = { type: tokenType.DOUBLE_ARROW };
+        } else if (str.match(namePattern)) {
+          token = { type: tokenType.NAME, value: str };
+        } else if (str.match(instrumentPattern)) {
+          token = { type: tokenType.INSTRUMENT, value: str.substr(0, str.length - 1) };
+          context = CTX_PATTERN;
+        } else {
+          token = { type: tokenType.ERROR, value: str };
+        }
       }
     }
 
