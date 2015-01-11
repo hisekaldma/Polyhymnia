@@ -1,5 +1,208 @@
-var Polyhymnia = Polyhymnia || {}; Polyhymnia.templates = { 'player': '<div class="polyhymnia-player">    <div class="code">     <div class="display">       <div class="text"></div>       <div class="cursor-layer">         <div class="cursor blink">&nbsp;</div>       </div>     </div>     <textarea class="editor" spellcheck="false"></textarea>   </div>    <div class="controls">      <button class="play">       <svg x="0px" y="0px" width="18px" height="18px">         <path fill="none" stroke="#FF884D" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" d="M16,9L2,17V1L16,9z"/>       </svg>     </button>      <button class="stop" style="display: none">       <svg x="0px" y="0px" width="18px" height="18px">         <rect x="2" y="2" fill="none" stroke="#FF884D" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" width="14" height="14"/>       </svg>     </button>      <div class="slider">       <div class="output hide">x = 0</div>       <input type="range" min="0" max="10" value="0" step="0.1" />     </div>      <div class="tempo">       <input type="number" min="1" max="320" value="120" step="1" maxlength="3" /><label>bpm</label>     </div>   </div>    <div class="not-supported" style="display: none">     Your browser doesn’t support web audio. Why don’t you try <a href="https://www.google.com/chrome/browser/desktop/">Chrome</a>?   </div> </div>' };
+var Polyhymnia = Polyhymnia || {}; Polyhymnia.templates = { 'editor': '<div class="polyhymnia-editor">    <div class="code">     <div class="display">       <div class="text"></div>       <div class="cursor-layer">         <div class="cursor blink">&nbsp;</div>       </div>     </div>     <textarea class="editor" spellcheck="false"></textarea>   </div>    <div class="controls">      <button class="play">       <svg x="0px" y="0px" width="18px" height="18px">         <path fill="none" stroke="#FF884D" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" d="M16,9L2,17V1L16,9z"/>       </svg>     </button>      <button class="stop" style="display: none">       <svg x="0px" y="0px" width="18px" height="18px">         <rect x="2" y="2" fill="none" stroke="#FF884D" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" width="14" height="14"/>       </svg>     </button>      <div class="slider">       <div class="output hide">x = 0</div>       <input type="range" min="0" max="10" value="0" step="0.1" />     </div>      <div class="settings">           <input class="tempo" type="number" min="1" max="320" value="120" step="1" maxlength="3" /><label>bpm</label>       <select class="time">         <option>3/4</option>         <option selected>4/4</option>         <option>5/4</option>         <option>6/8</option>         <option>7/8</option>       </select>     </div>   </div>    <div class="not-supported" style="display: none">     Your browser doesn’t support web audio. Why don’t you try <a href="https://www.google.com/chrome/browser/desktop/">Chrome</a>?   </div> </div>' };
 
+var Polyhymnia = Polyhymnia || {};
+
+Polyhymnia.Editor = function(element, context) {
+  'use strict';
+
+  // Code
+  var contents = element.textContent;
+
+  // Music
+  var rules = [];
+  var music = context;
+  var symbols = [];
+  music.setAnimCallback(highlightNotes);
+
+  // Elements
+  element.innerHTML = Polyhymnia.templates.editor;
+  var controls =     element.querySelector('.controls');
+  var playButton =   element.querySelector('.play');
+  var stopButton =   element.querySelector('.stop');
+  var paramSlider =  element.querySelector('.slider input');
+  var paramOutput =  element.querySelector('.slider .output');
+  var tempoInput =   element.querySelector('.settings .tempo');
+  var timeInput =    element.querySelector('.settings .time');
+  var codeEditor =   element.querySelector('.code .editor');
+  var codeDisplay =  element.querySelector('.code .display');
+  var codeText =     element.querySelector('.code .text');
+  var codeCursor =   element.querySelector('.code .cursor');
+  var notSupportedMessage = element.querySelector('.not-supported');
+  var noteElems = [];
+  codeEditor.value = contents;
+
+  // Private vars
+  var cursorPos;
+  var isPlaying = false;
+
+  // Functions
+  function play() {
+    parse();
+    music.play();
+    playButton.style.display = 'none';
+    stopButton.style.display = 'block';
+    isPlaying = true;
+  }
+
+  function stop() {
+    music.stop();
+    playButton.style.display = 'block';
+    stopButton.style.display = 'none';
+    isPlaying = false;
+    highlightNotes([]);
+  }
+
+  function parse() {
+    // Parse rules
+    var rules = music.parse(codeEditor.value);
+    symbols = rules.symbols;
+
+    // Render the code
+    renderCode();
+  }
+
+  function changeTimeSignature() {
+    var val = timeInput.value.split('/');
+    var num = parseInt(val[0]);
+    var den = parseInt(val[1]);
+    music.setTimeSignature(num, den);
+  }
+
+  function changeTempo() {
+    if (tempoInput.value === '') {
+      tempoInput.value = 120;
+    } else if (tempoInput.value > parseInt(tempoInput.max)) {
+      tempoInput.value = tempoInput.max;
+    } else if (tempoInput.value < parseInt(tempoInput.min)) {
+      tempoInput.value = tempoInput.min;
+    }
+    music.setTempo(tempoInput.value);
+  }
+
+  function changeParam() {
+    // Update the value
+    music.setParam('x', paramSlider.valueAsNumber);
+
+    // Show the value
+    paramOutput.textContent = 'x = ' + paramSlider.value;
+    paramOutput.classList.remove('hide');
+    paramOutput.classList.add('show');
+
+    // Move the value with the slider
+    var pos = paramSlider.value / (paramSlider.max - paramSlider.min);
+    var nudge = 8 * (1 - pos) - 8 * pos; // Offset for handle size 16px
+    paramOutput.style.left = pos * paramSlider.offsetWidth - paramOutput.offsetWidth/2 + nudge + 'px';
+
+    // Hide the value again
+    setTimeout(function() {
+      paramOutput.classList.add('hide');
+      paramOutput.classList.remove('show');
+    }, 2000);
+  }
+
+  function renderCode() {
+    // Get the code
+    var code = codeEditor.value;
+
+    // Wrap symbols in spans
+    var html = '';
+    var s = 0;
+    for (var i = 0; i < code.length; i++) {
+      if (s < symbols.length && symbols[s].start == i) {
+        html += '<span class="' + symbols[s].type + '" data-start="' + symbols[s].start + '">';
+      }
+
+      html += code.charAt(i);
+
+      if (s < symbols.length && symbols[s].end == i + 1) {
+        html += '</span>';
+        s++;
+      }
+    }
+
+    // Replace contents of the code display
+    codeText.innerHTML = html;
+
+    // Get all note elements for later highlighting
+    noteElems = [];
+    var elems = codeText.querySelectorAll('.note');
+    for (var e = 0; e < elems.length; e++) {
+      noteElems.push({ elem: elems[e], start: elems[e].dataset.start });
+    }
+  }
+
+  function render() {
+    var newCursorPos = codeEditor.selectionDirection == 'forward' ? codeEditor.selectionEnd : codeEditor.selectionStart;
+
+    // Draw the cursor
+    if (document.activeElement === codeEditor) {
+      codeCursor.style.display = 'block';
+
+      // Only redraw the cursor if it's moved
+      if (newCursorPos !== cursorPos) {
+        cursorPos = newCursorPos;
+
+        // Measure text sizes
+        var rect = codeCursor.getBoundingClientRect();
+        var lineHeight = rect.height - (codeCursor.offsetHeight - codeCursor.clientHeight);
+        var characterWidth = rect.width - (codeCursor.offsetWidth - codeCursor.clientWidth);
+
+        // Calculate position
+        var lines = codeEditor.value.substr(0, cursorPos).split('\n');
+        var top = (lines.length - 1) * lineHeight;
+        var left = lines[lines.length - 1].length * characterWidth;
+
+        // Move the cursor
+        codeCursor.classList.remove('blink');
+        codeCursor.style.top = top + 'px';
+        codeCursor.style.left = left - 1 + 'px';
+        var reflow = codeCursor.offsetWidth; // Trigger animation reset
+        codeCursor.classList.add('blink');
+      }
+    } else {
+      codeCursor.style.display = 'none';
+    }
+
+    // Sync scroll
+    codeDisplay.scrollTop = codeEditor.scrollTop;
+
+    // Repaint
+    window.requestAnimationFrame(render);    
+  }
+
+  function highlightNotes(notes) {
+    for (var i = 0; i < noteElems.length; i++) {
+      var highlight = false;
+      for (var j = 0; j < notes.length; j++) {
+        if (noteElems[i].start == notes[j].start) {
+          highlight = true;
+        }
+      }
+      if (isPlaying && highlight) {
+        noteElems[i].elem.className = 'playing';
+      } else {
+        noteElems[i].elem.className = 'note';
+      }
+    }
+  }
+
+  // Events
+  if (Polyhymnia.isSupported()) {
+    playButton.addEventListener('click',  play);
+    stopButton.addEventListener('click',  stop);
+    paramSlider.addEventListener('input', changeParam);
+    tempoInput.addEventListener('input',  changeTempo);
+    timeInput.addEventListener('input',   changeTimeSignature);
+    codeEditor.addEventListener('input',  parse);
+  } else {
+    controls.style.display = 'none';
+    notSupportedMessage.style.display = 'block';
+  }
+
+  // Rendering
+  parse();
+  window.requestAnimationFrame(render);
+};
 var Polyhymnia = Polyhymnia || {};
 
 Polyhymnia.Generator = function() {
@@ -250,7 +453,7 @@ Polyhymnia.parse = function(tokensToParse, instruments) {
       return true;
     } else if (currentToken.type == tokenType.EOL) {
       return true;
-    } else if (currentToken.type == tokenType.NAME && lookaheadToken && lookaheadToken.type == tokenType.SINGLE_ARROW) {
+    } else if (currentToken.type == tokenType.NAME && lookaheadToken && lookaheadToken.type == tokenType.ARROW) {
       return true;
     } else {
       return false;
@@ -271,7 +474,7 @@ Polyhymnia.parse = function(tokensToParse, instruments) {
     }
     nextToken();
 
-    if (currentToken.type == tokenType.SINGLE_ARROW) {
+    if (currentToken.type == tokenType.ARROW) {
       symbol(symbolType.ARROW);
     } else {
       // ERROR: Expected ->
@@ -481,8 +684,7 @@ Polyhymnia.tokenType = {
   NOTE:           'note',
   CHORD:          'chord',
   DRUM_TRIGGER:   'drum trigger',
-  SINGLE_ARROW:   'single arrow',
-  DOUBLE_ARROW:   'double arrow',
+  ARROW:          'arrow',
   LEFT_PAREN:     'left paren',
   RIGHT_PAREN:    'right paren',
   PARAM:          'param',
@@ -498,12 +700,13 @@ Polyhymnia.tokenize = function(textToTokenize) {
 
   var tokenType = Polyhymnia.tokenType;
 
-  var NAME_PATTERN        = '[A-Z][a-zA-Z0-9_]+';
+  var NAME_PATTERN        = '[A-Z][a-zA-Z0-9_]*';
   var PARAM_PATTERN       = '[a-z][a-zA-Z0-9_]*';
   var INSTRUMENT_PATTERN  = NAME_PATTERN + ':';
   var NUMBER_PATTERN      = '-?(([1-9][0-9]*)|0)(\\.[0-9]*)?';
-  var NOTE_PATTERN        = '[CDEFGAB][#b]?';
-  var CHORD_PATTERN       = NOTE_PATTERN + '(M|m|dom|aug|dim)7?';
+  var NOTE_PATTERN        = '([CDEFGAB][#b]?)';
+  var OCTAVE_PATTERN      = '(-2|-1|[0-8])?';
+  var CHORD_PATTERN       = '((M|m|dom|aug|dim)7?)';
   var DRUM_PATTERN        = '[xX]';
 
   var NEWLINE    = '\n';
@@ -512,14 +715,15 @@ Polyhymnia.tokenize = function(textToTokenize) {
   var DELIMITERS = '()\n\t ';
 
   var CTX_DEFAULT   = 'sequence';
+  var CTX_PATTERN   = 'pattern';
   var CTX_CONDITION = 'condition';
 
   var namePattern           = new RegExp('^' + NAME_PATTERN + '$');
   var paramPattern          = new RegExp('^' + PARAM_PATTERN + '$');
   var instrumentPattern     = new RegExp('^' + INSTRUMENT_PATTERN + '$');
   var numberPattern         = new RegExp('^' + NUMBER_PATTERN + '$');
-  var notePattern           = new RegExp('^' + NOTE_PATTERN + '$');
-  var chordPattern          = new RegExp('^' + CHORD_PATTERN + '$');
+  var notePattern           = new RegExp('^' + NOTE_PATTERN + OCTAVE_PATTERN + '$');
+  var chordPattern          = new RegExp('^' + NOTE_PATTERN + OCTAVE_PATTERN + CHORD_PATTERN + '$');
   var drumPattern           = new RegExp('^' + DRUM_PATTERN + '$');
 
   var text = textToTokenize.replace('\r', ''); // Handle weird Windows newlines
@@ -562,6 +766,7 @@ Polyhymnia.tokenize = function(textToTokenize) {
   var positionBeforeReading;
   var context = CTX_DEFAULT;
   var str;
+  var matches, octave;
 
   while (moreToRead) {
     str = undefined;
@@ -586,34 +791,48 @@ Polyhymnia.tokenize = function(textToTokenize) {
       nextChar();
     } else {
       str = readText();
-      if (context == CTX_CONDITION && str.match(paramPattern)) {
-        token = { type: tokenType.PARAM, value: str };
-      } else if (str == '->') {
-        token = { type: tokenType.SINGLE_ARROW };
-      } else if (str == '=>') {
-        token = { type: tokenType.DOUBLE_ARROW };
-      } else if (str == '>') {
-        token = { type: tokenType.GREATER_THAN };
-      } else if (str == '<') {
-        token = { type: tokenType.LESS_THAN };
-      } else if (str == '_') {
-        token = { type: tokenType.PAUSE };
-      } else if (str.match(drumPattern)) {
-        token = { type: tokenType.DRUM_TRIGGER, value: str };
-      } else if (str.match(notePattern)) {
-        token = { type: tokenType.NOTE, value: str };
-      } else if (str.match(chordPattern)) {
-        token = { type: tokenType.CHORD, value: str };
-      } else if (str.match(instrumentPattern)) {
-        token = { type: tokenType.INSTRUMENT, value: str.substr(0, str.length - 1) };
-      } else if (str.match(numberPattern)) {
-        token = { type: tokenType.NUMBER, value: str };
-      } else if (str.match(namePattern)) {
-        token = { type: tokenType.NAME, value: str };
-      } else if (str.match(paramPattern)) {
-        token = { type: tokenType.PARAM, value: str };
+      if (context == CTX_CONDITION) {
+        // Inside a condition
+        if (str == '>') {
+          token = { type: tokenType.GREATER_THAN };
+        } else if (str == '<') {
+          token = { type: tokenType.LESS_THAN };
+        } else if (str.match(paramPattern)) {
+          token = { type: tokenType.PARAM, value: str };
+        } else if (str.match(numberPattern)) {
+          token = { type: tokenType.NUMBER, value: parseFloat(str) };
+        } else {
+          token = { type: tokenType.ERROR, value: str };
+        }
+      } else if (context == CTX_PATTERN) {
+        // Inside a pattern
+        if (str == '_') {
+          token = { type: tokenType.PAUSE };
+        } else if (str.match(drumPattern)) {
+          token = { type: tokenType.DRUM_TRIGGER, value: str };
+        } else if (str.match(notePattern)) {
+          matches = str.match(notePattern);
+          octave = matches[2] ? parseInt(matches[2]) : undefined;
+          token = { type: tokenType.NOTE, value: { note: matches[1], octave: octave }};
+        } else if (str.match(chordPattern)) {
+          matches = str.match(chordPattern);
+          octave = matches[2] ? parseInt(matches[2]) : undefined;
+          token = { type: tokenType.CHORD, value: { note: matches[1], octave: octave, chord: matches[3] }};
+        } else {
+          token = { type: tokenType.ERROR, value: str };
+        }
       } else {
-        token = { type: tokenType.ERROR, value: str };
+        // Not inside a condition or pattern
+        if (str == '->') {
+          token = { type: tokenType.ARROW };
+        } else if (str.match(namePattern)) {
+          token = { type: tokenType.NAME, value: str };
+        } else if (str.match(instrumentPattern)) {
+          token = { type: tokenType.INSTRUMENT, value: str.substr(0, str.length - 1) };
+          context = CTX_PATTERN;
+        } else {
+          token = { type: tokenType.ERROR, value: str };
+        }
       }
     }
 
@@ -792,197 +1011,6 @@ Polyhymnia.Scales = (function() {
 })();
 var Polyhymnia = Polyhymnia || {};
 
-Polyhymnia.Player = function(element, context) {
-  'use strict';
-
-  // Code
-  var contents = element.textContent;
-
-  // Music
-  var rules = [];
-  var music = context;
-  var symbols = [];
-  music.setAnimCallback(highlightNotes);
-
-  // Elements
-  element.innerHTML = Polyhymnia.templates.player;
-  var controls =     element.querySelector('.controls');
-  var playButton =   element.querySelector('.play');
-  var stopButton =   element.querySelector('.stop');
-  var paramSlider =  element.querySelector('.slider input');
-  var paramOutput =  element.querySelector('.slider .output');
-  var tempoInput =   element.querySelector('.tempo input');
-  var codeEditor =   element.querySelector('.code .editor');
-  var codeDisplay =  element.querySelector('.code .display');
-  var codeText =     element.querySelector('.code .text');
-  var codeCursor =   element.querySelector('.code .cursor');
-  var notSupportedMessage = element.querySelector('.not-supported');
-  var noteElems = [];
-  codeEditor.value = contents;
-
-  // Private vars
-  var cursorPos;
-
-  // Functions
-  function play() {
-    parse();
-    music.play();
-    playButton.style.display = 'none';
-    stopButton.style.display = 'block';
-  }
-
-  function stop() {
-    music.stop();
-    playButton.style.display = 'block';
-    stopButton.style.display = 'none';
-    highlightNotes([]);
-  }
-
-  function parse() {
-    // Parse rules
-    var rules = music.parse(codeEditor.value);
-    symbols = rules.symbols;
-
-    // Render the code
-    renderCode();
-  }
-
-  function changeTempo() {
-    if (tempoInput.value === '') {
-      tempoInput.value = 120;
-    } else if (tempoInput.value > parseInt(tempoInput.max)) {
-      tempoInput.value = tempoInput.max;
-    } else if (tempoInput.value < parseInt(tempoInput.min)) {
-      tempoInput.value = tempoInput.min;
-    }
-    music.setTempo(tempoInput.value);
-  }
-
-  function changeParam() {
-    // Update the value
-    music.setParam('x', paramSlider.valueAsNumber);
-
-    // Show the value
-    paramOutput.textContent = 'x = ' + paramSlider.value;
-    paramOutput.classList.remove('hide');
-    paramOutput.classList.add('show');
-
-    // Move the value with the slider
-    var pos = paramSlider.value / (paramSlider.max - paramSlider.min);
-    var nudge = 8 * (1 - pos) - 8 * pos; // Offset for handle size 16px
-    paramOutput.style.left = pos * paramSlider.offsetWidth - paramOutput.offsetWidth/2 + nudge + 'px';
-
-    // Hide the value again
-    setTimeout(function() {
-      paramOutput.classList.add('hide');
-      paramOutput.classList.remove('show');
-    }, 2000);
-  }
-
-  function renderCode() {
-    // Get the code
-    var code = codeEditor.value;
-
-    // Wrap symbols in spans
-    var html = '';
-    var s = 0;
-    for (var i = 0; i < code.length; i++) {
-      if (s < symbols.length && symbols[s].start == i) {
-        html += '<span class="' + symbols[s].type + '" data-start="' + symbols[s].start + '">';
-      }
-
-      html += code.charAt(i);
-
-      if (s < symbols.length && symbols[s].end == i + 1) {
-        html += '</span>';
-        s++;
-      }
-    }
-
-    // Replace contents of the code display
-    codeText.innerHTML = html;
-
-    // Get all note elements for later highlighting
-    noteElems = [];
-    var elems = codeText.querySelectorAll('.note');
-    for (var e = 0; e < elems.length; e++) {
-      noteElems.push({ elem: elems[e], start: elems[e].dataset.start });
-    }
-  }
-
-  function render() {
-    var newCursorPos = codeEditor.selectionDirection == 'forward' ? codeEditor.selectionEnd : codeEditor.selectionStart;
-
-    // Draw the cursor
-    if (document.activeElement === codeEditor) {
-      codeCursor.style.display = 'block';
-
-      // Only redraw the cursor if it's moved
-      if (newCursorPos !== cursorPos) {
-        cursorPos = newCursorPos;
-
-        // Measure text sizes
-        var rect = codeCursor.getBoundingClientRect();
-        var lineHeight = rect.height - (codeCursor.offsetHeight - codeCursor.clientHeight);
-        var characterWidth = rect.width - (codeCursor.offsetWidth - codeCursor.clientWidth);
-
-        // Calculate position
-        var lines = codeEditor.value.substr(0, cursorPos).split('\n');
-        var top = (lines.length - 1) * lineHeight;
-        var left = lines[lines.length - 1].length * characterWidth;
-
-        // Move the cursor
-        codeCursor.classList.remove('blink');
-        codeCursor.style.top = top + 'px';
-        codeCursor.style.left = left - 1 + 'px';
-        var reflow = codeCursor.offsetWidth; // Trigger animation reset
-        codeCursor.classList.add('blink');
-      }
-    } else {
-      codeCursor.style.display = 'none';
-    }
-
-    // Sync scroll
-    codeDisplay.scrollTop = codeEditor.scrollTop;
-
-    // Repaint
-    window.requestAnimationFrame(render);    
-  }
-
-  function highlightNotes(notes) {
-    for (var i = 0; i < noteElems.length; i++) {
-      var highlight = false;
-      for (var j = 0; j < notes.length; j++) {
-        if (noteElems[i].start == notes[j].start) {
-          highlight = true;
-        }
-      }
-      if (highlight) {
-        noteElems[i].elem.className = 'playing';
-      } else {
-        noteElems[i].elem.className = 'note';
-      }
-    }
-  }
-
-  // Events
-  if (Polyhymnia.isSupported()) {
-    playButton.addEventListener('click',  play);
-    stopButton.addEventListener('click',  stop);
-    paramSlider.addEventListener('input', changeParam);
-    tempoInput.addEventListener('input',  changeTempo);
-    codeEditor.addEventListener('input',  parse);
-  } else {
-    controls.style.display = 'none';
-    notSupportedMessage.style.display = 'block';
-  }
-
-  // Rendering
-  parse();
-  window.requestAnimationFrame(render);
-};
-var Polyhymnia = Polyhymnia || {};
-
 Polyhymnia.Metronome = function() {
   'use strict';
   var self = this;
@@ -1152,7 +1180,7 @@ Polyhymnia.Sequencer = function() {
   var self = this;
   
   this.instruments = {};
-  this.measure = { num: 4, den: 4 };
+  this.timeSignature = { num: 4, den: 4 };
   this.stepsPerBeat = 16;
   this.generator = null;
   this.animCallback = undefined;
@@ -1162,7 +1190,7 @@ Polyhymnia.Sequencer = function() {
 
   this.scheduleStep = function(step, time) {
     // Calculate where we're at
-    var stepInBar = step % (self.stepsPerBeat * self.measure.num);
+    var stepInBar = step % (self.stepsPerBeat * self.timeSignature.num);
 
     // If we've reached the end of a bar, generate new patterns
     if (stepInBar === 0) {
@@ -1205,18 +1233,10 @@ Polyhymnia.Sequencer = function() {
     // Convert value to relative midi numbers
     var midiNumbers = [];
     if (type == noteType.NOTE) {
-      midiNumbers = [Polyhymnia.Notes.fromName(value)];
+      midiNumbers = [Polyhymnia.Notes.fromName(value.note, value.octave)];
     } else if (type == noteType.CHORD) {
-      var intonation = value.substr(1,1);
-      var root, chord;
-      if (intonation == '#' || intonation == 'b') {
-        root = Polyhymnia.Notes.fromName(value.substr(0,2));
-        chord = Polyhymnia.Chords.fromName(value.substr(2));
-      } else {
-        root = Polyhymnia.Notes.fromName(value.substr(0,1));
-        chord = Polyhymnia.Chords.fromName(value.substr(1));
-      }
-
+      var root = Polyhymnia.Notes.fromName(value.note, value.octave);
+      var chord = Polyhymnia.Chords.fromName(value.chord);
       midiNumbers = chord.map(function(note) {
         return note + root;
       });
@@ -1234,7 +1254,7 @@ Polyhymnia.Sequencer = function() {
     var noteLengths = [1, 2, 4, 8, 16, 32, 64];
     var noteLength = self.stepsPerBeat;
     for (var n = 0; n < noteLengths.length; n++) {
-      if (patternLength < self.measure.num * noteLengths[n] / 4) {
+      if (patternLength < self.timeSignature.num * noteLengths[n] / 4) {
         break;
       }
       noteLength = self.stepsPerBeat * 4 / noteLengths[n];
@@ -1356,6 +1376,11 @@ Polyhymnia.Context = function(options) {
     metronome.tempo = tempo;
   }
 
+  function setTimeSignature(numerator, denominator) {
+    sequencer.timeSignature.num = numerator;
+    sequencer.timeSignature.den = denominator;
+  }
+
   function setAnimCallback(callback) {
     sequencer.animCallback = callback;
   }
@@ -1366,6 +1391,7 @@ Polyhymnia.Context = function(options) {
     stop: metronome.stop,
     setParam: generator.setParam,
     setTempo: setTempo,
+    setTimeSignature: setTimeSignature,
     setAnimCallback: setAnimCallback
   };
 };

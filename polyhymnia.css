@@ -1,4 +1,4 @@
-.polyhymnia-player {
+.polyhymnia-editor {
   position: relative;
   font-family: Inconsolata, Consolas, "Andale Mono", "Lucida Console", monospace;
   /* Resets */
@@ -6,27 +6,33 @@
   /* Controls */
   /* Not supported message */
 }
-.polyhymnia-player * {
+.polyhymnia-editor * {
   box-sizing: border-box;
 }
-.polyhymnia-player *:focus {
+.polyhymnia-editor *:focus {
   outline: none;
 }
-.polyhymnia-player input {
+.polyhymnia-editor input,
+.polyhymnia-editor select {
   font-size: inherit;
   font-weight: inherit;
   font-family: inherit;
   color: inherit;
+  background: none;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  -webkit-appearance: none;
   -webkit-font-smoothing: antialiased;
 }
-.polyhymnia-player input[type=number] {
+.polyhymnia-editor input[type=number] {
   -moz-appearance: textfield;
 }
-.polyhymnia-player input[type=number]::-webkit-inner-spin-button,
-.polyhymnia-player input[type=number]::-webkit-outer-spin-button {
+.polyhymnia-editor input[type=number]::-webkit-inner-spin-button,
+.polyhymnia-editor input[type=number]::-webkit-outer-spin-button {
   -webkit-appearance: none;
 }
-.polyhymnia-player .code {
+.polyhymnia-editor .code {
   position: relative;
   display: block;
   width: 100%;
@@ -37,8 +43,8 @@
   font-size: 17px;
   line-height: 1.4em;
 }
-.polyhymnia-player .code .editor,
-.polyhymnia-player .code .display {
+.polyhymnia-editor .code .editor,
+.polyhymnia-editor .code .display {
   display: block;
   position: absolute;
   left: 0;
@@ -50,14 +56,14 @@
   resize: none;
   overflow-y: scroll;
 }
-.polyhymnia-player .code .editor,
-.polyhymnia-player .code .text {
+.polyhymnia-editor .code .editor,
+.polyhymnia-editor .code .text {
   padding: 24px;
   white-space: pre-wrap;
   text-rendering: optimizeSpeed;
   /* Jumps otherwise */
 }
-.polyhymnia-player .code .editor {
+.polyhymnia-editor .code .editor {
   color: transparent;
   background: transparent;
   font-size: inherit;
@@ -65,39 +71,39 @@
   font-family: inherit;
   line-height: inherit;
 }
-.polyhymnia-player .code .editor::selection {
+.polyhymnia-editor .code .editor::selection {
   color: transparent;
   background: rgba(229, 0, 77, 0.2);
 }
-.polyhymnia-player .code .editor::-moz-selection {
+.polyhymnia-editor .code .editor::-moz-selection {
   color: transparent;
   background: rgba(229, 0, 77, 0.2);
 }
-.polyhymnia-player .code .display .text {
+.polyhymnia-editor .code .display .text {
   position: absolute;
   width: 100%;
   color: rgba(0, 0, 0, 0.7);
 }
-.polyhymnia-player .code .display .text span.error {
+.polyhymnia-editor .code .display .text span.error {
   color: #ff323c;
   border-bottom: 2px solid #ff323c;
 }
-.polyhymnia-player .code .display .text span.arrow {
+.polyhymnia-editor .code .display .text span.arrow {
   color: #f03a76;
 }
-.polyhymnia-player .code .display .text span.reference {
+.polyhymnia-editor .code .display .text span.reference {
   color: #815ccc;
 }
-.polyhymnia-player .code .display .text span.note {
+.polyhymnia-editor .code .display .text span.note {
   color: #3399ff;
 }
-.polyhymnia-player .code .display .text span.condition {
+.polyhymnia-editor .code .display .text span.condition {
   color: #ff854c;
 }
-.polyhymnia-player .code .display .text span.playing {
+.polyhymnia-editor .code .display .text span.playing {
   color: #ffffb3;
 }
-.polyhymnia-player .code .display .cursor-layer {
+.polyhymnia-editor .code .display .cursor-layer {
   position: absolute;
   left: 0;
   top: 0;
@@ -105,12 +111,12 @@
   bottom: 0;
   margin: 24px;
 }
-.polyhymnia-player .code .display .cursor {
+.polyhymnia-editor .code .display .cursor {
   display: inline-block;
   position: absolute;
   border-left: #e5004d 2px solid;
 }
-.polyhymnia-player .code .display .blink {
+.polyhymnia-editor .code .display .blink {
   -webkit-animation: 1s blink step-end infinite;
   -moz-animation: 1s blink step-end infinite;
   animation: 1s blink step-end infinite;
@@ -139,7 +145,7 @@
     opacity: 0;
   }
 }
-.polyhymnia-player .controls {
+.polyhymnia-editor .controls {
   position: relative;
   width: 100%;
   height: 64px;
@@ -149,9 +155,10 @@
   color: #ff884d;
   /* Play/stop buttons */
   /* Slider */
+  /* Settings */
 }
-.polyhymnia-player .controls .play,
-.polyhymnia-player .controls .stop {
+.polyhymnia-editor .controls .play,
+.polyhymnia-editor .controls .stop {
   position: absolute;
   top: 12px;
   left: 16px;
@@ -162,39 +169,39 @@
   background: none;
   cursor: pointer;
 }
-.polyhymnia-player .controls .play:hover,
-.polyhymnia-player .controls .stop:hover {
+.polyhymnia-editor .controls .play:hover,
+.polyhymnia-editor .controls .stop:hover {
   border-color: #e5004d;
 }
-.polyhymnia-player .controls .play svg path,
-.polyhymnia-player .controls .stop svg path,
-.polyhymnia-player .controls .play svg rect,
-.polyhymnia-player .controls .stop svg rect {
+.polyhymnia-editor .controls .play svg path,
+.polyhymnia-editor .controls .stop svg path,
+.polyhymnia-editor .controls .play svg rect,
+.polyhymnia-editor .controls .stop svg rect {
   stroke-width: 1;
 }
-.polyhymnia-player .controls .play:hover svg path,
-.polyhymnia-player .controls .stop:hover svg path,
-.polyhymnia-player .controls .play:hover svg rect,
-.polyhymnia-player .controls .stop:hover svg rect {
+.polyhymnia-editor .controls .play:hover svg path,
+.polyhymnia-editor .controls .stop:hover svg path,
+.polyhymnia-editor .controls .play:hover svg rect,
+.polyhymnia-editor .controls .stop:hover svg rect {
   stroke: #e5004d;
 }
-.polyhymnia-player .controls .play svg {
+.polyhymnia-editor .controls .play svg {
   position: absolute;
   top: 10px;
   left: 12px;
 }
-.polyhymnia-player .controls .stop svg {
+.polyhymnia-editor .controls .stop svg {
   position: absolute;
   top: 10px;
   left: 10px;
 }
-.polyhymnia-player .controls .slider {
+.polyhymnia-editor .controls .slider {
   position: absolute;
   top: 0px;
   left: 80px;
-  right: 100px;
+  right: 140px;
 }
-.polyhymnia-player .controls .slider .output {
+.polyhymnia-editor .controls .slider .output {
   position: absolute;
   top: 3px;
   left: -27px;
@@ -202,30 +209,26 @@
   font-size: 14px;
   text-align: center;
 }
-.polyhymnia-player .controls .slider .output.hide {
+.polyhymnia-editor .controls .slider .output.hide {
   opacity: 0;
   transition: opacity 1s ease 1s;
 }
-.polyhymnia-player .controls .slider .output.show {
+.polyhymnia-editor .controls .slider .output.show {
   opacity: 1;
   transition: opacity 0.2s ease;
 }
-.polyhymnia-player .controls .slider input {
-  -webkit-appearance: none;
+.polyhymnia-editor .controls .slider input {
   display: block;
   position: absolute;
   top: 24px;
   width: 100%;
-  margin: 0;
-  padding: 0;
-  background: transparent;
 }
-.polyhymnia-player .controls .slider input::-webkit-slider-runnable-track {
+.polyhymnia-editor .controls .slider input::-webkit-slider-runnable-track {
   height: 1px;
   margin-top: 8px;
   background: #ff884d;
 }
-.polyhymnia-player .controls .slider input::-webkit-slider-thumb {
+.polyhymnia-editor .controls .slider input::-webkit-slider-thumb {
   -webkit-appearance: none;
   position: relative;
   top: -8px;
@@ -235,15 +238,15 @@
   background: #ffffff;
   border-radius: 50%;
 }
-.polyhymnia-player .controls .slider input::-webkit-slider-thumb:active {
+.polyhymnia-editor .controls .slider input::-webkit-slider-thumb:active {
   border-color: #e5004d;
 }
-.polyhymnia-player .controls .slider input::-moz-range-track {
+.polyhymnia-editor .controls .slider input::-moz-range-track {
   height: 1px;
   background: #ff884d;
   border: none;
 }
-.polyhymnia-player .controls .slider input::-moz-range-thumb {
+.polyhymnia-editor .controls .slider input::-moz-range-thumb {
   position: relative;
   height: 16px;
   width: 16px;
@@ -251,23 +254,22 @@
   background: #ffffff;
   border-radius: 50%;
 }
-.polyhymnia-player .controls .slider input::-moz-range-thumb:active {
+.polyhymnia-editor .controls .slider input::-moz-range-thumb:active {
   border-color: #e5004d;
 }
-.polyhymnia-player .controls .tempo {
+.polyhymnia-editor .controls .settings {
   position: absolute;
   top: 20px;
   right: 18px;
 }
-.polyhymnia-player .controls .tempo input {
-  border: none;
-  width: 30px;
-  padding: 0;
+.polyhymnia-editor .controls .settings input {
   margin-right: 8px;
   text-align: right;
-  background: transparent;
 }
-.polyhymnia-player .not-supported {
+.polyhymnia-editor .controls .settings select {
+  margin-left: 8px;
+}
+.polyhymnia-editor .not-supported {
   position: relative;
   width: 100%;
   height: 64px;
@@ -278,9 +280,9 @@
   color: #ff884d;
   text-align: center;
 }
-.polyhymnia-player .not-supported a {
+.polyhymnia-editor .not-supported a {
   color: #ff884d;
 }
-.polyhymnia-player .not-supported a:hover {
+.polyhymnia-editor .not-supported a:hover {
   border-bottom-color: #ff884d;
 }
