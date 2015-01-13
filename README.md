@@ -24,7 +24,7 @@ Drums ->
 
 ## Getting started
 
-The best way to try Polyhymnia is in the [online playgroud](http://hisekaldma.github.io/Polyhymnia).
+The best way to try Polyhymnia is in the [online playgroud](http://polyhymnia.io).
 
 ## Installation
 
@@ -73,6 +73,4 @@ To use Polyhymnia locally:
   ```
 
 ## Requirements
-Polyhymnia runs in the browser, and uses the Web Audio API, which is part of HTML5. It is supported in all modern browsers, including Safari on iOS and Chrome on Android. You won’t have much luck with Internet Explorer.
-
-To see exactly which browsers are supported, check [caniuse.com](http://caniuse.com/#feat=audio-api).
+Polyhymnia runs in the browser and uses the Web Audio API, which is part of HTML5. It should work in all modern browsers, including Safari on iOS and Chrome on Android. You won’t have much luck with Internet Explorer.
