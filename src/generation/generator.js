@@ -41,12 +41,12 @@ Polyhymnia.Generator = function() {
   };
 
   function buildTree(rule) {
-    var node = { name: name || '', definitions: [] };
-
     // If we can't find the rule, return an empty node, so we can keep playing
     if (!rule) {
-      return node;
+      return { name: '', definitions: [] };
     }
+
+    var node = { name: rule.name, definitions: [] };
 
     rule.definitions.forEach(function(definition) {
       if (definition.sequence) {
