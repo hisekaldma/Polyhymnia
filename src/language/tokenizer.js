@@ -7,6 +7,8 @@ Polyhymnia.tokenType = {
   PAUSE:          'pause',
   NOTE:           'note',
   CHORD:          'chord',
+  DEGREE_NOTE:    'degree note',
+  DEGREE_CHORD:   'degree chord',
   DRUM_TRIGGER:   'drum trigger',
   ARROW:          'arrow',
   LEFT_PAREN:     'left paren',
@@ -24,14 +26,16 @@ Polyhymnia.tokenize = function(textToTokenize) {
 
   var tokenType = Polyhymnia.tokenType;
 
-  var NAME_PATTERN        = '[A-Z][a-zA-Z0-9_]*';
-  var PARAM_PATTERN       = '[a-z][a-zA-Z0-9_]*';
-  var INSTRUMENT_PATTERN  = NAME_PATTERN + ':';
-  var NUMBER_PATTERN      = '-?(([1-9][0-9]*)|0)(\\.[0-9]*)?';
-  var NOTE_PATTERN        = '([CDEFGAB][#b]?)';
-  var OCTAVE_PATTERN      = '(-2|-1|[0-8])?';
-  var CHORD_PATTERN       = '((M|m|dom|aug|dim)7?)';
-  var DRUM_PATTERN        = '[xX]';
+  var NAME_PATTERN         = '[A-Z][a-zA-Z0-9_]*';
+  var PARAM_PATTERN        = '[a-z][a-zA-Z0-9_]*';
+  var INSTRUMENT_PATTERN   = NAME_PATTERN + ':';
+  var NUMBER_PATTERN       = '-?(([1-9][0-9]*)|0)(\\.[0-9]*)?';
+  var NOTE_PATTERN         = '([CDEFGAB][#b]?)';
+  var OCTAVE_PATTERN       = '(-2|-1|[0-8])?';
+  var CHORD_PATTERN        = '((M|m|dom|aug|dim)7?)';
+  var DEGREE_NOTE_PATTERN  = '[1-7]';
+  var DEGREE_CHORD_PATTERN = '((I|II|III|IV|V|VI|VII)\\+?|(i|ii|iii|iv|v|vi|vii)°?)7?';
+  var DRUM_PATTERN         = '[xX]';
 
   var NEWLINE    = '\n';
   var SPACE      = ' ';
@@ -48,6 +52,8 @@ Polyhymnia.tokenize = function(textToTokenize) {
   var numberPattern         = new RegExp('^' + NUMBER_PATTERN + '$');
   var notePattern           = new RegExp('^' + NOTE_PATTERN + OCTAVE_PATTERN + '$');
   var chordPattern          = new RegExp('^' + NOTE_PATTERN + OCTAVE_PATTERN + CHORD_PATTERN + '$');
+  var degreeNotePattern     = new RegExp('^' + DEGREE_NOTE_PATTERN + '$');
+  var degreeChordPattern    = new RegExp('^' + DEGREE_CHORD_PATTERN + '$');
   var drumPattern           = new RegExp('^' + DRUM_PATTERN + '$');
 
   var text = textToTokenize.replace('\r', ''); // Handle weird Windows newlines
@@ -142,6 +148,10 @@ Polyhymnia.tokenize = function(textToTokenize) {
           matches = str.match(chordPattern);
           octave = matches[2] ? parseInt(matches[2]) : undefined;
           token = { type: tokenType.CHORD, value: { note: matches[1], octave: octave, chord: matches[3] }};
+        } else if (str.match(degreeNotePattern)) {
+          token = { type: tokenType.DEGREE_NOTE, value: str };
+        } else if (str.match(degreeChordPattern)) {
+          token = { type: tokenType.DEGREE_CHORD, value: str };
         } else {
           token = { type: tokenType.ERROR, value: str };
         }

@@ -73,6 +73,46 @@ describe('Tokenizer', function() {
     expect(tokens[10].value).toEqual({ note: 'G', octave: 0, chord: 'dim7' });
     expect(tokens[10].type).toBe(tokenType.CHORD);    
   });
+  
+  it('can tokenize degree notes', function() {
+    var tokens = Polyhymnia.tokenize('Piano: 1 2 3 4 5 6 7');
+    
+    expect(tokens[1].value).toEqual('1');
+    expect(tokens[1].type).toBe(tokenType.DEGREE_NOTE);
+    expect(tokens[2].value).toEqual('2');
+    expect(tokens[2].type).toBe(tokenType.DEGREE_NOTE);
+    expect(tokens[3].value).toEqual('3');
+    expect(tokens[3].type).toBe(tokenType.DEGREE_NOTE);
+    expect(tokens[4].value).toEqual('4');
+    expect(tokens[4].type).toBe(tokenType.DEGREE_NOTE);
+    expect(tokens[5].value).toEqual('5');
+    expect(tokens[5].type).toBe(tokenType.DEGREE_NOTE);
+    expect(tokens[6].value).toEqual('6');
+    expect(tokens[6].type).toBe(tokenType.DEGREE_NOTE);
+    expect(tokens[7].value).toEqual('7');
+    expect(tokens[7].type).toBe(tokenType.DEGREE_NOTE);
+  });
+
+  it('can tokenize degree chords', function() {
+    var tokens = Polyhymnia.tokenize('Piano: I ii iii° IV+ V7 vi7 vii°7 I+7');
+    
+    expect(tokens[1].value).toEqual('I');
+    expect(tokens[1].type).toBe(tokenType.DEGREE_CHORD);
+    expect(tokens[2].value).toEqual('ii');
+    expect(tokens[2].type).toBe(tokenType.DEGREE_CHORD);
+    expect(tokens[3].value).toEqual('iii°');
+    expect(tokens[3].type).toBe(tokenType.DEGREE_CHORD);
+    expect(tokens[4].value).toEqual('IV+');
+    expect(tokens[4].type).toBe(tokenType.DEGREE_CHORD);
+    expect(tokens[5].value).toEqual('V7');
+    expect(tokens[5].type).toBe(tokenType.DEGREE_CHORD);
+    expect(tokens[6].value).toEqual('vi7');
+    expect(tokens[6].type).toBe(tokenType.DEGREE_CHORD);
+    expect(tokens[7].value).toEqual('vii°7');
+    expect(tokens[7].type).toBe(tokenType.DEGREE_CHORD);
+    expect(tokens[8].value).toEqual('I+7');
+    expect(tokens[8].type).toBe(tokenType.DEGREE_CHORD);
+  });
 
   it('can tokenize drums', function() {
     var tokens = Polyhymnia.tokenize('Kick: x X');
