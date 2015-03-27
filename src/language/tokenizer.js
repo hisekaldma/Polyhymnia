@@ -143,11 +143,11 @@ Polyhymnia.tokenize = function(textToTokenize) {
         } else if (str.match(notePattern)) {
           matches = str.match(notePattern);
           octave = matches[2] ? parseInt(matches[2]) : undefined;
-          token = { type: tokenType.NOTE, value: { note: matches[1], octave: octave }};
+          token = { type: tokenType.NOTE, note: matches[1], octave: octave };
         } else if (str.match(chordPattern)) {
           matches = str.match(chordPattern);
           octave = matches[2] ? parseInt(matches[2]) : undefined;
-          token = { type: tokenType.CHORD, value: { note: matches[1], octave: octave, chord: matches[3] }};
+          token = { type: tokenType.CHORD, note: matches[1], octave: octave, chord: matches[3] };
         } else if (str.match(degreeNotePattern)) {
           token = { type: tokenType.DEGREE_NOTE, value: str };
         } else if (str.match(degreeChordPattern)) {

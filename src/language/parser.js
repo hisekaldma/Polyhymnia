@@ -202,28 +202,36 @@ Polyhymnia.parse = function(tokensToParse, instruments) {
 
   // C# | Cm7 | x | _
   function parseNote() {
-    var type;
-    var value = '';
-    var start = currentToken.start;
-    var end = currentToken.end;
+    var note = {
+      start: currentToken.start,
+      end:   currentToken.end
+    };
     var valid = true;
 
-    if (currentToken.type == tokenType.NOTE) {
-      type = noteType.NOTE;
-      value = currentToken.value;
-    } else if (currentToken.type == tokenType.CHORD) {
-      type = noteType.CHORD;
-      value = currentToken.value;
-    } else if (currentToken.type == tokenType.DRUM_TRIGGER) {
-      type = noteType.DRUM;
-      value = currentToken.value;
-    } else if (currentToken.type == tokenType.PAUSE) {
-      type = noteType.PAUSE;
-    } else {
-      // ERROR: Expected note, chord, drum symbol or pause
-      error('Expected a note, chord, drum symbol or pause');
-      valid = false;
-      type = noteType.PAUSE;
+    switch (currentToken.type) {
+      case tokenType.NOTE:
+        note.type = noteType.NOTE;
+        note.note = currentToken.note;
+        note.octave = currentToken.octave;
+        break;
+      case tokenType.CHORD:
+        note.type = noteType.CHORD;
+        note.note = currentToken.note;
+        note.octave = currentToken.octave;
+        note.chord = currentToken.chord;
+        break;
+      case tokenType.DRUM_TRIGGER:
+        note.type = noteType.DRUM;
+        note.value = currentToken.value;
+        break;
+      case tokenType.PAUSE:
+        note.type = noteType.PAUSE;
+        break;
+      default:
+        // ERROR: Expected note, chord, drum symbol or pause
+        error('Expected a note, chord, drum symbol or pause');
+        valid = false;
+        note.type = noteType.PAUSE;
     }
 
     if (valid) {
@@ -231,7 +239,7 @@ Polyhymnia.parse = function(tokensToParse, instruments) {
     }
 
     nextToken();
-    return { type: type, value: value, start: start, end: end };
+    return note;
   }
 
   // (x > 0) | (0 > x) | (0 > x > 0) | (x < 0) | (0 < x) | (0 < x < 0)

@@ -30,7 +30,7 @@ Polyhymnia.Sequencer = function() {
     var animateNotes = [];
     for (var i = 0; i < patterns.length; i++) {
       var instrument = patterns[i].instrument;
-      var pattern = patterns[i].pattern;
+      var pattern    = patterns[i].pattern;
       var noteLength = getNoteLength(pattern.length);
       var noteNumber = Math.floor(stepInBar / noteLength);
 
@@ -38,7 +38,13 @@ Polyhymnia.Sequencer = function() {
         // Only trigger the note if we're on step 0 of it
         var note = pattern[noteNumber];
         if (stepInBar % noteLength === 0) {
-          scheduleNote(instrument, note.type, note.value, time);
+          if (Array.isArray(note)) {
+            for (var n = 0; n < note.length; n++) {
+              scheduleNote(instrument, note[n], time);
+            }
+          } else {
+            scheduleNote(instrument, note, time);
+          }
         }
 
         // But always animate it
@@ -55,24 +61,9 @@ Polyhymnia.Sequencer = function() {
     }
   };
 
-  function scheduleNote(instrument, type, value, time) {
-    // Convert value to relative midi numbers
-    var midiNumbers = [];
-    if (type == noteType.NOTE) {
-      midiNumbers = [Polyhymnia.Notes.fromName(value.note, value.octave)];
-    } else if (type == noteType.CHORD) {
-      var root = Polyhymnia.Notes.fromName(value.note, value.octave);
-      var chord = Polyhymnia.Chords.fromName(value.chord);
-      midiNumbers = chord.map(function(note) {
-        return note + root;
-      });
-    } else if (type == noteType.DRUM) {
-      midiNumbers = [Polyhymnia.Notes.fromName('C')];
-    }
-
-    // Play notes
-    if (self.instruments[instrument]) {
-      self.instruments[instrument].scheduleNotes(midiNumbers, time);
+  function scheduleNote(instrument, note, time) {
+    if (self.instruments[instrument] && note.key) {
+      self.instruments[instrument].scheduleNote(note.key, time);
     }
   }
 

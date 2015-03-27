@@ -163,10 +163,10 @@ describe('Generator', function() {
         [
           { instrument: 'Piano', pattern:
             [
-              { value: 'C', type: noteType.NOTE },
-              { value: 'D', type: noteType.NOTE },
-              { value: 'E', type: noteType.NOTE },
-              { value: 'F', type: noteType.NOTE }
+              { type: noteType.NOTE, note: 'C' },
+              { type: noteType.NOTE, note: 'D' },
+              { type: noteType.NOTE, note: 'E' },
+              { type: noteType.NOTE, note: 'F' }
             ]
           }
         ]
@@ -175,10 +175,10 @@ describe('Generator', function() {
     var patterns = generator.getPatterns();
 
     expect(patterns[0].instrument).toBe('Piano');
-    expect(patterns[0].pattern[0].value).toBe('C');
-    expect(patterns[0].pattern[1].value).toBe('D');
-    expect(patterns[0].pattern[2].value).toBe('E');
-    expect(patterns[0].pattern[3].value).toBe('F');
+    expect(patterns[0].pattern[0].key).toBe(60);
+    expect(patterns[0].pattern[1].key).toBe(62);
+    expect(patterns[0].pattern[2].key).toBe(64);
+    expect(patterns[0].pattern[3].key).toBe(65);
   });
 
   it('can interpret parallel patterns', function() {
@@ -188,18 +188,18 @@ describe('Generator', function() {
         [
           { instrument: 'Piano', pattern:
             [
-              { value: 'C', type: noteType.NOTE },
-              { value: 'D', type: noteType.NOTE },
-              { value: 'E', type: noteType.NOTE },
-              { value: 'F', type: noteType.NOTE }
+              { type: noteType.NOTE, note: 'C' },
+              { type: noteType.NOTE, note: 'D' },
+              { type: noteType.NOTE, note: 'E' },
+              { type: noteType.NOTE, note: 'F' }
             ]
           },
           { instrument: 'Zoombasa', pattern:
             [
-              { value: 'B', type: noteType.NOTE },
-              { value: 'A', type: noteType.NOTE },
-              { value: 'G', type: noteType.NOTE },
-              { value: 'F', type: noteType.NOTE }
+              { type: noteType.NOTE, note: 'B' },
+              { type: noteType.NOTE, note: 'A' },
+              { type: noteType.NOTE, note: 'G' },
+              { type: noteType.NOTE, note: 'F' }
             ]
           }
         ]
@@ -209,15 +209,15 @@ describe('Generator', function() {
     var patterns = generator.getPatterns();
 
     expect(patterns[0].instrument).toBe('Piano');
-    expect(patterns[0].pattern[0].value).toBe('C');
-    expect(patterns[0].pattern[1].value).toBe('D');
-    expect(patterns[0].pattern[2].value).toBe('E');
-    expect(patterns[0].pattern[3].value).toBe('F');
+    expect(patterns[0].pattern[0].key).toBe(60);
+    expect(patterns[0].pattern[1].key).toBe(62);
+    expect(patterns[0].pattern[2].key).toBe(64);
+    expect(patterns[0].pattern[3].key).toBe(65);
     expect(patterns[1].instrument).toBe('Zoombasa');
-    expect(patterns[1].pattern[0].value).toBe('B');
-    expect(patterns[1].pattern[1].value).toBe('A');
-    expect(patterns[1].pattern[2].value).toBe('G');
-    expect(patterns[1].pattern[3].value).toBe('F');
+    expect(patterns[1].pattern[0].key).toBe(71);
+    expect(patterns[1].pattern[1].key).toBe(69);
+    expect(patterns[1].pattern[2].key).toBe(67);
+    expect(patterns[1].pattern[3].key).toBe(65);
   });
 
   it('can interpret nested patterns', function() {
@@ -225,25 +225,25 @@ describe('Generator', function() {
     generator.setRules([
       { name: 'Play', definitions:
         [
-          { instrument: 'Piano', pattern: [{ value: 'C', type: noteType.NOTE }] },
+          { instrument: 'Piano', pattern: [{ type: noteType.NOTE, note: 'C' }] },
           { sequence: ['Drums'] }
         ]
       },
       { name: 'Drums', definitions:
         [
-          { instrument: 'Kick',  pattern: [{ value: 'x', type: noteType.DRUM }] },
-          { instrument: 'Snare', pattern: [{ value: 'x', type: noteType.DRUM }] }
+          { instrument: 'Kick',  pattern: [{ type: noteType.DRUM, value: 'x' }] },
+          { instrument: 'Snare', pattern: [{ type: noteType.DRUM, value: 'x' }] }
         ]
       }
     ]);
     var patterns = generator.getPatterns();
 
     expect(patterns[0].instrument).toBe('Piano');
-    expect(patterns[0].pattern[0].value).toBe('C');
+    expect(patterns[0].pattern[0].key).toBe(60);
     expect(patterns[1].instrument).toBe('Kick');
-    expect(patterns[1].pattern[0].value).toBe('x');
+    expect(patterns[1].pattern[0].key).toBe(60);
     expect(patterns[2].instrument).toBe('Snare');
-    expect(patterns[2].pattern[0].value).toBe('x');
+    expect(patterns[2].pattern[0].key).toBe(60);
   });
 
   it('only chooses pattern definitions whose min conditions apply', function() {

@@ -2,6 +2,7 @@ var Polyhymnia = Polyhymnia || {};
 
 Polyhymnia.Generator = function() {
   'use strict';
+  var noteType = Polyhymnia.noteType;
   var self = this;
 
   var startRule = 'Play';
@@ -100,8 +101,9 @@ Polyhymnia.Generator = function() {
         var childPatterns = getPatterns(definition.sequence[definition.index]);
         childPatterns.forEach(function(p) { patterns.push(p); });
       } else if (definition.pattern) {
-        // Pattern definition, get the patterns
-        patterns.push({ instrument: definition.instrument, pattern: definition.pattern });
+        // Pattern definition
+        var midiNumbers = definition.pattern.map(convertToMidi);
+        patterns.push({ instrument: definition.instrument, pattern: midiNumbers });
       }
     });
 
@@ -139,6 +141,44 @@ Polyhymnia.Generator = function() {
       }
     });
     return validDefinitions;
+  }
+
+  function convertToMidi(note) {
+    var keys;
+    switch (note.type) {
+      case noteType.NOTE:
+        keys = [Polyhymnia.Notes.fromName(note.note, note.octave)];
+        break;
+      case noteType.CHORD:
+        var root = Polyhymnia.Notes.fromName(note.note, note.octave);
+        var chord = Polyhymnia.Chords.fromName(note.chord);
+        keys = chord.map(function(n) {
+          return n + root;
+        });
+        break;
+      case noteType.DRUM:
+        keys = [Polyhymnia.Notes.fromName('C')];
+        break;
+      case noteType.PAUSE:
+        keys = [undefined];
+        break;
+      default:
+        keys = [undefined];
+    }
+
+    var midiNotes = keys.map(function(k) {
+      return {
+        key:   k,
+        start: note.start,
+        end:   note.end
+      };
+    });
+
+    if (midiNotes.length == 1) {
+      return midiNotes[0];
+    } else {
+      return midiNotes;
+    }
   }
 
   function getRandom(array) {
