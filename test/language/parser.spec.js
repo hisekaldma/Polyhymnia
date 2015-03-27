@@ -131,7 +131,7 @@ describe('Parser', function() {
 
   it('doesn\'t parse invalid notes', function() {
     var rules = Polyhymnia.parse(Polyhymnia.tokenize('R1 -> Piano: C / J Caug2'));
-    expect(rules.errors[0].error).toBe('Expected a note, chord, drum symbol or pause');
+    expect(rules.errors[0].error).toBe('Expected a note, chord, drum hit or pause');
   });
 
   it('can parse incomplete rules', function() {

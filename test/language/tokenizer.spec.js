@@ -145,9 +145,9 @@ describe('Tokenizer', function() {
     var tokens = Polyhymnia.tokenize('Kick: x X');
     
     expect(tokens[1].value).toBe('x');
-    expect(tokens[1].type).toBe(tokenType.DRUM_TRIGGER);
+    expect(tokens[1].type).toBe(tokenType.DRUM_HIT);
     expect(tokens[2].value).toBe('X');
-    expect(tokens[2].type).toBe(tokenType.DRUM_TRIGGER);
+    expect(tokens[2].type).toBe(tokenType.DRUM_HIT);
   });
 
   it('can tokenize numbers', function() {

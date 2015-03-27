@@ -220,7 +220,7 @@ Polyhymnia.parse = function(tokensToParse, instruments) {
         note.octave = currentToken.octave;
         note.chord = currentToken.chord;
         break;
-      case tokenType.DRUM_TRIGGER:
+      case tokenType.DRUM_HIT:
         note.type = noteType.DRUM;
         note.value = currentToken.value;
         break;
@@ -228,8 +228,8 @@ Polyhymnia.parse = function(tokensToParse, instruments) {
         note.type = noteType.PAUSE;
         break;
       default:
-        // ERROR: Expected note, chord, drum symbol or pause
-        error('Expected a note, chord, drum symbol or pause');
+        // ERROR: Expected note, chord, drum hit or pause
+        error('Expected a note, chord, drum hit or pause');
         valid = false;
         note.type = noteType.PAUSE;
     }

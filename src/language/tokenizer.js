@@ -9,7 +9,7 @@ Polyhymnia.tokenType = {
   CHORD:          'chord',
   DEGREE_NOTE:    'degree note',
   DEGREE_CHORD:   'degree chord',
-  DRUM_TRIGGER:   'drum trigger',
+  DRUM_HIT:       'drum hit',
   ARROW:          'arrow',
   LEFT_PAREN:     'left paren',
   RIGHT_PAREN:    'right paren',
@@ -139,7 +139,7 @@ Polyhymnia.tokenize = function(textToTokenize) {
         if (str == '_') {
           token = { type: tokenType.PAUSE };
         } else if (str.match(drumPattern)) {
-          token = { type: tokenType.DRUM_TRIGGER, value: str };
+          token = { type: tokenType.DRUM_HIT, value: str };
         } else if (str.match(notePattern)) {
           matches = str.match(notePattern);
           octave = matches[2] ? parseInt(matches[2]) : undefined;
