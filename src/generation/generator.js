@@ -158,6 +158,9 @@ Polyhymnia.Generator = function() {
       case noteType.DEGREE_NOTE:
         keys = [Polyhymnia.Scales.fromName(self.scale, self.tonic)[note.value - 1]];
         break;
+      case noteType.DEGREE_CHORD:
+        keys = Polyhymnia.Degrees.fromName(note.value, self.tonic, self.scale);
+        break;
       case noteType.DRUM:
         keys = [Polyhymnia.Notes.fromName('C')];
         break;

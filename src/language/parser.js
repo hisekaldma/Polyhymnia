@@ -1,10 +1,12 @@
 var Polyhymnia = Polyhymnia || {};
 
 Polyhymnia.noteType = {
-  PAUSE: 'pause',
-  NOTE:  'note',
-  CHORD: 'chord',
-  DRUM:  'drum'
+  PAUSE:        'pause',
+  NOTE:         'note',
+  CHORD:        'chord',
+  DEGREE_NOTE:  'degree note',
+  DEGREE_CHORD: 'degree chord',
+  DRUM:         'drum'
 };
 
 Polyhymnia.symbolType = {
@@ -222,6 +224,10 @@ Polyhymnia.parse = function(tokensToParse, instruments) {
         break;
       case tokenType.DEGREE_NOTE:
         note.type = noteType.DEGREE_NOTE;
+        note.value = currentToken.value;
+        break;
+      case tokenType.DEGREE_CHORD:
+        note.type = noteType.DEGREE_CHORD;
         note.value = currentToken.value;
         break;
       case tokenType.DRUM_HIT:
