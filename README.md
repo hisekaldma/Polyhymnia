@@ -1,7 +1,7 @@
 Polyhymnia
 ==========
 
-Polyhymnia is a programming language for generative, interactive music. It lets you write rules that evaluate to sequences and patterns of notes, chords and drums.
+Polyhymnia is a programming language for composing generative, interactive music. It lets you write rules that evaluate to sequences and patterns of notes, chords and drums.
 
 **Polyhymnia is still in the design stage. Some things will change. Some things won’t.**
 
