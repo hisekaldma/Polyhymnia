@@ -4,7 +4,7 @@ Polyhymnia.Scales = (function() {
   'use strict';
   var self = {};
 
-  self.scales = {
+  var scales = {
     'major':            [0, 2, 4, 5, 7, 9, 11],
     'minor':            [0, 2, 3, 5, 7, 8, 10],
     'pentatonic-major': [0, 2, 4, 7, 9],
@@ -17,8 +17,8 @@ Polyhymnia.Scales = (function() {
       numbers[i] = value % 12;
     });
 
-    for (var name in self.scales) {
-      var scale = self.scales[name];
+    for (var name in scales) {
+      var scale = scales[name];
       if (scale.length == numbers.length) {
         var correct = true;
         for (var i = 0; i < scale.length; i++) {
@@ -34,12 +34,20 @@ Polyhymnia.Scales = (function() {
     return '';
   };
 
-  // Gets the relative note numbers in a scale
-  self.fromName = function(name) {
-    if (name in self.scales)
-      return self.scales[name];
+  // Gets the midi note numbers in a scale
+  self.fromName = function(name, tonic, octave) {
+    if (!tonic)
+      tonic = 60; // Default to middle C
     else
+      tonic = Polyhymnia.Notes.fromName(tonic, octave);
+
+    if (name in scales) {
+      return scales[name].map(function(n) {
+        return n + tonic;
+      });
+    } else {
       return [];
+    }
   };
 
   return self;
