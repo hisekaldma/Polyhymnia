@@ -4,7 +4,7 @@ Polyhymnia.Chords = (function() {
   'use strict';
   var self = {};
 
-  self.chords = {
+  var chords = {
     'M':      [0, 4, 7],
     'm':      [0, 3, 7],
     'M7':     [0, 4, 7, 11],
@@ -22,8 +22,8 @@ Polyhymnia.Chords = (function() {
       numbers[i] = value % 12;
     });
 
-    for (var name in self.chords) {
-      var chord = self.chords[name];
+    for (var name in chords) {
+      var chord = chords[name];
       if (chord.length == numbers.length) {
         var correct = true;
         for (var i = 0; i < chord.length; i++) {
@@ -42,12 +42,12 @@ Polyhymnia.Chords = (function() {
   // Gets the midi note numbers of a chord
   self.fromName = function(name, root, octave) {
     if (!root)
-      root = 0;
+      root = 0; // If no root is provided, just use relative note numbers
     else
       root = Polyhymnia.Notes.fromName(root, octave);
 
-    if (name in self.chords) {
-      return self.chords[name].map(function(n) {
+    if (name in chords) {
+      return chords[name].map(function(n) {
         return n + root;
       });
     } else {

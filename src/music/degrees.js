@@ -3,25 +3,45 @@ var Polyhymnia = Polyhymnia || {};
 Polyhymnia.Degrees = (function() {
   'use strict';
   var self = {};
-  var degrees = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII'];
+
+  var degrees = [
+    'i',
+    'ii',
+    'iii',
+    'iv',
+    'v',
+    'vi',
+    'vii'
+  ];
+
+  var chords = {
+    'maj':    [0, 4, 7],
+    'min':    [0, 3, 7],
+    'maj7':   [0, 4, 7, 11],
+    'min7':   [0, 3, 7, 10],
+    'aug':    [0, 4, 8],
+    'aug7':   [0, 4, 8, 10],
+    'dim':    [0, 3, 6],
+    'dim7':   [0, 3, 6, 9]
+  };
 
   // Generate scale degree chords for a midi number scale
   function generateChords(scale) {
-    var chords = {};
-    function maj(val) { return val; }
-    function min(val) { return val.toLowerCase(); }
+    var c = {};
+    function maj(val) { return val.toUpperCase(); }
+    function min(val) { return val; }
     degrees.forEach(function(degree, index) {
       function toScale(n) { return n + scale[index]; }
-      chords[maj(degree)]        = [0, 4, 7]    .map(toScale); // Maj
-      chords[min(degree)]        = [0, 3, 7]    .map(toScale); // Min
-      chords[maj(degree) + '7']  = [0, 4, 7, 11].map(toScale); // Maj 7th
-      chords[min(degree) + '7']  = [0, 3, 7, 10].map(toScale); // Min 7th
-      chords[maj(degree) + '+']  = [0, 4, 8]    .map(toScale); // Aug
-      chords[maj(degree) + '+7'] = [0, 4, 8, 10].map(toScale); // Aug 7th
-      chords[min(degree) + '°']  = [0, 3, 6]    .map(toScale); // Dim
-      chords[min(degree) + '°7'] = [0, 3, 6, 9] .map(toScale); // Dim 7th
+      c[maj(degree)]        = chords.maj  .map(toScale); // Maj
+      c[min(degree)]        = chords.min  .map(toScale); // Min
+      c[maj(degree) + '7']  = chords.maj7 .map(toScale); // Maj 7th
+      c[min(degree) + '7']  = chords.min7 .map(toScale); // Min 7th
+      c[maj(degree) + '+']  = chords.aug  .map(toScale); // Aug
+      c[maj(degree) + '+7'] = chords.aug7 .map(toScale); // Aug 7th
+      c[min(degree) + '°']  = chords.dim  .map(toScale); // Dim
+      c[min(degree) + '°7'] = chords.dim7 .map(toScale); // Dim 7th
     });
-    return chords;
+    return c;
   }
 
   // Gets the name of a scale degree chord
@@ -57,7 +77,7 @@ Polyhymnia.Degrees = (function() {
   // Gets the midi note numbers in a scale degree chord
   self.fromName = function(name, tonic, scale) {
     if (!scale)
-      scale = Polyhymnia.Scales.fromName('major', tonic);
+      scale = Polyhymnia.Scales.fromName('major', tonic); // Default to major
     else
       scale = Polyhymnia.Scales.fromName(scale, tonic);
 

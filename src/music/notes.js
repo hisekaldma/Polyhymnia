@@ -4,7 +4,7 @@ Polyhymnia.Notes = (function() {
   'use strict';
   var self = {};
 
-  self.notes = {
+  var notes = {
     'C':  0,  'B#': 0,
     'C#': 1,  'Db': 1,
     'D':  2,
@@ -19,7 +19,7 @@ Polyhymnia.Notes = (function() {
     'B':  11, 'Cb': 11
   };
 
-  self.notesReverse = {
+  var notesReverse = {
     0: 'C',
     1: 'C#',
     2: 'D',
@@ -36,7 +36,7 @@ Polyhymnia.Notes = (function() {
 
   // Gets the canonical name of a note
   self.toName = function(midiNumber) {
-    return self.notesReverse[midiNumber % 12];
+    return notesReverse[midiNumber % 12];
   };
 
   // Gets the midi note number of a note
@@ -46,8 +46,8 @@ Polyhymnia.Notes = (function() {
     }
     octave += 2; // Octave numbers are -2 to 8, but midi octaves are 0 to 10
 
-    if (name in self.notes)
-      return self.notes[name] + octave * 12;
+    if (name in notes)
+      return notes[name] + octave * 12;
     else
       return 0;
   };
