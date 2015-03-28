@@ -35,20 +35,20 @@ Polyhymnia.Sequencer = function() {
       var noteNumber = Math.floor(stepInBar / noteLength);
 
       if (noteNumber < pattern.length) {
-        // Only trigger the note if we're on step 0 of it
-        var note = pattern[noteNumber];
-        if (stepInBar % noteLength === 0) {
-          if (Array.isArray(note)) {
-            for (var n = 0; n < note.length; n++) {
-              scheduleNote(instrument, note[n], time);
-            }
-          } else {
-            scheduleNote(instrument, note, time);
-          }
+        var notes = pattern[noteNumber];
+        if (!Array.isArray(notes)) {
+          notes = [notes];
         }
 
-        // But always animate it
-        animateNotes.push(note);
+        for (var n = 0; n < notes.length; n++) {
+          // Only trigger the note if we're on step 0 of it
+          if (stepInBar % noteLength === 0) {
+            scheduleNote(instrument, notes[n], time);
+          }
+
+          // But always animate it
+          animateNotes.push(notes[n]);
+        }
       }
     }
 
