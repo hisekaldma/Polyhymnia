@@ -75,6 +75,14 @@ Polyhymnia.Context = function(options) {
     sequencer.timeSignature.den = denominator;
   }
 
+  function setTonic(tonic) {
+    generator.tonic = tonic;
+  }
+
+  function setScale(scale) {
+    generator.scale = scale;
+  }
+
   function setAnimCallback(callback) {
     sequencer.animCallback = callback;
   }
@@ -85,6 +93,8 @@ Polyhymnia.Context = function(options) {
     stop: metronome.stop,
     setParam: generator.setParam,
     setTempo: setTempo,
+    setTonic: setTonic,
+    setScale: setScale,
     setTimeSignature: setTimeSignature,
     setAnimCallback: setAnimCallback
   };

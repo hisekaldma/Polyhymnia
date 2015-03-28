@@ -19,6 +19,7 @@
   }
 
   input, select {
+    display: inline-block;
     font-size: inherit;
     font-weight: inherit;
     font-family: inherit;
@@ -30,6 +31,12 @@
     -moz-appearance: none;
     -webkit-appearance: none;
     -webkit-font-smoothing: antialiased;
+  }
+
+  input:hover, input:active, input:focus,
+  select:hover, select:active, select:focus {
+    color: @active-color;
+    cursor: default;
   }
 
   input[type=number] {
@@ -174,12 +181,6 @@
     color: @interaction-color;
     cursor: default;
 
-    input:hover,
-    select:hover {
-      color: @active-color;
-      cursor: default;
-    }
-
     /* Play/stop buttons */
 
     .play,
@@ -230,7 +231,7 @@
       position: absolute;
       top: 0px;
       left: 80px;
-      right: 140px;
+      right: 210px;
 
       .output {
         position: absolute;
@@ -311,9 +312,12 @@
         text-align: right;
       }
 
-      select {
+      .time, .tonic {
         margin-left: 8px;
-      }      
+      }
+      .tonic.short {
+        margin-right: -8px;
+      }
     }
   }
 

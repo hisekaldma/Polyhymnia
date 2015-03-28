@@ -20,6 +20,8 @@ Polyhymnia.Editor = function(element, context) {
   var paramSlider =  element.querySelector('.slider input');
   var paramOutput =  element.querySelector('.slider .output');
   var tempoInput =   element.querySelector('.settings .tempo');
+  var tonicInput =   element.querySelector('.settings .tonic');
+  var scaleInput =   element.querySelector('.settings .scale');
   var timeInput =    element.querySelector('.settings .time');
   var codeEditor =   element.querySelector('.code .editor');
   var codeDisplay =  element.querySelector('.code .display');
@@ -57,14 +59,7 @@ Polyhymnia.Editor = function(element, context) {
 
     // Render the code
     renderCode();
-  }
-
-  function changeTimeSignature() {
-    var val = timeInput.value.split('/');
-    var num = parseInt(val[0]);
-    var den = parseInt(val[1]);
-    music.setTimeSignature(num, den);
-  }
+  } 
 
   function changeTempo() {
     if (tempoInput.value === '') {
@@ -75,6 +70,28 @@ Polyhymnia.Editor = function(element, context) {
       tempoInput.value = tempoInput.min;
     }
     music.setTempo(tempoInput.value);
+  }
+
+  function changeTonic() {
+    music.setTonic(tonicInput.value);
+
+    // Tweak layout to account for length
+    if (tonicInput.value.length == 1) {
+      tonicInput.classList.add('short');
+    } else {
+      tonicInput.classList.remove('short');
+    }
+  }
+
+  function changeScale() {
+    music.setScale(scaleInput.value);
+  }
+  
+  function changeTimeSignature() {
+    var val = timeInput.value.split('/');
+    var num = parseInt(val[0]);
+    var den = parseInt(val[1]);
+    music.setTimeSignature(num, den);
   }
 
   function changeParam() {
@@ -190,6 +207,8 @@ Polyhymnia.Editor = function(element, context) {
     stopButton.addEventListener('click',  stop);
     paramSlider.addEventListener('input', changeParam);
     tempoInput.addEventListener('input',  changeTempo);
+    tonicInput.addEventListener('input',  changeTonic);
+    scaleInput.addEventListener('input',  changeScale);
     timeInput.addEventListener('input',   changeTimeSignature);
     codeEditor.addEventListener('input',  parse);
   } else {
