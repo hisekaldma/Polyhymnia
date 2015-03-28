@@ -150,11 +150,7 @@ Polyhymnia.Generator = function() {
         keys = [Polyhymnia.Notes.fromName(note.note, note.octave)];
         break;
       case noteType.CHORD:
-        var root = Polyhymnia.Notes.fromName(note.note, note.octave);
-        var chord = Polyhymnia.Chords.fromName(note.chord);
-        keys = chord.map(function(n) {
-          return n + root;
-        });
+        keys = Polyhymnia.Chords.fromName(note.chord, note.note, note.octave);
         break;
       case noteType.DRUM:
         keys = [Polyhymnia.Notes.fromName('C')];

@@ -39,12 +39,20 @@ Polyhymnia.Chords = (function() {
     return '';
   };
 
-  // Gets the relative note numbers in a chord
-  self.fromName = function(name) {
-    if (name in self.chords)
-      return self.chords[name];
+  // Gets the midi note numbers of a chord
+  self.fromName = function(name, root, octave) {
+    if (!root)
+      root = 0;
     else
+      root = Polyhymnia.Notes.fromName(root, octave);
+
+    if (name in self.chords) {
+      return self.chords[name].map(function(n) {
+        return n + root;
+      });
+    } else {
       return [];
+    }
   };
 
   return self;

@@ -7,6 +7,18 @@ describe('Chords', function() {
     expect(chord).toEqual([0, 4, 7]);
   });
 
+  it('can be found by name and root note', function() {
+    var chord = Polyhymnia.Chords.fromName('M', 'C');
+
+    expect(chord).toEqual([60, 64, 67]);
+  });
+
+  it('can be found by name, root note and octave', function() {
+    var chord = Polyhymnia.Chords.fromName('M', 'C', 4);
+
+    expect(chord).toEqual([72, 76, 79]);
+  });
+
   it('can be found by midi numbers', function() {
     var chord = Polyhymnia.Chords.toName([0, 4, 7]);
     
