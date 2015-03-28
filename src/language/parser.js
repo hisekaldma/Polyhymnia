@@ -220,6 +220,10 @@ Polyhymnia.parse = function(tokensToParse, instruments) {
         note.octave = currentToken.octave;
         note.chord = currentToken.chord;
         break;
+      case tokenType.DEGREE_NOTE:
+        note.type = noteType.DEGREE_NOTE;
+        note.value = currentToken.value;
+        break;
       case tokenType.DRUM_HIT:
         note.type = noteType.DRUM;
         note.value = currentToken.value;

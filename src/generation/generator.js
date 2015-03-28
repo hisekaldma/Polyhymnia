@@ -5,6 +5,9 @@ Polyhymnia.Generator = function() {
   var noteType = Polyhymnia.noteType;
   var self = this;
 
+  this.tonic = 'C';
+  this.scale = 'major';
+
   var startRule = 'Play';
   var params = {};
   var ruleDictionary = null;
@@ -151,6 +154,9 @@ Polyhymnia.Generator = function() {
         break;
       case noteType.CHORD:
         keys = Polyhymnia.Chords.fromName(note.chord, note.note, note.octave);
+        break;
+      case noteType.DEGREE_NOTE:
+        keys = [Polyhymnia.Scales.fromName(self.scale, self.tonic)[note.value - 1]];
         break;
       case noteType.DRUM:
         keys = [Polyhymnia.Notes.fromName('C')];
