@@ -41,10 +41,10 @@ Polyhymnia.Notes = (function() {
 
   // Gets the midi note number of a note
   self.fromName = function(name, octave) {
-    if (!octave)
-      octave = 5;
-    else
-      octave += 2; // Octaves start at -2
+    if (!octave) {
+      octave = 3; // Default to the middle octave
+    }
+    octave += 2; // Octave numbers are -2 to 8, but midi octaves are 0 to 10
 
     if (name in self.notes)
       return self.notes[name] + octave * 12;
