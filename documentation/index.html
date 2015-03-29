@@ -45,7 +45,7 @@
     <div class="contents">
       <div class="twothirds">
         <h1>Documentation</h1>
-        <p>Polyhymnia is a live programming language for making generative and interactive music. It is a so-called context-free grammar, meaning that it lets you write rules that map to other rules. The rules can contain sequences and patterns that play music. They can also take user input into account, making it easy to write music that reacts to what the user does in a game or interactive artwork.</p>
+        <p>Polyhymnia is a live programming language for composing generative and interactive music. It is a so-called context-free grammar, meaning that it lets you write rules that map to other rules. The rules can contain sequences and patterns that play music. They can also take user input into account, making it easy to write music that reacts to what the user does in a game or interactive artwork.</p>
         <p><em>Polyhymnia is still in the design stage. Some things will change. Some things won’t.</em></p>
 
         <h2>Rules</h2>
@@ -69,11 +69,13 @@ R2 <span class="arrow">-></span> Piano: C D C G</code></pre>
 R2 <span class="arrow">-></span> R4 R4 R4 R4</code></pre>
 
         <h2>Patterns</h2>
-        <p>A pattern consists of an instrument and a succession of notes to play on that instrument. And it doesn’t have to be notes. Patterns can contain chords and drum symbols too:</p>
+        <p>A pattern consists of an instrument and a succession of notes to play on that instrument. And it doesn’t have to be notes. Patterns can contain chords, drum hits, and scale degrees too:</p>
 
         <pre><code>R1 <span class="arrow">-></span> Piano: C D C E
 R2 <span class="arrow">-></span> Synth: CM Dm Caug Edom7
 R3 <span class="arrow">-></span> Hihat: x _ x _</code></pre>
+R4 <span class="arrow">-></span> Piano: I IV V I</code></pre>
+R5 <span class="arrow">-></span> Piano: 1 3 5 1</code></pre>
 
         <p>A pattern is always one bar long, no matter how many notes are in it. For example, in 4/4 time signature, if a pattern is four notes long, they will be interpreted as fourths. If a pattern is eight notes long, they will be interpreted as eights, etc.</p>
 
