@@ -1,4 +1,4 @@
-var Polyhymnia = Polyhymnia || {}; Polyhymnia.templates = { 'editor': '<div class="polyhymnia-editor">    <div class="code">     <div class="display">       <div class="text"></div>       <div class="cursor-layer">         <div class="cursor blink">&nbsp;</div>       </div>     </div>     <textarea class="editor" spellcheck="false"></textarea>   </div>    <div class="controls">      <button class="play">       <svg x="0px" y="0px" width="18px" height="18px">         <path fill="none" stroke="#FF884D" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" d="M16,9L2,17V1L16,9z"/>       </svg>     </button>      <button class="stop" style="display: none">       <svg x="0px" y="0px" width="18px" height="18px">         <rect x="2" y="2" fill="none" stroke="#FF884D" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" width="14" height="14"/>       </svg>     </button>      <div class="slider">       <div class="output hide">x = 0</div>       <input type="range" min="0" max="10" value="0" step="0.1" />     </div>      <div class="settings">           <input class="tempo" type="number" min="1" max="320" value="120" step="1" maxlength="3" /><label>bpm</label>       <select class="time">         <option>3/4</option>         <option selected>4/4</option>         <option>5/4</option>         <option>6/8</option>         <option>7/8</option>       </select>     </div>   </div>    <div class="not-supported" style="display: none">     Your browser doesn’t support web audio. Why don’t you try <a href="https://www.google.com/chrome/browser/desktop/">Chrome</a>?   </div> </div>' };
+var Polyhymnia = Polyhymnia || {}; Polyhymnia.templates = { 'editor': '<div class="polyhymnia-editor">    <div class="code">     <div class="display">       <div class="text"></div>       <div class="cursor-layer">         <div class="cursor blink">&nbsp;</div>       </div>     </div>     <textarea class="editor" spellcheck="false"></textarea>   </div>    <div class="controls">      <button class="play">       <svg x="0px" y="0px" width="18px" height="18px">         <path fill="none" stroke="#FF884D" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" d="M16,9L2,17V1L16,9z"/>       </svg>     </button>      <button class="stop" style="display: none">       <svg x="0px" y="0px" width="18px" height="18px">         <rect x="2" y="2" fill="none" stroke="#FF884D" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" width="14" height="14"/>       </svg>     </button>      <div class="slider">       <div class="output hide">x = 0</div>       <input type="range" min="0" max="10" value="0" step="0.1" />     </div>      <div class="settings">           <input class="tempo" type="number" min="1" max="320" value="120" step="1" maxlength="3" /><label>bpm</label>       <select class="time">         <option>3/4</option>         <option selected>4/4</option>         <option>5/4</option>         <option>6/8</option>         <option>7/8</option>       </select>       <select class="tonic short">         <option selected>C</option>         <option>C#</option>         <option>D</option>         <option>Db</option>         <option>D#</option>         <option>E</option>         <option>Eb</option>         <option>F</option>         <option>F#</option>         <option>G</option>         <option>Gb</option>         <option>G#</option>         <option>A</option>         <option>Ab</option>         <option>A#</option>         <option>B</option>         <option>Bb</option>       </select>       <select class="scale">         <option value="major" selected>maj</option>         <option value="minor">min</option>       </select>     </div>   </div>    <div class="not-supported" style="display: none">     Your browser doesn’t support web audio. Why don’t you try <a href="https://www.google.com/chrome/browser/desktop/">Chrome</a>?   </div> </div>' };
 
 var Polyhymnia = Polyhymnia || {};
 
@@ -22,6 +22,8 @@ Polyhymnia.Editor = function(element, context) {
   var paramSlider =  element.querySelector('.slider input');
   var paramOutput =  element.querySelector('.slider .output');
   var tempoInput =   element.querySelector('.settings .tempo');
+  var tonicInput =   element.querySelector('.settings .tonic');
+  var scaleInput =   element.querySelector('.settings .scale');
   var timeInput =    element.querySelector('.settings .time');
   var codeEditor =   element.querySelector('.code .editor');
   var codeDisplay =  element.querySelector('.code .display');
@@ -59,14 +61,7 @@ Polyhymnia.Editor = function(element, context) {
 
     // Render the code
     renderCode();
-  }
-
-  function changeTimeSignature() {
-    var val = timeInput.value.split('/');
-    var num = parseInt(val[0]);
-    var den = parseInt(val[1]);
-    music.setTimeSignature(num, den);
-  }
+  } 
 
   function changeTempo() {
     if (tempoInput.value === '') {
@@ -77,6 +72,28 @@ Polyhymnia.Editor = function(element, context) {
       tempoInput.value = tempoInput.min;
     }
     music.setTempo(tempoInput.value);
+  }
+
+  function changeTonic() {
+    music.setTonic(tonicInput.value);
+
+    // Tweak layout to account for length
+    if (tonicInput.value.length == 1) {
+      tonicInput.classList.add('short');
+    } else {
+      tonicInput.classList.remove('short');
+    }
+  }
+
+  function changeScale() {
+    music.setScale(scaleInput.value);
+  }
+  
+  function changeTimeSignature() {
+    var val = timeInput.value.split('/');
+    var num = parseInt(val[0]);
+    var den = parseInt(val[1]);
+    music.setTimeSignature(num, den);
   }
 
   function changeParam() {
@@ -192,6 +209,8 @@ Polyhymnia.Editor = function(element, context) {
     stopButton.addEventListener('click',  stop);
     paramSlider.addEventListener('input', changeParam);
     tempoInput.addEventListener('input',  changeTempo);
+    tonicInput.addEventListener('input',  changeTonic);
+    scaleInput.addEventListener('input',  changeScale);
     timeInput.addEventListener('input',   changeTimeSignature);
     codeEditor.addEventListener('input',  parse);
   } else {
@@ -207,7 +226,11 @@ var Polyhymnia = Polyhymnia || {};
 
 Polyhymnia.Generator = function() {
   'use strict';
+  var noteType = Polyhymnia.noteType;
   var self = this;
+
+  this.tonic = 'C';
+  this.scale = 'major';
 
   var startRule = 'Play';
   var params = {};
@@ -246,12 +269,12 @@ Polyhymnia.Generator = function() {
   };
 
   function buildTree(rule) {
-    var node = { name: name || '', definitions: [] };
-
     // If we can't find the rule, return an empty node, so we can keep playing
     if (!rule) {
-      return node;
+      return { name: '', definitions: [] };
     }
+
+    var node = { name: rule.name, definitions: [] };
 
     rule.definitions.forEach(function(definition) {
       if (definition.sequence) {
@@ -305,8 +328,9 @@ Polyhymnia.Generator = function() {
         var childPatterns = getPatterns(definition.sequence[definition.index]);
         childPatterns.forEach(function(p) { patterns.push(p); });
       } else if (definition.pattern) {
-        // Pattern definition, get the patterns
-        patterns.push({ instrument: definition.instrument, pattern: definition.pattern });
+        // Pattern definition
+        var midiNumbers = definition.pattern.map(convertToMidi);
+        patterns.push({ instrument: definition.instrument, pattern: midiNumbers });
       }
     });
 
@@ -346,6 +370,46 @@ Polyhymnia.Generator = function() {
     return validDefinitions;
   }
 
+  function convertToMidi(note) {
+    var keys;
+    switch (note.type) {
+      case noteType.NOTE:
+        keys = [Polyhymnia.Notes.fromName(note.note, note.octave)];
+        break;
+      case noteType.CHORD:
+        keys = Polyhymnia.Chords.fromName(note.chord, note.note, note.octave);
+        break;
+      case noteType.DEGREE_NOTE:
+        keys = [Polyhymnia.Scales.fromName(self.scale, self.tonic)[note.value - 1]];
+        break;
+      case noteType.DEGREE_CHORD:
+        keys = Polyhymnia.Degrees.fromName(note.value, self.tonic, self.scale);
+        break;
+      case noteType.DRUM:
+        keys = [Polyhymnia.Notes.fromName('C')];
+        break;
+      case noteType.PAUSE:
+        keys = [undefined];
+        break;
+      default:
+        keys = [undefined];
+    }
+
+    var midiNotes = keys.map(function(k) {
+      return {
+        key:   k,
+        start: note.start,
+        end:   note.end
+      };
+    });
+
+    if (midiNotes.length == 1) {
+      return midiNotes[0];
+    } else {
+      return midiNotes;
+    }
+  }
+
   function getRandom(array) {
     return array[Math.floor(Math.random() * array.length)];
   }
@@ -353,10 +417,12 @@ Polyhymnia.Generator = function() {
 var Polyhymnia = Polyhymnia || {};
 
 Polyhymnia.noteType = {
-  PAUSE: 'pause',
-  NOTE:  'note',
-  CHORD: 'chord',
-  DRUM:  'drum'
+  PAUSE:        'pause',
+  NOTE:         'note',
+  CHORD:        'chord',
+  DEGREE_NOTE:  'degree note',
+  DEGREE_CHORD: 'degree chord',
+  DRUM:         'drum'
 };
 
 Polyhymnia.symbolType = {
@@ -554,28 +620,44 @@ Polyhymnia.parse = function(tokensToParse, instruments) {
 
   // C# | Cm7 | x | _
   function parseNote() {
-    var type;
-    var value = '';
-    var start = currentToken.start;
-    var end = currentToken.end;
+    var note = {
+      start: currentToken.start,
+      end:   currentToken.end
+    };
     var valid = true;
 
-    if (currentToken.type == tokenType.NOTE) {
-      type = noteType.NOTE;
-      value = currentToken.value;
-    } else if (currentToken.type == tokenType.CHORD) {
-      type = noteType.CHORD;
-      value = currentToken.value;
-    } else if (currentToken.type == tokenType.DRUM_TRIGGER) {
-      type = noteType.DRUM;
-      value = currentToken.value;
-    } else if (currentToken.type == tokenType.PAUSE) {
-      type = noteType.PAUSE;
-    } else {
-      // ERROR: Expected note, chord, drum symbol or pause
-      error('Expected a note, chord, drum symbol or pause');
-      valid = false;
-      type = noteType.PAUSE;
+    switch (currentToken.type) {
+      case tokenType.NOTE:
+        note.type = noteType.NOTE;
+        note.note = currentToken.note;
+        note.octave = currentToken.octave;
+        break;
+      case tokenType.CHORD:
+        note.type = noteType.CHORD;
+        note.note = currentToken.note;
+        note.octave = currentToken.octave;
+        note.chord = currentToken.chord;
+        break;
+      case tokenType.DEGREE_NOTE:
+        note.type = noteType.DEGREE_NOTE;
+        note.value = currentToken.value;
+        break;
+      case tokenType.DEGREE_CHORD:
+        note.type = noteType.DEGREE_CHORD;
+        note.value = currentToken.value;
+        break;
+      case tokenType.DRUM_HIT:
+        note.type = noteType.DRUM;
+        note.value = currentToken.value;
+        break;
+      case tokenType.PAUSE:
+        note.type = noteType.PAUSE;
+        break;
+      default:
+        // ERROR: Expected note, chord, drum hit or pause
+        error('Expected a note, chord, drum hit or pause');
+        valid = false;
+        note.type = noteType.PAUSE;
     }
 
     if (valid) {
@@ -583,7 +665,7 @@ Polyhymnia.parse = function(tokensToParse, instruments) {
     }
 
     nextToken();
-    return { type: type, value: value, start: start, end: end };
+    return note;
   }
 
   // (x > 0) | (0 > x) | (0 > x > 0) | (x < 0) | (0 < x) | (0 < x < 0)
@@ -683,7 +765,9 @@ Polyhymnia.tokenType = {
   PAUSE:          'pause',
   NOTE:           'note',
   CHORD:          'chord',
-  DRUM_TRIGGER:   'drum trigger',
+  DEGREE_NOTE:    'degree note',
+  DEGREE_CHORD:   'degree chord',
+  DRUM_HIT:       'drum hit',
   ARROW:          'arrow',
   LEFT_PAREN:     'left paren',
   RIGHT_PAREN:    'right paren',
@@ -700,14 +784,16 @@ Polyhymnia.tokenize = function(textToTokenize) {
 
   var tokenType = Polyhymnia.tokenType;
 
-  var NAME_PATTERN        = '[A-Z][a-zA-Z0-9_]*';
-  var PARAM_PATTERN       = '[a-z][a-zA-Z0-9_]*';
-  var INSTRUMENT_PATTERN  = NAME_PATTERN + ':';
-  var NUMBER_PATTERN      = '-?(([1-9][0-9]*)|0)(\\.[0-9]*)?';
-  var NOTE_PATTERN        = '([CDEFGAB][#b]?)';
-  var OCTAVE_PATTERN      = '(-2|-1|[0-8])?';
-  var CHORD_PATTERN       = '((M|m|dom|aug|dim)7?)';
-  var DRUM_PATTERN        = '[xX]';
+  var NAME_PATTERN         = '[A-Z][a-zA-Z0-9_]*';
+  var PARAM_PATTERN        = '[a-z][a-zA-Z0-9_]*';
+  var INSTRUMENT_PATTERN   = NAME_PATTERN + ':';
+  var NUMBER_PATTERN       = '-?(([1-9][0-9]*)|0)(\\.[0-9]*)?';
+  var NOTE_PATTERN         = '([CDEFGAB][#b]?)';
+  var OCTAVE_PATTERN       = '(-2|-1|[0-8])?';
+  var CHORD_PATTERN        = '((M|m|dom|aug|dim)7?)';
+  var DEGREE_NOTE_PATTERN  = '[1-7]';
+  var DEGREE_CHORD_PATTERN = '((I|II|III|IV|V|VI|VII)\\+?|(i|ii|iii|iv|v|vi|vii)°?)7?';
+  var DRUM_PATTERN         = '[xX]';
 
   var NEWLINE    = '\n';
   var SPACE      = ' ';
@@ -724,6 +810,8 @@ Polyhymnia.tokenize = function(textToTokenize) {
   var numberPattern         = new RegExp('^' + NUMBER_PATTERN + '$');
   var notePattern           = new RegExp('^' + NOTE_PATTERN + OCTAVE_PATTERN + '$');
   var chordPattern          = new RegExp('^' + NOTE_PATTERN + OCTAVE_PATTERN + CHORD_PATTERN + '$');
+  var degreeNotePattern     = new RegExp('^' + DEGREE_NOTE_PATTERN + '$');
+  var degreeChordPattern    = new RegExp('^' + DEGREE_CHORD_PATTERN + '$');
   var drumPattern           = new RegExp('^' + DRUM_PATTERN + '$');
 
   var text = textToTokenize.replace('\r', ''); // Handle weird Windows newlines
@@ -809,15 +897,19 @@ Polyhymnia.tokenize = function(textToTokenize) {
         if (str == '_') {
           token = { type: tokenType.PAUSE };
         } else if (str.match(drumPattern)) {
-          token = { type: tokenType.DRUM_TRIGGER, value: str };
+          token = { type: tokenType.DRUM_HIT, value: str };
         } else if (str.match(notePattern)) {
           matches = str.match(notePattern);
           octave = matches[2] ? parseInt(matches[2]) : undefined;
-          token = { type: tokenType.NOTE, value: { note: matches[1], octave: octave }};
+          token = { type: tokenType.NOTE, note: matches[1], octave: octave };
         } else if (str.match(chordPattern)) {
           matches = str.match(chordPattern);
           octave = matches[2] ? parseInt(matches[2]) : undefined;
-          token = { type: tokenType.CHORD, value: { note: matches[1], octave: octave, chord: matches[3] }};
+          token = { type: tokenType.CHORD, note: matches[1], octave: octave, chord: matches[3] };
+        } else if (str.match(degreeNotePattern)) {
+          token = { type: tokenType.DEGREE_NOTE, value: str };
+        } else if (str.match(degreeChordPattern)) {
+          token = { type: tokenType.DEGREE_CHORD, value: str };
         } else {
           token = { type: tokenType.ERROR, value: str };
         }
@@ -852,7 +944,7 @@ Polyhymnia.Chords = (function() {
   'use strict';
   var self = {};
 
-  self.chords = {
+  var chords = {
     'M':      [0, 4, 7],
     'm':      [0, 3, 7],
     'M7':     [0, 4, 7, 11],
@@ -870,8 +962,8 @@ Polyhymnia.Chords = (function() {
       numbers[i] = value % 12;
     });
 
-    for (var name in self.chords) {
-      var chord = self.chords[name];
+    for (var name in chords) {
+      var chord = chords[name];
       if (chord.length == numbers.length) {
         var correct = true;
         for (var i = 0; i < chord.length; i++) {
@@ -887,12 +979,113 @@ Polyhymnia.Chords = (function() {
     return '';
   };
 
-  // Gets the relative note numbers in a chord
-  self.fromName = function(name) {
-    if (name in self.chords)
-      return self.chords[name];
+  // Gets the midi note numbers of a chord
+  self.fromName = function(name, root, octave) {
+    if (!root)
+      root = 0; // If no root is provided, just use relative note numbers
     else
+      root = Polyhymnia.Notes.fromName(root, octave);
+
+    if (name in chords) {
+      return chords[name].map(function(n) {
+        return n + root;
+      });
+    } else {
       return [];
+    }
+  };
+
+  return self;
+})();
+var Polyhymnia = Polyhymnia || {};
+
+Polyhymnia.Degrees = (function() {
+  'use strict';
+  var self = {};
+
+  var degrees = [
+    'i',
+    'ii',
+    'iii',
+    'iv',
+    'v',
+    'vi',
+    'vii'
+  ];
+
+  var chords = {
+    'maj':    [0, 4, 7],
+    'min':    [0, 3, 7],
+    'maj7':   [0, 4, 7, 11],
+    'min7':   [0, 3, 7, 10],
+    'aug':    [0, 4, 8],
+    'aug7':   [0, 4, 8, 10],
+    'dim':    [0, 3, 6],
+    'dim7':   [0, 3, 6, 9]
+  };
+
+  // Generate scale degree chords for a midi number scale
+  function generateChords(scale) {
+    var c = {};
+    function maj(val) { return val.toUpperCase(); }
+    function min(val) { return val; }
+    degrees.forEach(function(degree, index) {
+      function toScale(n) { return n + scale[index]; }
+      c[maj(degree)]        = chords.maj  .map(toScale); // Maj
+      c[min(degree)]        = chords.min  .map(toScale); // Min
+      c[maj(degree) + '7']  = chords.maj7 .map(toScale); // Maj 7th
+      c[min(degree) + '7']  = chords.min7 .map(toScale); // Min 7th
+      c[maj(degree) + '+']  = chords.aug  .map(toScale); // Aug
+      c[maj(degree) + '+7'] = chords.aug7 .map(toScale); // Aug 7th
+      c[min(degree) + '°']  = chords.dim  .map(toScale); // Dim
+      c[min(degree) + '°7'] = chords.dim7 .map(toScale); // Dim 7th
+    });
+    return c;
+  }
+
+  // Gets the name of a scale degree chord
+  self.toName = function(numbers, tonic, scale) {
+    if (!scale)
+      scale = Polyhymnia.Scales.fromName('major', tonic);
+    else
+      scale = Polyhymnia.Scales.fromName(scale, tonic);
+
+    var octave = Math.floor(numbers[0] / 12);
+    numbers.forEach(function(value, i) {
+      numbers[i] = value - 12 * octave + 60;
+    });
+
+    var chords = generateChords(scale);
+    for (var name in chords) {
+      var degree = chords[name];
+      if (degree.length == numbers.length) {
+        var correct = true;
+        for (var i = 0; i < degree.length; i++) {
+          if (degree[i] != numbers[i]) {
+            correct = false;
+          }
+        }
+        if (correct) {
+          return name;
+        }
+      }
+    }
+    return '';
+  };
+
+  // Gets the midi note numbers in a scale degree chord
+  self.fromName = function(name, tonic, scale) {
+    if (!scale)
+      scale = Polyhymnia.Scales.fromName('major', tonic); // Default to major
+    else
+      scale = Polyhymnia.Scales.fromName(scale, tonic);
+
+    var chords = generateChords(scale);
+    if (name in chords) {
+      return chords[name];
+    } else {
+      return [];
+    }
   };
 
   return self;
@@ -903,7 +1096,7 @@ Polyhymnia.Notes = (function() {
   'use strict';
   var self = {};
 
-  self.notes = {
+  var notes = {
     'C':  0,  'B#': 0,
     'C#': 1,  'Db': 1,
     'D':  2,
@@ -918,7 +1111,7 @@ Polyhymnia.Notes = (function() {
     'B':  11, 'Cb': 11
   };
 
-  self.notesReverse = {
+  var notesReverse = {
     0: 'C',
     1: 'C#',
     2: 'D',
@@ -935,18 +1128,18 @@ Polyhymnia.Notes = (function() {
 
   // Gets the canonical name of a note
   self.toName = function(midiNumber) {
-    return self.notesReverse[midiNumber % 12];
+    return notesReverse[midiNumber % 12];
   };
 
   // Gets the midi note number of a note
   self.fromName = function(name, octave) {
-    if (!octave)
-      octave = 5;
-    else
-      octave += 2; // Octaves start at -2
+    if (!octave) {
+      octave = 3; // Default to the middle octave
+    }
+    octave += 2; // Octave numbers are -2 to 8, but midi octaves are 0 to 10
 
-    if (name in self.notes)
-      return self.notes[name] + octave * 12;
+    if (name in notes)
+      return notes[name] + octave * 12;
     else
       return 0;
   };
@@ -969,7 +1162,7 @@ Polyhymnia.Scales = (function() {
   'use strict';
   var self = {};
 
-  self.scales = {
+  var scales = {
     'major':            [0, 2, 4, 5, 7, 9, 11],
     'minor':            [0, 2, 3, 5, 7, 8, 10],
     'pentatonic-major': [0, 2, 4, 7, 9],
@@ -982,8 +1175,8 @@ Polyhymnia.Scales = (function() {
       numbers[i] = value % 12;
     });
 
-    for (var name in self.scales) {
-      var scale = self.scales[name];
+    for (var name in scales) {
+      var scale = scales[name];
       if (scale.length == numbers.length) {
         var correct = true;
         for (var i = 0; i < scale.length; i++) {
@@ -999,12 +1192,20 @@ Polyhymnia.Scales = (function() {
     return '';
   };
 
-  // Gets the relative note numbers in a scale
-  self.fromName = function(name) {
-    if (name in self.scales)
-      return self.scales[name];
+  // Gets the midi note numbers in a scale
+  self.fromName = function(name, tonic, octave) {
+    if (!tonic)
+      tonic = 60; // Default to middle C
     else
+      tonic = Polyhymnia.Notes.fromName(tonic, octave);
+
+    if (name in scales) {
+      return scales[name].map(function(n) {
+        return n + tonic;
+      });
+    } else {
       return [];
+    }
   };
 
   return self;
@@ -1204,19 +1405,25 @@ Polyhymnia.Sequencer = function() {
     var animateNotes = [];
     for (var i = 0; i < patterns.length; i++) {
       var instrument = patterns[i].instrument;
-      var pattern = patterns[i].pattern;
+      var pattern    = patterns[i].pattern;
       var noteLength = getNoteLength(pattern.length);
       var noteNumber = Math.floor(stepInBar / noteLength);
 
       if (noteNumber < pattern.length) {
-        // Only trigger the note if we're on step 0 of it
-        var note = pattern[noteNumber];
-        if (stepInBar % noteLength === 0) {
-          scheduleNote(instrument, note.type, note.value, time);
+        var notes = pattern[noteNumber];
+        if (!Array.isArray(notes)) {
+          notes = [notes];
         }
 
-        // But always animate it
-        animateNotes.push(note);
+        for (var n = 0; n < notes.length; n++) {
+          // Only trigger the note if we're on step 0 of it
+          if (stepInBar % noteLength === 0) {
+            scheduleNote(instrument, notes[n], time);
+          }
+
+          // But always animate it
+          animateNotes.push(notes[n]);
+        }
       }
     }
 
@@ -1229,24 +1436,9 @@ Polyhymnia.Sequencer = function() {
     }
   };
 
-  function scheduleNote(instrument, type, value, time) {
-    // Convert value to relative midi numbers
-    var midiNumbers = [];
-    if (type == noteType.NOTE) {
-      midiNumbers = [Polyhymnia.Notes.fromName(value.note, value.octave)];
-    } else if (type == noteType.CHORD) {
-      var root = Polyhymnia.Notes.fromName(value.note, value.octave);
-      var chord = Polyhymnia.Chords.fromName(value.chord);
-      midiNumbers = chord.map(function(note) {
-        return note + root;
-      });
-    } else if (type == noteType.DRUM) {
-      midiNumbers = [Polyhymnia.Notes.fromName('C')];
-    }
-
-    // Play notes
-    if (self.instruments[instrument]) {
-      self.instruments[instrument].scheduleNotes(midiNumbers, time);
+  function scheduleNote(instrument, note, time) {
+    if (self.instruments[instrument] && note.key) {
+      self.instruments[instrument].scheduleNote(note.key, time);
     }
   }
 
@@ -1381,6 +1573,14 @@ Polyhymnia.Context = function(options) {
     sequencer.timeSignature.den = denominator;
   }
 
+  function setTonic(tonic) {
+    generator.tonic = tonic;
+  }
+
+  function setScale(scale) {
+    generator.scale = scale;
+  }
+
   function setAnimCallback(callback) {
     sequencer.animCallback = callback;
   }
@@ -1391,6 +1591,8 @@ Polyhymnia.Context = function(options) {
     stop: metronome.stop,
     setParam: generator.setParam,
     setTempo: setTempo,
+    setTonic: setTonic,
+    setScale: setScale,
     setTimeSignature: setTimeSignature,
     setAnimCallback: setAnimCallback
   };
