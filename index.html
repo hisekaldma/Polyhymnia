@@ -16,9 +16,12 @@
   document.addEventListener('DOMContentLoaded', function() {
     var context = new Polyhymnia.Context({
       instruments: [
-        { name: 'Kick', samples: [{ url: 'audio/Kick.mp3' }] },
-        { name: 'Snare', samples: [{ url: 'audio/Snare.mp3' }] },
-        { name: 'Hihat', samples: [{ url: 'audio/Hihat.mp3' }] },
+        { name: 'Kick',      samples: [{ url: 'audio/Kick.mp3' }] },
+        { name: 'Snare',     samples: [{ url: 'audio/Snare.mp3' }] },
+        { name: 'Hihat',     samples: [{ url: 'audio/Hihat.mp3' }] },
+        { name: 'HihatOpen', samples: [{ url: 'audio/HihatOpen.mp3' }] },
+        { name: 'Clap',      samples: [{ url: 'audio/Clap.mp3' }] },
+        { name: 'Shake',     samples: [{ url: 'audio/Shake.mp3' }] },          
         {
           name: 'Pad',
           samples: [
@@ -27,6 +30,23 @@
             { root: 'C', octave: 3, url: 'audio/BreathC3.mp3' },
             { root: 'C', octave: 4, url: 'audio/BreathC4.mp3' },
             { root: 'C', octave: 5, url: 'audio/BreathC5.mp3' }
+          ]
+        },
+        {
+          name: 'Marimba',
+          samples: [
+            { root: 'C',  octave: 1, url: 'audio/MarimbaC1.mp3' },
+            { root: 'F#', octave: 1, url: 'audio/MarimbaF#1.mp3' },
+            { root: 'C',  octave: 2, url: 'audio/MarimbaC2.mp3' },
+            { root: 'F#', octave: 2, url: 'audio/MarimbaF#2.mp3' },
+            { root: 'C',  octave: 3, url: 'audio/MarimbaC3.mp3' },
+            { root: 'F#', octave: 3, url: 'audio/MarimbaF#3.mp3' },
+            { root: 'C',  octave: 4, url: 'audio/MarimbaC4.mp3' },
+            { root: 'F#', octave: 4, url: 'audio/MarimbaF#4.mp3' },
+            { root: 'C',  octave: 5, url: 'audio/MarimbaC5.mp3' },
+            { root: 'F#', octave: 5, url: 'audio/MarimbaF#5.mp3' },
+            { root: 'C',  octave: 5, url: 'audio/MarimbaC6.mp3' },
+            { root: 'F#', octave: 5, url: 'audio/MarimbaF#6.mp3' }
           ]
         }
       ]
@@ -67,33 +87,37 @@
   </header>
   <section>
     <div class="contents">
-      <div class="editor twothirds">Play -> A B
+      <div class="editor twothirds">Play ->
+  A B
+  Drums
 
 A ->
-  Drums
   (x > 3) Pad: C
   (x > 5) Pad: E
   (x > 7) Pad: G
 
 B ->
-  Drums
   (x > 3) Pad: D
   (x > 5) Pad: F
   (x > 7) Pad: A
 
 Drums ->
   Kick:          x _ _ _ _ _ x _ _ _ _ _ _ _ x _
-  (x > 2) Hihat: _ _ _ _ x _ _ _ _ _ x _ _ _ _ _
-  (x > 4) Kick:  _ _ _ _ _ _ _ _ _ _ _ _ x _ _ _
-  (x > 6) Hihat: x _ _ _ _ _ x _ x _ _ _ x x x x</div>
+  (x > 2) Snare: _ _ _ _ x _ _ _ _ _ x _ _ _ _ _
+  (x > 4) Clap:  _ _ _ _ _ _ _ _ _ _ _ _ x _ _ _
+  (x > 6) Hihat: x _ _ _ x _ x _ x _ x _ x x x x</div>
       <div class="ref third">
         <h2>Reference</h2>
         <h3>Instruments</h3>
         <ul>
+          <li><code>Marimba</code></li>
           <li><code>Pad</code></li>
           <li><code>Kick</code></li>
           <li><code>Snare</code></li>
+          <li><code>Clap</code></li>
+          <li><code>Shake</code></li>
           <li><code>Hihat</code></li>
+          <li><code>HihatOpen</code></li>
         </ul>
         <h3>Sequences</h3>
         <ul>
