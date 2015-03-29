@@ -105,8 +105,8 @@ Polyhymnia.Generator = function() {
         childPatterns.forEach(function(p) { patterns.push(p); });
       } else if (definition.pattern) {
         // Pattern definition
-        var midiNumbers = definition.pattern.map(convertToMidi);
-        patterns.push({ instrument: definition.instrument, pattern: midiNumbers });
+        var midiNotes = definition.pattern.map(toMidi);
+        patterns.push({ instrument: definition.instrument, pattern: midiNotes });
       }
     });
 
@@ -146,7 +146,7 @@ Polyhymnia.Generator = function() {
     return validDefinitions;
   }
 
-  function convertToMidi(note) {
+  function toMidi(note) {
     var keys;
     switch (note.type) {
       case noteType.NOTE:
@@ -171,11 +171,25 @@ Polyhymnia.Generator = function() {
         keys = [undefined];
     }
 
+    var velocity;
+    if (typeof note.velocity === 'string') {
+      velocity = Polyhymnia.Velocities.fromName(note.velocity);
+    } else if (note.velocity) {
+      velocity = note.velocity;
+    } else if (note.value === 'X' || note.value === 'O') {
+      velocity = 127; // Hard drum hits
+    } else if (note.value === 'x' || note.value === 'o') {
+      velocity = 64; // Soft drum hits
+    } else {
+      velocity = 72; // Default
+    }
+
     var midiNotes = keys.map(function(k) {
       return {
-        key:   k,
-        start: note.start,
-        end:   note.end
+        key:      k,
+        velocity: velocity,
+        start:    note.start,
+        end:      note.end
       };
     });
 
