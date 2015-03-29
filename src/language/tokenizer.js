@@ -32,10 +32,11 @@ Polyhymnia.tokenize = function(textToTokenize) {
   var NUMBER_PATTERN       = '-?(([1-9][0-9]*)|0)(\\.[0-9]*)?';
   var OCTAVE_PATTERN       = '(-2|-1|[0-8])?';
   var NOTE_PATTERN         = '([CDEFGAB][#b]?)' + OCTAVE_PATTERN;
-  var CHORD_PATTERN        = NOTE_PATTERN + '((M|m|dom|aug|dim)7?)';
-  var DEGREE_NOTE_PATTERN  = '[1-7]';
-  var DEGREE_CHORD_PATTERN = '((I|II|III|IV|V|VI|VII)\\+?|(i|ii|iii|iv|v|vi|vii)°?)7?';
-  var DRUM_PATTERN         = '[xX]';
+  var CHORD_PATTERN        = NOTE_PATTERN + '((?:M|m|dom|aug|dim)7?)';
+  var DEGREE_NOTE_PATTERN  = '([1-7])';
+  var DEGREE_CHORD_PATTERN = '((?:(?:I|II|III|IV|V|VI|VII)\\+?|(?:i|ii|iii|iv|v|vi|vii)°?)7?)';
+  var DRUM_PATTERN         = '([xX])';
+  var VELOCITY_PATTERN     = '(\\.(?:(?:ppp|fff|pp|ff|mp|mf|p|f)|(?:12[0-7]|1[0-1][0-9]|[1-9][0-9]|[0-9])))?';
 
   var NEWLINE    = '\n';
   var SPACE      = ' ';
@@ -46,15 +47,15 @@ Polyhymnia.tokenize = function(textToTokenize) {
   var CTX_PATTERN   = 'pattern';
   var CTX_CONDITION = 'condition';
 
-  var namePattern           = new RegExp('^' + NAME_PATTERN +         '$');
-  var paramPattern          = new RegExp('^' + PARAM_PATTERN +        '$');
-  var instrumentPattern     = new RegExp('^' + INSTRUMENT_PATTERN +   '$');
-  var numberPattern         = new RegExp('^' + NUMBER_PATTERN +       '$');
-  var notePattern           = new RegExp('^' + NOTE_PATTERN +         '$');
-  var chordPattern          = new RegExp('^' + CHORD_PATTERN +        '$');
-  var degreeNotePattern     = new RegExp('^' + DEGREE_NOTE_PATTERN +  '$');
-  var degreeChordPattern    = new RegExp('^' + DEGREE_CHORD_PATTERN + '$');
-  var drumPattern           = new RegExp('^' + DRUM_PATTERN +         '$');
+  var namePattern           = new RegExp('^' + NAME_PATTERN +                            '$');
+  var paramPattern          = new RegExp('^' + PARAM_PATTERN +                           '$');
+  var instrumentPattern     = new RegExp('^' + INSTRUMENT_PATTERN +                      '$');
+  var numberPattern         = new RegExp('^' + NUMBER_PATTERN +                          '$');
+  var notePattern           = new RegExp('^' + NOTE_PATTERN +         VELOCITY_PATTERN + '$');
+  var chordPattern          = new RegExp('^' + CHORD_PATTERN +        VELOCITY_PATTERN + '$');
+  var degreeNotePattern     = new RegExp('^' + DEGREE_NOTE_PATTERN +  VELOCITY_PATTERN + '$');
+  var degreeChordPattern    = new RegExp('^' + DEGREE_CHORD_PATTERN + VELOCITY_PATTERN + '$');
+  var drumPattern           = new RegExp('^' + DRUM_PATTERN +         VELOCITY_PATTERN + '$');
 
   var text = textToTokenize.replace('\r', ''); // Handle weird Windows newlines
   var characters = text.split('');
@@ -91,6 +92,15 @@ Polyhymnia.tokenize = function(textToTokenize) {
     return octave ? parseInt(octave) : undefined;
   }
 
+  function getVelocity(velocity) {
+    if (velocity) {
+      var v = velocity.substr(1);
+      var n = parseInt(v);
+      return isNaN(n) ? v : n;
+    }
+    return undefined;
+  }
+
 
   // Start tokenizing
 
@@ -101,7 +111,7 @@ Polyhymnia.tokenize = function(textToTokenize) {
   var positionBeforeReading;
   var context = CTX_DEFAULT;
   var str;
-  var matches, octave;
+  var matches, octave, velocity;
 
   while (moreToRead) {
     str = undefined;
@@ -144,19 +154,27 @@ Polyhymnia.tokenize = function(textToTokenize) {
         if (str == '_') {
           token = { type: tokenType.PAUSE };
         } else if (str.search(drumPattern) !== -1) {
-          token = { type: tokenType.DRUM_HIT, value: str };
+          matches = str.match(drumPattern);
+          velocity = getVelocity(matches[2]);
+          token = { type: tokenType.DRUM_HIT, value: matches[1], velocity: velocity };
         } else if (str.search(notePattern) !== -1) {
           matches = str.match(notePattern);
           octave = getOctave(matches[2]);
-          token = { type: tokenType.NOTE, note: matches[1], octave: octave };
+          velocity = getVelocity(matches[3]);
+          token = { type: tokenType.NOTE, note: matches[1], octave: octave, velocity: velocity };
         } else if (str.search(chordPattern) !== -1) {
           matches = str.match(chordPattern);
           octave = getOctave(matches[2]);
-          token = { type: tokenType.CHORD, note: matches[1], octave: octave, chord: matches[3] };
+          velocity = getVelocity(matches[4]);
+          token = { type: tokenType.CHORD, note: matches[1], octave: octave, chord: matches[3], velocity: velocity };
         } else if (str.search(degreeNotePattern) !== -1) {
-          token = { type: tokenType.DEGREE_NOTE, value: str };
+          matches = str.match(degreeNotePattern);
+          velocity = getVelocity(matches[2]);
+          token = { type: tokenType.DEGREE_NOTE, value: matches[1], velocity: velocity };
         } else if (str.search(degreeChordPattern) !== -1) {
-          token = { type: tokenType.DEGREE_CHORD, value: str };
+          matches = str.match(degreeChordPattern);
+          velocity = getVelocity(matches[2]);
+          token = { type: tokenType.DEGREE_CHORD, value: matches[1], velocity: velocity };
         } else {
           token = { type: tokenType.ERROR, value: str };
         }
