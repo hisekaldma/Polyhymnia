@@ -93,17 +93,17 @@ Polyhymnia.Sampler = function(options) {
     }
   }
 
-  this.scheduleNote = function(midiNumber, time) {
+  this.scheduleNote = function(midiNumber, velocity, time) {
+    // Gain
+    var gain = audioContext.createGain();
+    gain.connect(audioContext.destination);
+    gain.gain.value = velocity / 127;
+
+    // Source
     var source = audioContext.createBufferSource();
     source.buffer = samples[midiNumber].buffer;
     source.playbackRate.value = samples[midiNumber].pitch;
-    source.connect(audioContext.destination);
+    source.connect(gain);
     source.start(time);
-  };
-
-  this.scheduleNotes = function(midiNumbers, time) {
-    midiNumbers.forEach(function(midiNumber) {
-      self.scheduleNote(midiNumber, time);
-    });
   };
 };

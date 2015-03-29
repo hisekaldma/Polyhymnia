@@ -13,7 +13,7 @@ Polyhymnia.Synthesizer = function(options) {
 
   var audioContext = Polyhymnia.getAudioContext();
 
-  this.scheduleNote = function(midiNumber, time) {
+  this.scheduleNote = function(midiNumber, velocity, time) {
     // Gain
     var gain = audioContext.createGain();
     gain.connect(audioContext.destination);
@@ -27,16 +27,11 @@ Polyhymnia.Synthesizer = function(options) {
 
     // Play, envelope, stop
     osc.start(time);
-    gain.gain.linearRampToValueAtTime(0.0,                   time + 0.0001); // Offset to avoid click/pop
-    gain.gain.linearRampToValueAtTime(1.0,                   time + attack);
-    gain.gain.linearRampToValueAtTime(sustain, time + attack + decay);
-    gain.gain.linearRampToValueAtTime(0.0,                   time + attack + decay + release);
+    var volume = velocity / 127;
+    gain.gain.linearRampToValueAtTime(0.0,              time + 0.0001); // Offset to avoid click/pop
+    gain.gain.linearRampToValueAtTime(volume,           time + attack);
+    gain.gain.linearRampToValueAtTime(volume * sustain, time + attack + decay);
+    gain.gain.linearRampToValueAtTime(0.0,              time + attack + decay + release);
     osc.stop(time + attack + decay + release + 0.0001);
-  };
-
-  this.scheduleNotes = function(midiNumbers, time) {
-    midiNumbers.forEach(function(midiNumber) {
-      self.scheduleNote(midiNumber, time);
-    });
   };
 };

@@ -63,7 +63,7 @@ Polyhymnia.Sequencer = function() {
 
   function scheduleNote(instrument, note, time) {
     if (self.instruments[instrument] && note.key) {
-      self.instruments[instrument].scheduleNote(note.key, time);
+      self.instruments[instrument].scheduleNote(note.key, note.velocity, time);
     }
   }
 
