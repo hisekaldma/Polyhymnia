@@ -12,14 +12,14 @@ Polyhymnia.Sampler = function(options) {
 
   // Load samples
   if (options && options.samples) {
-    total = options.samples.length;
-    for (var i = 0; i < options.samples.length; i++) {
-      var root =   options.samples[i].root || 'C';
-      var octave = options.samples[i].octave || 4;
-      var url =    options.samples[i].url;
+    options.samples.forEach(function(sample) {
+      var root =   sample.root || 'C';
+      var octave = sample.octave || 4;
+      var url =    sample.url;
       var midiNumber = Polyhymnia.Notes.fromName(root, octave);
       loadSample(midiNumber, url);
-    }
+      total++;
+    });
   }
 
   function loadSample(midiNumber, url) {

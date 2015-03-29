@@ -32,9 +32,9 @@ Polyhymnia.Generator = function() {
   this.setRules = function(rules) {
     // Prepare for playing
     ruleDictionary = {};
-    for (var j = 0; j < rules.length; j++) {
-      ruleDictionary[rules[j].name] = rules[j];
-    }
+    rules.forEach(function(rule) {
+      ruleDictionary[rule.name] = rule;
+    });
     var oldRuleTree = ruleTree;    
     ruleTree = buildTree(ruleDictionary[startRule]);
 

@@ -51,12 +51,11 @@ Polyhymnia.Context = function(options) {
 
   // Instruments
   if (options && options.instruments) {
-    for (var i = 0; i < options.instruments.length; i++) {
-      var instrument = options.instruments[i];
+    options.instruments.forEach(function(instrument) {
       sequencer.instruments[instrument.name] = new Polyhymnia.Sampler({
         samples: instrument.samples
       });
-    }
+    });
   }
 
   function parse(code) {

@@ -46,13 +46,10 @@ Polyhymnia.parse = function(tokensToParse, instruments) {
     rule.definitions.forEach(function(definition) {
       if (definition.sequence) {
         definition.sequence.forEach(function(name) {
-          var found = false;
-          for (var i = 0; i < rules.length; i++) {
-            if (rules[i].name == name) {
-              found = true;
-            }
-          }
-          if (!found) {
+          var exists = rules.some(function(element) {
+            return element.name == name;
+          });
+          if (!exists) {
             errors.push({ error: 'There is no rule ' + name });
           }
         });
