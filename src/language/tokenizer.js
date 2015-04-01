@@ -42,6 +42,7 @@ Polyhymnia.tokenize = function(textToTokenize) {
   var SPACE      = ' ';
   var TAB        = '\t';
   var DELIMITERS = '()\n\t ';
+  var COMMENT    = '*';
 
   var CTX_DEFAULT   = 'sequence';
   var CTX_PATTERN   = 'pattern';
@@ -134,6 +135,14 @@ Polyhymnia.tokenize = function(textToTokenize) {
       token = { type: tokenType.RIGHT_PAREN };
       context = CTX_DEFAULT;
       nextChar();
+    } else if (currentChar == COMMENT) {
+        // Comment
+        str = '';
+        while (moreToRead && currentChar !== NEWLINE) {
+          str += currentChar;
+          nextChar();
+        }
+        token = { type: tokenType.COMMENT, value: str };
     } else {
       str = readText();
       if (context == CTX_CONDITION) {

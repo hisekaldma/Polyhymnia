@@ -194,4 +194,28 @@ describe('Parser', function() {
     var rules = Polyhymnia.parse(Polyhymnia.tokenize('R1 -> Piano: C'), {});
     expect(rules.errors[0].error).toBe('There is no instrument Piano');
   });
+
+  it('ignores comments before the first rule', function() {
+    var rules = Polyhymnia.parse(Polyhymnia.tokenize('* No comment\nR1 -> R2 R1\n\nR2 -> Piano: C'));
+    expect(rules[0].name).toBe('R1');
+    expect(rules[1].name).toBe('R2');
+  });
+
+  it('ignores comments after the last rule', function() {
+    var rules = Polyhymnia.parse(Polyhymnia.tokenize('R1 -> R2 R1\n\nR2 -> Piano: C\n* No comment'));
+    expect(rules[0].name).toBe('R1');
+    expect(rules[1].name).toBe('R2');
+  });
+
+  it('ignores comments between rules', function() {
+    var rules = Polyhymnia.parse(Polyhymnia.tokenize('R1 -> R2 R2\n\n* No comment\nR2 -> Piano: C'));
+    expect(rules[0].name).toBe('R1');
+    expect(rules[1].name).toBe('R2');
+  });
+
+  it('ignores comments at the end of line', function() {
+    var rules = Polyhymnia.parse(Polyhymnia.tokenize('R1 ->\nR2 R2 * No comment\nR2 R2\n\nR2 -> Piano: C'));
+    expect(rules[0].name).toBe('R1');
+    expect(rules[1].name).toBe('R2');
+  });
 });

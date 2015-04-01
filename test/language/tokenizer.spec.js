@@ -240,4 +240,22 @@ describe('Tokenizer', function() {
     expect(tokens[5].type).toBe(tokenType.PARAM);
     expect(tokens[6].type).toBe(tokenType.RIGHT_PAREN);
   });
+
+  it('can tokenize comments in the beginning', function() {
+    var tokens = Polyhymnia.tokenize('* No comment\nPlay -> C D E F');
+    expect(tokens[0].value).toBe('* No comment');
+    expect(tokens[0].type).toBe(tokenType.COMMENT);
+  });
+
+  it('can tokenize comments in the middle', function() {
+    var tokens = Polyhymnia.tokenize('Play -> C D E F\n* No comment\nA -> C D E F');
+    expect(tokens[7].value).toBe('* No comment');
+    expect(tokens[7].type).toBe(tokenType.COMMENT);
+  });
+
+  it('can tokenize comments at the end', function() {
+    var tokens = Polyhymnia.tokenize('Play -> C D E F\n* No comment');
+    expect(tokens[7].value).toBe('* No comment');
+    expect(tokens[7].type).toBe(tokenType.COMMENT);
+  });
 });

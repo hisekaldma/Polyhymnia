@@ -15,7 +15,8 @@ Polyhymnia.symbolType = {
   REFERENCE:  'reference',
   INSTRUMENT: 'instrument',
   NOTE:       'note',
-  CONDITION:  'condition'
+  CONDITION:  'condition',
+  COMMENT:    'comment'
 };
 
 Polyhymnia.parse = function(tokensToParse, instruments) {
@@ -87,6 +88,16 @@ Polyhymnia.parse = function(tokensToParse, instruments) {
     tokensLeft     = tokens.length > 0;
     currentToken   = tokens.length > 0 ? tokens.shift() : {};
     lookaheadToken = tokens.length > 0 ? tokens[0] : {};
+
+    // Skip over comments
+    if (currentToken.type == tokenType.COMMENT) {
+      symbols.push({
+        type:  'comment',
+        start: currentToken.start,
+        end:   currentToken.end
+      });
+      nextToken();
+    }
   }
 
   function skipEmptyLines() {
