@@ -214,6 +214,11 @@ describe('Tokenizer', function() {
     var tokens = Polyhymnia.tokenize('\n');
     expect(tokens[0].type).toBe(tokenType.EOL);
   });
+  
+  it('can tokenize bar dividers', function() {
+    var tokens = Polyhymnia.tokenize('Piano: |');
+    expect(tokens[1].type).toBe(tokenType.BAR);
+  });
 
   it('names start with uppercase', function() {
     var tokens = Polyhymnia.tokenize('TestName1');

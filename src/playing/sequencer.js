@@ -11,26 +11,26 @@ Polyhymnia.Sequencer = function() {
   this.generator = null;
   this.animCallback = undefined;
 
-  var patterns = [];
+  var output = [];
   var audioContext = Polyhymnia.getAudioContext();
 
   this.scheduleStep = function(step, time) {
     // Calculate where we're at
     var stepInBar = step % (self.stepsPerBeat * self.timeSignature.num);
 
-    // If we've reached the end of a bar, generate new patterns
+    // If we've reached the end of a bar, generate new output
     if (stepInBar === 0) {
       if (step > 0) {
         self.generator.step();
       }
-      patterns = self.generator.getPatterns();
+      output = self.generator.getCurrentBar();
     }
 
-    // Play the patterns
+    // Play the output
     var animateNotes = [];
-    for (var i = 0; i < patterns.length; i++) {
-      var instrument = patterns[i].instrument;
-      var pattern    = patterns[i].pattern;
+    for (var i = 0; i < output.length; i++) {
+      var instrument = output[i].instrument;
+      var pattern    = output[i].pattern;
       var noteLength = getNoteLength(pattern.length);
       var noteNumber = Math.floor(stepInBar / noteLength);
 

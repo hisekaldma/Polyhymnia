@@ -202,12 +202,20 @@ Polyhymnia.parse = function(tokensToParse, instruments) {
     }
     nextToken();
 
-    var pattern = [];
+    var bar = [];
+    var bars = [bar];
     while (currentToken.type !== tokenType.EOL && tokensLeft) {
-      pattern.push(parseNote());
+      if (currentToken.type == tokenType.BAR) {
+        // New bar
+        bar = [];
+        bars.push(bar);
+        nextToken();
+      } else {
+        bar.push(parseNote());
+      }
     }
 
-    return { instrument: instrument, pattern: pattern };
+    return { instrument: instrument, pattern: bars };
   }
 
   // C# | Cm7 | x | _

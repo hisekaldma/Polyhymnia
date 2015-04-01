@@ -10,6 +10,7 @@ Polyhymnia.tokenType = {
   DEGREE_NOTE:    'degree note',
   DEGREE_CHORD:   'degree chord',
   DRUM_HIT:       'drum hit',
+  BAR:            'bar',
   ARROW:          'arrow',
   LEFT_PAREN:     'left paren',
   RIGHT_PAREN:    'right paren',
@@ -162,6 +163,8 @@ Polyhymnia.tokenize = function(textToTokenize) {
         // Inside a pattern
         if (str == '_') {
           token = { type: tokenType.PAUSE };
+        } else if (str == '|') {
+          token = { type: tokenType.BAR };
         } else if (str.search(drumPattern) !== -1) {
           matches = str.match(drumPattern);
           velocity = getVelocity(matches[2]);

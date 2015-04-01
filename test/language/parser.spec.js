@@ -15,18 +15,37 @@ describe('Parser', function() {
     
     expect(rules[0].name).toBe('R1');
     expect(rules[0].definitions[0].instrument).toBe('Piano');
-    expect(rules[0].definitions[0].pattern[0].note).toEqual('C');
-    expect(rules[0].definitions[0].pattern[0].octave).toEqual(undefined);    
-    expect(rules[0].definitions[0].pattern[0].type).toBe(noteType.NOTE);
-    expect(rules[0].definitions[0].pattern[1].note).toEqual('D');
-    expect(rules[0].definitions[0].pattern[1].octave).toEqual(undefined);    
-    expect(rules[0].definitions[0].pattern[1].type).toBe(noteType.NOTE);
-    expect(rules[0].definitions[0].pattern[2].note).toEqual('E');
-    expect(rules[0].definitions[0].pattern[2].octave).toEqual(undefined);    
-    expect(rules[0].definitions[0].pattern[2].type).toBe(noteType.NOTE);
-    expect(rules[0].definitions[0].pattern[3].note).toEqual('F');
-    expect(rules[0].definitions[0].pattern[3].octave).toEqual(undefined);    
-    expect(rules[0].definitions[0].pattern[3].type).toBe(noteType.NOTE);
+    expect(rules[0].definitions[0].pattern[0][0].note).toEqual('C');
+    expect(rules[0].definitions[0].pattern[0][0].octave).toEqual(undefined);
+    expect(rules[0].definitions[0].pattern[0][0].type).toBe(noteType.NOTE);
+    expect(rules[0].definitions[0].pattern[0][1].note).toEqual('D');
+    expect(rules[0].definitions[0].pattern[0][1].octave).toEqual(undefined);
+    expect(rules[0].definitions[0].pattern[0][1].type).toBe(noteType.NOTE);
+    expect(rules[0].definitions[0].pattern[0][2].note).toEqual('E');
+    expect(rules[0].definitions[0].pattern[0][2].octave).toEqual(undefined);
+    expect(rules[0].definitions[0].pattern[0][2].type).toBe(noteType.NOTE);
+    expect(rules[0].definitions[0].pattern[0][3].note).toEqual('F');
+    expect(rules[0].definitions[0].pattern[0][3].octave).toEqual(undefined);
+    expect(rules[0].definitions[0].pattern[0][3].type).toBe(noteType.NOTE);
+  });
+
+  it('can parse multi bar patterns', function() {
+    var rules = Polyhymnia.parse(Polyhymnia.tokenize('R1 -> Piano: C D | E F'));
+    
+    expect(rules[0].name).toBe('R1');
+    expect(rules[0].definitions[0].instrument).toBe('Piano');
+    expect(rules[0].definitions[0].pattern[0][0].note).toEqual('C');
+    expect(rules[0].definitions[0].pattern[0][0].octave).toEqual(undefined);
+    expect(rules[0].definitions[0].pattern[0][0].type).toBe(noteType.NOTE);
+    expect(rules[0].definitions[0].pattern[0][1].note).toEqual('D');
+    expect(rules[0].definitions[0].pattern[0][1].octave).toEqual(undefined);
+    expect(rules[0].definitions[0].pattern[0][1].type).toBe(noteType.NOTE);
+    expect(rules[0].definitions[0].pattern[1][0].note).toEqual('E');
+    expect(rules[0].definitions[0].pattern[1][0].octave).toEqual(undefined);
+    expect(rules[0].definitions[0].pattern[1][0].type).toBe(noteType.NOTE);
+    expect(rules[0].definitions[0].pattern[1][1].note).toEqual('F');
+    expect(rules[0].definitions[0].pattern[1][1].octave).toEqual(undefined);
+    expect(rules[0].definitions[0].pattern[1][1].type).toBe(noteType.NOTE);
   });
 
   it('can parse min conditions', function() {
