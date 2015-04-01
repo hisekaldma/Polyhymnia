@@ -65,6 +65,15 @@ Polyhymnia.Context = function(options) {
     return rules;
   }
 
+  function play() {
+    metronome.play();
+  }
+
+  function stop() {
+    metronome.stop();
+    generator.reset();
+  }
+
   function setTempo(tempo) {
     metronome.tempo = tempo;
   }
@@ -88,8 +97,8 @@ Polyhymnia.Context = function(options) {
 
   return {
     parse: parse,
-    play: metronome.play,
-    stop: metronome.stop,
+    play: play,
+    stop: stop,
     setParam: generator.setParam,
     setTempo: setTempo,
     setTonic: setTonic,

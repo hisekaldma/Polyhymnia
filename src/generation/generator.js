@@ -29,6 +29,10 @@ Polyhymnia.Generator = function() {
     step(ruleTree);
   };
 
+  this.reset = function() {
+    resetState(ruleTree);
+  };
+
   this.setRules = function(rules) {
     // Prepare for playing
     ruleDictionary = {};
@@ -132,6 +136,17 @@ Polyhymnia.Generator = function() {
         }
       }
     }
+  }
+
+  function resetState(node) {
+    node.definitions.forEach(function(definition) {
+      definition.index = 0;
+      if (definition.sequence) {
+        definition.sequence.forEach(function(childNode) {
+          resetState(childNode);
+        });
+      }
+    });
   }
 
   function getValidDefinitions(definitions) {
