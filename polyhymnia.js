@@ -256,9 +256,9 @@ Polyhymnia.Generator = function() {
   this.setRules = function(rules) {
     // Prepare for playing
     ruleDictionary = {};
-    for (var j = 0; j < rules.length; j++) {
-      ruleDictionary[rules[j].name] = rules[j];
-    }
+    rules.forEach(function(rule) {
+      ruleDictionary[rule.name] = rule;
+    });
     var oldRuleTree = ruleTree;    
     ruleTree = buildTree(ruleDictionary[startRule]);
 
@@ -329,8 +329,8 @@ Polyhymnia.Generator = function() {
         childPatterns.forEach(function(p) { patterns.push(p); });
       } else if (definition.pattern) {
         // Pattern definition
-        var midiNumbers = definition.pattern.map(convertToMidi);
-        patterns.push({ instrument: definition.instrument, pattern: midiNumbers });
+        var midiNotes = definition.pattern.map(toMidi);
+        patterns.push({ instrument: definition.instrument, pattern: midiNotes });
       }
     });
 
@@ -370,7 +370,7 @@ Polyhymnia.Generator = function() {
     return validDefinitions;
   }
 
-  function convertToMidi(note) {
+  function toMidi(note) {
     var keys;
     switch (note.type) {
       case noteType.NOTE:
@@ -395,11 +395,25 @@ Polyhymnia.Generator = function() {
         keys = [undefined];
     }
 
+    var velocity;
+    if (typeof note.velocity === 'string') {
+      velocity = Polyhymnia.Velocities.fromName(note.velocity);
+    } else if (note.velocity) {
+      velocity = note.velocity;
+    } else if (note.value === 'X' || note.value === 'O') {
+      velocity = 127; // Hard drum hits
+    } else if (note.value === 'x' || note.value === 'o') {
+      velocity = 64; // Soft drum hits
+    } else {
+      velocity = 72; // Default
+    }
+
     var midiNotes = keys.map(function(k) {
       return {
-        key:   k,
-        start: note.start,
-        end:   note.end
+        key:      k,
+        velocity: velocity,
+        start:    note.start,
+        end:      note.end
       };
     });
 
@@ -462,13 +476,10 @@ Polyhymnia.parse = function(tokensToParse, instruments) {
     rule.definitions.forEach(function(definition) {
       if (definition.sequence) {
         definition.sequence.forEach(function(name) {
-          var found = false;
-          for (var i = 0; i < rules.length; i++) {
-            if (rules[i].name == name) {
-              found = true;
-            }
-          }
-          if (!found) {
+          var exists = rules.some(function(element) {
+            return element.name == name;
+          });
+          if (!exists) {
             errors.push({ error: 'There is no rule ' + name });
           }
         });
@@ -631,24 +642,29 @@ Polyhymnia.parse = function(tokensToParse, instruments) {
         note.type = noteType.NOTE;
         note.note = currentToken.note;
         note.octave = currentToken.octave;
+        note.velocity = currentToken.velocity;
         break;
       case tokenType.CHORD:
         note.type = noteType.CHORD;
         note.note = currentToken.note;
         note.octave = currentToken.octave;
         note.chord = currentToken.chord;
+        note.velocity = currentToken.velocity;
         break;
       case tokenType.DEGREE_NOTE:
         note.type = noteType.DEGREE_NOTE;
         note.value = currentToken.value;
+        note.velocity = currentToken.velocity;
         break;
       case tokenType.DEGREE_CHORD:
         note.type = noteType.DEGREE_CHORD;
         note.value = currentToken.value;
+        note.velocity = currentToken.velocity;
         break;
       case tokenType.DRUM_HIT:
         note.type = noteType.DRUM;
         note.value = currentToken.value;
+        note.velocity = currentToken.velocity;
         break;
       case tokenType.PAUSE:
         note.type = noteType.PAUSE;
@@ -788,12 +804,13 @@ Polyhymnia.tokenize = function(textToTokenize) {
   var PARAM_PATTERN        = '[a-z][a-zA-Z0-9_]*';
   var INSTRUMENT_PATTERN   = NAME_PATTERN + ':';
   var NUMBER_PATTERN       = '-?(([1-9][0-9]*)|0)(\\.[0-9]*)?';
-  var NOTE_PATTERN         = '([CDEFGAB][#b]?)';
   var OCTAVE_PATTERN       = '(-2|-1|[0-8])?';
-  var CHORD_PATTERN        = '((M|m|dom|aug|dim)7?)';
-  var DEGREE_NOTE_PATTERN  = '[1-7]';
-  var DEGREE_CHORD_PATTERN = '((I|II|III|IV|V|VI|VII)\\+?|(i|ii|iii|iv|v|vi|vii)°?)7?';
-  var DRUM_PATTERN         = '[xX]';
+  var NOTE_PATTERN         = '([CDEFGAB][#b]?)' + OCTAVE_PATTERN;
+  var CHORD_PATTERN        = NOTE_PATTERN + '((?:M|m|dom|aug|dim)7?)';
+  var DEGREE_NOTE_PATTERN  = '([1-7])';
+  var DEGREE_CHORD_PATTERN = '((?:(?:I|II|III|IV|V|VI|VII)\\+?|(?:i|ii|iii|iv|v|vi|vii)°?)7?)';
+  var DRUM_PATTERN         = '([xX])';
+  var VELOCITY_PATTERN     = '(\\.(?:(?:ppp|fff|pp|ff|mp|mf|p|f)|(?:12[0-7]|1[0-1][0-9]|[1-9][0-9]|[0-9])))?';
 
   var NEWLINE    = '\n';
   var SPACE      = ' ';
@@ -804,15 +821,15 @@ Polyhymnia.tokenize = function(textToTokenize) {
   var CTX_PATTERN   = 'pattern';
   var CTX_CONDITION = 'condition';
 
-  var namePattern           = new RegExp('^' + NAME_PATTERN + '$');
-  var paramPattern          = new RegExp('^' + PARAM_PATTERN + '$');
-  var instrumentPattern     = new RegExp('^' + INSTRUMENT_PATTERN + '$');
-  var numberPattern         = new RegExp('^' + NUMBER_PATTERN + '$');
-  var notePattern           = new RegExp('^' + NOTE_PATTERN + OCTAVE_PATTERN + '$');
-  var chordPattern          = new RegExp('^' + NOTE_PATTERN + OCTAVE_PATTERN + CHORD_PATTERN + '$');
-  var degreeNotePattern     = new RegExp('^' + DEGREE_NOTE_PATTERN + '$');
-  var degreeChordPattern    = new RegExp('^' + DEGREE_CHORD_PATTERN + '$');
-  var drumPattern           = new RegExp('^' + DRUM_PATTERN + '$');
+  var namePattern           = new RegExp('^' + NAME_PATTERN +                            '$');
+  var paramPattern          = new RegExp('^' + PARAM_PATTERN +                           '$');
+  var instrumentPattern     = new RegExp('^' + INSTRUMENT_PATTERN +                      '$');
+  var numberPattern         = new RegExp('^' + NUMBER_PATTERN +                          '$');
+  var notePattern           = new RegExp('^' + NOTE_PATTERN +         VELOCITY_PATTERN + '$');
+  var chordPattern          = new RegExp('^' + CHORD_PATTERN +        VELOCITY_PATTERN + '$');
+  var degreeNotePattern     = new RegExp('^' + DEGREE_NOTE_PATTERN +  VELOCITY_PATTERN + '$');
+  var degreeChordPattern    = new RegExp('^' + DEGREE_CHORD_PATTERN + VELOCITY_PATTERN + '$');
+  var drumPattern           = new RegExp('^' + DRUM_PATTERN +         VELOCITY_PATTERN + '$');
 
   var text = textToTokenize.replace('\r', ''); // Handle weird Windows newlines
   var characters = text.split('');
@@ -845,6 +862,20 @@ Polyhymnia.tokenize = function(textToTokenize) {
     return s;
   }
 
+  function getOctave(octave) {
+    return octave ? parseInt(octave) : undefined;
+  }
+
+  function getVelocity(velocity) {
+    if (velocity) {
+      var v = velocity.substr(1);
+      var n = parseInt(v);
+      return isNaN(n) ? v : n;
+    }
+    return undefined;
+  }
+
+
   // Start tokenizing
 
   nextChar();
@@ -854,7 +885,7 @@ Polyhymnia.tokenize = function(textToTokenize) {
   var positionBeforeReading;
   var context = CTX_DEFAULT;
   var str;
-  var matches, octave;
+  var matches, octave, velocity;
 
   while (moreToRead) {
     str = undefined;
@@ -885,9 +916,9 @@ Polyhymnia.tokenize = function(textToTokenize) {
           token = { type: tokenType.GREATER_THAN };
         } else if (str == '<') {
           token = { type: tokenType.LESS_THAN };
-        } else if (str.match(paramPattern)) {
+        } else if (str.search(paramPattern) !== -1) {
           token = { type: tokenType.PARAM, value: str };
-        } else if (str.match(numberPattern)) {
+        } else if (str.search(numberPattern) !== -1) {
           token = { type: tokenType.NUMBER, value: parseFloat(str) };
         } else {
           token = { type: tokenType.ERROR, value: str };
@@ -896,20 +927,28 @@ Polyhymnia.tokenize = function(textToTokenize) {
         // Inside a pattern
         if (str == '_') {
           token = { type: tokenType.PAUSE };
-        } else if (str.match(drumPattern)) {
-          token = { type: tokenType.DRUM_HIT, value: str };
-        } else if (str.match(notePattern)) {
+        } else if (str.search(drumPattern) !== -1) {
+          matches = str.match(drumPattern);
+          velocity = getVelocity(matches[2]);
+          token = { type: tokenType.DRUM_HIT, value: matches[1], velocity: velocity };
+        } else if (str.search(notePattern) !== -1) {
           matches = str.match(notePattern);
-          octave = matches[2] ? parseInt(matches[2]) : undefined;
-          token = { type: tokenType.NOTE, note: matches[1], octave: octave };
-        } else if (str.match(chordPattern)) {
+          octave = getOctave(matches[2]);
+          velocity = getVelocity(matches[3]);
+          token = { type: tokenType.NOTE, note: matches[1], octave: octave, velocity: velocity };
+        } else if (str.search(chordPattern) !== -1) {
           matches = str.match(chordPattern);
-          octave = matches[2] ? parseInt(matches[2]) : undefined;
-          token = { type: tokenType.CHORD, note: matches[1], octave: octave, chord: matches[3] };
-        } else if (str.match(degreeNotePattern)) {
-          token = { type: tokenType.DEGREE_NOTE, value: str };
-        } else if (str.match(degreeChordPattern)) {
-          token = { type: tokenType.DEGREE_CHORD, value: str };
+          octave = getOctave(matches[2]);
+          velocity = getVelocity(matches[4]);
+          token = { type: tokenType.CHORD, note: matches[1], octave: octave, chord: matches[3], velocity: velocity };
+        } else if (str.search(degreeNotePattern) !== -1) {
+          matches = str.match(degreeNotePattern);
+          velocity = getVelocity(matches[2]);
+          token = { type: tokenType.DEGREE_NOTE, value: matches[1], velocity: velocity };
+        } else if (str.search(degreeChordPattern) !== -1) {
+          matches = str.match(degreeChordPattern);
+          velocity = getVelocity(matches[2]);
+          token = { type: tokenType.DEGREE_CHORD, value: matches[1], velocity: velocity };
         } else {
           token = { type: tokenType.ERROR, value: str };
         }
@@ -917,9 +956,9 @@ Polyhymnia.tokenize = function(textToTokenize) {
         // Not inside a condition or pattern
         if (str == '->') {
           token = { type: tokenType.ARROW };
-        } else if (str.match(namePattern)) {
+        } else if (str.search(namePattern) !== -1) {
           token = { type: tokenType.NAME, value: str };
-        } else if (str.match(instrumentPattern)) {
+        } else if (str.search(instrumentPattern) !== -1) {
           token = { type: tokenType.INSTRUMENT, value: str.substr(0, str.length - 1) };
           context = CTX_PATTERN;
         } else {
@@ -1212,6 +1251,34 @@ Polyhymnia.Scales = (function() {
 })();
 var Polyhymnia = Polyhymnia || {};
 
+Polyhymnia.Velocities = (function() {
+  'use strict';
+  var self = {};
+
+  var velocities = {
+    'ppp': 16,
+    'pp':  32,
+    'p':   48,
+    'mp':  64,
+    'mf':  80,
+    'f':   96,
+    'ff':  112,
+    'fff': 127
+  };
+
+  // Gets the midi velocity of a named velocity
+  self.fromName = function(name) {
+    if (name in velocities) {
+      return velocities[name];
+    } else {
+      return [];
+    }
+  };
+
+  return self;
+})();
+var Polyhymnia = Polyhymnia || {};
+
 Polyhymnia.Metronome = function() {
   'use strict';
   var self = this;
@@ -1278,14 +1345,14 @@ Polyhymnia.Sampler = function(options) {
 
   // Load samples
   if (options && options.samples) {
-    total = options.samples.length;
-    for (var i = 0; i < options.samples.length; i++) {
-      var root =   options.samples[i].root || 'C';
-      var octave = options.samples[i].octave || 4;
-      var url =    options.samples[i].url;
+    options.samples.forEach(function(sample) {
+      var root =   sample.root || 'C';
+      var octave = sample.octave || 4;
+      var url =    sample.url;
       var midiNumber = Polyhymnia.Notes.fromName(root, octave);
       loadSample(midiNumber, url);
-    }
+      total++;
+    });
   }
 
   function loadSample(midiNumber, url) {
@@ -1359,18 +1426,18 @@ Polyhymnia.Sampler = function(options) {
     }
   }
 
-  this.scheduleNote = function(midiNumber, time) {
+  this.scheduleNote = function(midiNumber, velocity, time) {
+    // Gain
+    var gain = audioContext.createGain();
+    gain.connect(audioContext.destination);
+    gain.gain.value = velocity / 127;
+
+    // Source
     var source = audioContext.createBufferSource();
     source.buffer = samples[midiNumber].buffer;
     source.playbackRate.value = samples[midiNumber].pitch;
-    source.connect(audioContext.destination);
+    source.connect(gain);
     source.start(time);
-  };
-
-  this.scheduleNotes = function(midiNumbers, time) {
-    midiNumbers.forEach(function(midiNumber) {
-      self.scheduleNote(midiNumber, time);
-    });
   };
 };
 var Polyhymnia = Polyhymnia || {};
@@ -1438,7 +1505,7 @@ Polyhymnia.Sequencer = function() {
 
   function scheduleNote(instrument, note, time) {
     if (self.instruments[instrument] && note.key) {
-      self.instruments[instrument].scheduleNote(note.key, time);
+      self.instruments[instrument].scheduleNote(note.key, note.velocity, time);
     }
   }
 
@@ -1469,7 +1536,7 @@ Polyhymnia.Synthesizer = function(options) {
 
   var audioContext = Polyhymnia.getAudioContext();
 
-  this.scheduleNote = function(midiNumber, time) {
+  this.scheduleNote = function(midiNumber, velocity, time) {
     // Gain
     var gain = audioContext.createGain();
     gain.connect(audioContext.destination);
@@ -1483,17 +1550,12 @@ Polyhymnia.Synthesizer = function(options) {
 
     // Play, envelope, stop
     osc.start(time);
-    gain.gain.linearRampToValueAtTime(0.0,                   time + 0.0001); // Offset to avoid click/pop
-    gain.gain.linearRampToValueAtTime(1.0,                   time + attack);
-    gain.gain.linearRampToValueAtTime(sustain, time + attack + decay);
-    gain.gain.linearRampToValueAtTime(0.0,                   time + attack + decay + release);
+    var volume = velocity / 127;
+    gain.gain.linearRampToValueAtTime(0.0,              time + 0.0001); // Offset to avoid click/pop
+    gain.gain.linearRampToValueAtTime(volume,           time + attack);
+    gain.gain.linearRampToValueAtTime(volume * sustain, time + attack + decay);
+    gain.gain.linearRampToValueAtTime(0.0,              time + attack + decay + release);
     osc.stop(time + attack + decay + release + 0.0001);
-  };
-
-  this.scheduleNotes = function(midiNumbers, time) {
-    midiNumbers.forEach(function(midiNumber) {
-      self.scheduleNote(midiNumber, time);
-    });
   };
 };
 var Polyhymnia = Polyhymnia || {};
@@ -1549,12 +1611,11 @@ Polyhymnia.Context = function(options) {
 
   // Instruments
   if (options && options.instruments) {
-    for (var i = 0; i < options.instruments.length; i++) {
-      var instrument = options.instruments[i];
+    options.instruments.forEach(function(instrument) {
       sequencer.instruments[instrument.name] = new Polyhymnia.Sampler({
         samples: instrument.samples
       });
-    }
+    });
   }
 
   function parse(code) {
