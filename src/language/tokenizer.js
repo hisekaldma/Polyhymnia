@@ -36,7 +36,7 @@ Polyhymnia.tokenize = function(textToTokenize) {
   var CHORD_PATTERN        = NOTE_PATTERN + '((?:M|m|dom|aug|dim)7?)';
   var DEGREE_NOTE_PATTERN  = '([1-7])';
   var DEGREE_CHORD_PATTERN = '((?:(?:I|II|III|IV|V|VI|VII)\\+?|(?:i|ii|iii|iv|v|vi|vii)°?)7?)';
-  var DRUM_PATTERN         = '([xX])';
+  var DRUM_PATTERN         = '([xXoO])';
   var VELOCITY_PATTERN     = '(\\.(?:(?:ppp|fff|pp|ff|mp|mf|p|f)|(?:12[0-7]|1[0-1][0-9]|[1-9][0-9]|[0-9])))?';
 
   var NEWLINE    = '\n';

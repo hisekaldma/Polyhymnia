@@ -142,12 +142,16 @@ describe('Tokenizer', function() {
   });
 
   it('can tokenize drums', function() {
-    var tokens = Polyhymnia.tokenize('Kick: x X');
+    var tokens = Polyhymnia.tokenize('Kick: x X o O');
     
     expect(tokens[1].value).toBe('x');
     expect(tokens[1].type).toBe(tokenType.DRUM_HIT);
     expect(tokens[2].value).toBe('X');
     expect(tokens[2].type).toBe(tokenType.DRUM_HIT);
+    expect(tokens[3].value).toBe('o');
+    expect(tokens[3].type).toBe(tokenType.DRUM_HIT);
+    expect(tokens[4].value).toBe('O');
+    expect(tokens[4].type).toBe(tokenType.DRUM_HIT);
   });
 
   it('can tokenize velocities', function() {
