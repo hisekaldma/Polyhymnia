@@ -1,8 +1,12 @@
 {
-  "author": "Jonathan Hise Kaldma (http://www.hisekaldma.com)",
   "name": "polyhymnia",
   "version": "0.1.0",
-  "license": "MIT",
+  "homepage": "https://polyhymnia.io",
+  "author": "Jonathan Hise Kaldma",
+  "license": {
+    "type": "MIT",
+    "url": "https://github.com/hisekaldma/Polyhymnia/blob/master/LICENSE"
+  },
   "repository" : {
     "type" : "git",
     "url" : "https://github.com/hisekaldma/Polyhymnia"
