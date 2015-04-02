@@ -65,10 +65,28 @@ module.exports = function(grunt) {
     watch: {
       files: ['src/**/*', 'test/**/*'],
       tasks: ['build', 'test']
+    },
+    compress: {
+      main: {
+        options: {
+          archive: 'dist/<%= pkg.name %>-<%= pkg.version %>.zip',
+          mode: 'zip',
+          level: 9,
+          pretty: true
+        },
+        files: [
+          {
+            expand: true,
+            cwd: 'build/',
+            src: '*'
+          }
+        ]
+      }
     }
   });
 
   // Load plugins
+  grunt.loadNpmTasks('grunt-contrib-compress');  
   grunt.loadNpmTasks('grunt-contrib-concat');
   grunt.loadNpmTasks('grunt-contrib-jasmine');
   grunt.loadNpmTasks('grunt-contrib-jshint');
@@ -80,6 +98,7 @@ module.exports = function(grunt) {
   // Register tasks
   grunt.registerTask('build',   ['jshint', 'concat', 'uglify', 'less']);
   grunt.registerTask('test',    ['jasmine']);
+  grunt.registerTask('dist',    ['build', 'test', 'compress']);
   grunt.registerTask('default', ['build', 'test']);
   grunt.registerTask('pages',   ['build', 'test', 'gh-pages']);
 

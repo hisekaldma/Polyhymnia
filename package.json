@@ -7,12 +7,13 @@
     "type": "MIT",
     "url": "https://github.com/hisekaldma/Polyhymnia/blob/master/LICENSE"
   },
-  "repository" : {
-    "type" : "git",
-    "url" : "https://github.com/hisekaldma/Polyhymnia"
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hisekaldma/Polyhymnia"
   },
   "devDependencies": {
     "grunt": "~0.4.5",
+    "grunt-contrib-compress": "~0.13.0",
     "grunt-contrib-concat": "~0.5.0",
     "grunt-contrib-jasmine": "~0.8.1",
     "grunt-contrib-jshint": "~0.10.0",
