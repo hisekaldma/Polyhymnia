@@ -98,9 +98,12 @@ h1 {
   padding-top: 1.4rem;
   padding-bottom: 0.7rem;
 }
+h2 {
+  margin-bottom: 0.7rem;
+}
 h3 {
   font-size: 17px;
-  padding-top: 1.4rem;  
+  padding-top: 1.4rem;
 }
 a, a:visited, a:hover {
   border-bottom: 1px solid rgba(255, 217, 178, 0.5);
