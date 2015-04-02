@@ -7,25 +7,37 @@ module.exports = function(grunt) {
   // Project configuration
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
+    banner: '/*!\n' +
+            ' * Polyhymnia v<%= pkg.version %> (<%= pkg.homepage %>)\n' +
+            ' *\n' +
+            ' * Copyright (c) 2014-<%= grunt.template.today("yyyy") %> <%= pkg.author %>\n' +
+            ' * Released under the <%= pkg.license.type %> license\n' +
+            ' */\n',
     concat: {
       build: {
         src: src,
         dest: 'build/<%= pkg.name %>.js',
         options: {
-          banner: templates
+          banner: '<%= banner %>' + templates
         }
       }
     },
     uglify: {
       build: {
         src: '<%= concat.build.dest %>',
-        dest: 'build/<%= pkg.name %>.min.js'
+        dest: 'build/<%= pkg.name %>.min.js',
+        options: {
+          banner: '<%= banner %>'
+        }
       }
     },
     less: {
       build: {
         src: less,
-        dest: 'build/<%= pkg.name %>.css'
+        dest: 'build/<%= pkg.name %>.css',
+        options: {
+          banner: '<%= banner %>'
+        }
       }
     },
     jshint: {
