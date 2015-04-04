@@ -101,6 +101,10 @@ Polyhymnia.Sampler = function(options) {
   }
 
   this.scheduleNoteOn = function(midiNumber, velocity, time) {
+    if (voices[midiNumber]) {
+      self.scheduleNoteOff(midiNumber, velocity, time);
+    }
+
     var voice = {};
     var volume = velocity / 127;
 
@@ -127,16 +131,19 @@ Polyhymnia.Sampler = function(options) {
   this.scheduleNoteOff = function(midiNumber, velocity, time) {
     var voice = voices[midiNumber];
 
-    // Release, stop
-    voice.gain.gain.linearRampToValueAtTime(0.0, time + release);
-    voice.source.stop(time + release + 0.0001);
+    if (voice) {
+      // Release, stop
+      voice.gain.gain.linearRampToValueAtTime(0.0, time + release);
+      voice.source.stop(time + release + 0.0001);
 
-    delete voices[midiNumber];
+      delete voices[midiNumber];
+    }
   };
 
   this.allNotesOff = function() {
     for (var voice in voices) {
       voices[voice].source.stop();
+      delete voices[voice];
     }
   };  
 };

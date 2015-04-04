@@ -15,6 +15,10 @@ Polyhymnia.Synthesizer = function(options) {
   var voices = {};
 
   this.scheduleNoteOn = function(midiNumber, velocity, time) {
+    if (voices[midiNumber]) {
+      self.scheduleNoteOff(midiNumber, velocity, time);
+    }
+
     var voice = {};
 
     // Gain
@@ -41,16 +45,19 @@ Polyhymnia.Synthesizer = function(options) {
   this.scheduleNoteOff = function(midiNumber, velocity, time) {
     var voice = voices[midiNumber];
 
-    // Release, stop
-    voice.gain.gain.linearRampToValueAtTime(0.0, time + release);
-    voice.osc.stop(time + release + 0.0001);
+    if (voice) {
+      // Release, stop
+      voice.gain.gain.linearRampToValueAtTime(0.0, time + release);
+      voice.osc.stop(time + release + 0.0001);
 
-    delete voices[midiNumber];
+      delete voices[midiNumber];
+    }
   };
 
   this.allNotesOff = function() {
     for (var voice in voices) {
       voices[voice].osc.stop();
+      delete voices[voice];
     }
   };
 };
