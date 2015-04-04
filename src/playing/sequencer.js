@@ -41,12 +41,19 @@ Polyhymnia.Sequencer = function() {
         }
 
         for (var n = 0; n < notes.length; n++) {
-          // Only trigger the note if we're on step 0 of it
-          if (stepInBar % noteLength === 0) {
-            scheduleNote(instrument, notes[n], time);
+          // Only trigger real notes, not pauses
+          if (notes[n].key) {
+            // Trigger NOTE ON if we're on the first step of a note
+            if (stepInBar % noteLength === 0) {
+              scheduleNoteOn(instrument, notes[n], time);
+            }
+            // Trigger NOTE OFF if we're on the last step of the note
+            if (stepInBar % noteLength === noteLength - 1) {
+              scheduleNoteOff(instrument, notes[n], time);
+            }
           }
 
-          // But always animate it
+          // But animate all notes, even pauses
           animateNotes.push(notes[n]);
         }
       }
@@ -61,9 +68,21 @@ Polyhymnia.Sequencer = function() {
     }
   };
 
-  function scheduleNote(instrument, note, time) {
-    if (self.instruments[instrument] && note.key) {
-      self.instruments[instrument].scheduleNote(note.key, note.velocity, time);
+  this.stop = function() {
+    for (var instrument in self.instruments) {
+      self.instruments[instrument].allNotesOff();
+    }
+  };
+
+  function scheduleNoteOn(instrument, note, time) {
+    if (self.instruments[instrument]) {
+      self.instruments[instrument].scheduleNoteOn(note.key, note.velocity, time);
+    }
+  }
+
+  function scheduleNoteOff(instrument, note, time) {
+    if (self.instruments[instrument]) {
+      self.instruments[instrument].scheduleNoteOff(note.key, note.velocity, time);
     }
   }
 

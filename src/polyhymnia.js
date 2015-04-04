@@ -71,6 +71,7 @@ Polyhymnia.Context = function(options) {
 
   function stop() {
     metronome.stop();
+    sequencer.stop();
     generator.reset();
   }
 

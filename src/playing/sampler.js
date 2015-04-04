@@ -4,7 +4,14 @@ Polyhymnia.Sampler = function(options) {
   'use strict';
   var self = this;
 
+  options = options || {};
+  var attack  = options.attack  || 0.01; // s
+  var decay   = options.decay   || 0.1;  // s
+  var sustain = options.sustain || 1.0;  // gain
+  var release = options.release || 0.7;  // s
+
   var audioContext = Polyhymnia.getAudioContext();
+  var voices = {};
   var samples = [];
   var buffers = [];
   var loaded = 0;
@@ -93,17 +100,43 @@ Polyhymnia.Sampler = function(options) {
     }
   }
 
-  this.scheduleNote = function(midiNumber, velocity, time) {
+  this.scheduleNoteOn = function(midiNumber, velocity, time) {
+    var voice = {};
+    var volume = velocity / 127;
+
     // Gain
-    var gain = audioContext.createGain();
-    gain.connect(audioContext.destination);
-    gain.gain.value = velocity / 127;
+    voice.gain = audioContext.createGain();
+    voice.gain.connect(audioContext.destination);
+    voice.gain.gain.value = 0;
 
     // Source
-    var source = audioContext.createBufferSource();
-    source.buffer = samples[midiNumber].buffer;
-    source.playbackRate.value = samples[midiNumber].pitch;
-    source.connect(gain);
-    source.start(time);
+    voice.source = audioContext.createBufferSource();
+    voice.source.buffer = samples[midiNumber].buffer;
+    voice.source.playbackRate.value = samples[midiNumber].pitch;
+    voice.source.connect(voice.gain);
+
+    // Play, attack, decay
+    voice.source.start(time);
+    voice.gain.gain.linearRampToValueAtTime(0.0,              time + 0.0001); // Offset to avoid click/pop
+    voice.gain.gain.linearRampToValueAtTime(volume,           time + attack);
+    voice.gain.gain.linearRampToValueAtTime(volume * sustain, time + attack + decay);
+
+    voices[midiNumber] = voice;
   };
+
+  this.scheduleNoteOff = function(midiNumber, velocity, time) {
+    var voice = voices[midiNumber];
+
+    // Release, stop
+    voice.gain.gain.linearRampToValueAtTime(0.0, time + release);
+    voice.source.stop(time + release + 0.0001);
+
+    delete voices[midiNumber];
+  };
+
+  this.allNotesOff = function() {
+    for (var voice in voices) {
+      voices[voice].source.stop();
+    }
+  };  
 };
