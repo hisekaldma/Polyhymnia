@@ -5,7 +5,7 @@ describe('Generator', function() {
   it('can interpret simple sequences', function() {
     var generator = new Polyhymnia.Generator();
     generator.setRules([
-      { name: 'Play', definitions: [{ sequence: ['R1', 'R2'] }] },
+      { name: 'Play', definitions: [{ sequence: [{ name: 'R1' }, { name: 'R2' }] }] },
       { name: 'R1',   definitions: [{ instrument: 'Piano', pattern: [[]]}] },
       { name: 'R2',   definitions: [{ instrument: 'Conga', pattern: [[]]}] }
     ]);
@@ -19,9 +19,9 @@ describe('Generator', function() {
   it('can interpret nested sequences', function() {
     var generator = new Polyhymnia.Generator();
     generator.setRules([
-      { name: 'Play', definitions: [{ sequence: ['R1', 'R2'] }] },
+      { name: 'Play', definitions: [{ sequence: [{ name: 'R1' }, { name: 'R2' }] }] },
       { name: 'R1',   definitions: [{ instrument: 'Piano', pattern: [[]]}] },
-      { name: 'R2',   definitions: [{ sequence: ['R3', 'R3'] }] },
+      { name: 'R2',   definitions: [{ sequence: [{ name: 'R3' }, { name: 'R3' }] }] },
       { name: 'R3',   definitions: [{ instrument: 'Conga', pattern: [[]]}] }
     ]);
     var output1 = generator.getCurrentBar(); generator.step();
@@ -36,7 +36,7 @@ describe('Generator', function() {
   it('can interpret parallel sequences', function() {
     var generator = new Polyhymnia.Generator();
     generator.setRules([
-      { name: 'Play', definitions: [{ sequence: ['R1', 'R2'] }, { sequence: ['R2', 'R1'] }]},
+      { name: 'Play', definitions: [{ sequence: [{ name: 'R1' }, { name: 'R2' }] }, { sequence: [{ name: 'R2' }, { name: 'R1' }] }] },
       { name: 'R1',   definitions: [{ instrument: 'Piano', pattern: [[]]}] },
       { name: 'R2',   definitions: [{ instrument: 'Conga', pattern: [[]]}] }
     ]);
@@ -53,8 +53,8 @@ describe('Generator', function() {
   it('can interpret nested parallel sequences of different length', function() {
     var generator = new Polyhymnia.Generator();
     generator.setRules([
-      { name: 'Play', definitions: [{ sequence: ['R1', 'R5'] }] },
-      { name: 'R1',   definitions: [{ sequence: ['R2', 'R3'] }, { sequence: ['R4'] }] },
+      { name: 'Play', definitions: [{ sequence: [{ name: 'R1' }, { name: 'R5' }] }] },
+      { name: 'R1',   definitions: [{ sequence: [{ name: 'R2' }, { name: 'R3' }] }, { sequence: [{ name: 'R4' }] }] },
       { name: 'R2',   definitions: [{ instrument: 'Piano', pattern: [[]]}] },
       { name: 'R3',   definitions: [{ instrument: 'Conga', pattern: [[]]}] },
       { name: 'R4',   definitions: [{ instrument: 'Viola', pattern: [[]]}] },
@@ -78,7 +78,7 @@ describe('Generator', function() {
   it('can interpret mixed output and sequences', function() {
     var generator = new Polyhymnia.Generator();
     generator.setRules([
-      { name: 'Play', definitions: [{ sequence: ['R1', 'R2'] }, { instrument: 'Viola', pattern: [[]]}] },
+      { name: 'Play', definitions: [{ sequence: [{ name: 'R1' }, { name: 'R2' }] }, { instrument: 'Viola', pattern: [[]]}] },
       { name: 'R1',   definitions: [{ instrument: 'Piano', pattern: [[]]}] },
       { name: 'R2',   definitions: [{ instrument: 'Conga', pattern: [[]]}] }
     ]);
@@ -97,8 +97,8 @@ describe('Generator', function() {
     generator.setRules([
       { name: 'Play', definitions:
         [
-          { sequence: ['R1', 'R2'], condition: { param: 'x', min: 0.0 } },
-          { sequence: ['R2', 'R1'], condition: { param: 'x', min: 0.5 } }
+          { sequence: [{ name: 'R1' }, { name: 'R2' }], condition: { param: 'x', min: 0.0 } },
+          { sequence: [{ name: 'R2' }, { name: 'R1' }], condition: { param: 'x', min: 0.5 } }
         ]
       },
       { name: 'R1', definitions: [{ instrument: 'Piano', pattern: [[]]}] },
@@ -118,8 +118,8 @@ describe('Generator', function() {
     generator.setRules([
       { name: 'Play', definitions:
         [
-          { sequence: ['R1', 'R2'], condition: { param: 'x', max: 0.5 } },
-          { sequence: ['R2', 'R1'], condition: { param: 'x', max: 1.0 } }
+          { sequence: [{ name: 'R1' }, { name: 'R2' }], condition: { param: 'x', max: 0.5 } },
+          { sequence: [{ name: 'R2' }, { name: 'R1' }], condition: { param: 'x', max: 1.0 } }
         ]
       },
       { name: 'R1', definitions: [{ instrument: 'Piano', pattern: [[]]}] },
@@ -139,9 +139,9 @@ describe('Generator', function() {
     generator.setRules([
       { name: 'Play', definitions:
         [
-          { sequence: ['R1', 'R1'], condition: { param: 'x', min: 0.0, max: 0.3 } },
-          { sequence: ['R1', 'R2'], condition: { param: 'x', min: 0.3, max: 0.6 } },
-          { sequence: ['R2', 'R2'], condition: { param: 'x', min: 0.6, max: 1.0 } }
+          { sequence: [{ name: 'R1' }, { name: 'R1' }], condition: { param: 'x', min: 0.0, max: 0.3 } },
+          { sequence: [{ name: 'R1' }, { name: 'R2' }], condition: { param: 'x', min: 0.3, max: 0.6 } },
+          { sequence: [{ name: 'R2' }, { name: 'R2' }], condition: { param: 'x', min: 0.6, max: 1.0 } }
         ]
       },
       { name: 'R1', definitions: [{ instrument: 'Piano', pattern: [[]]}] },
@@ -257,7 +257,7 @@ describe('Generator', function() {
       { name: 'Play', definitions:
         [
           { instrument: 'Piano', pattern: [[{ type: noteType.NOTE, note: 'C' }]] },
-          { sequence: ['Drums'] }
+          { sequence: [{ name: 'Drums' }] }
         ]
       },
       { name: 'Drums', definitions:

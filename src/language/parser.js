@@ -42,20 +42,18 @@ Polyhymnia.parse = function(tokensToParse, instruments) {
     skipEmptyLines();
   }
 
-  // Check that all rule references have definitions
+  // Check rules for validity
+  var ruleDict = {};
   rules.forEach(function(rule) {
-    rule.definitions.forEach(function(definition) {
-      if (definition.sequence) {
-        definition.sequence.forEach(function(name) {
-          var exists = rules.some(function(element) {
-            return element.name == name;
-          });
-          if (!exists) {
-            errors.push({ error: 'There is no rule ' + name });
-          }
-        });
-      }
-    });
+    ruleDict[rule.name] = rule;
+  });
+  rules.forEach(function(rule) {
+    checkRuleReferences(rule, rule.name);
+  });
+
+  // Sort symbols
+  symbols = symbols.sort(function(a, b) {
+    return a.start - b.start;
   });
 
   rules.symbols = symbols;
@@ -71,17 +69,17 @@ Polyhymnia.parse = function(tokensToParse, instruments) {
   }
 
   function error(message, start, end) {
-    errors.push({
-      error: message,
-      start: start || currentToken.start,
-      end:   end   || currentToken.end
+    start = start || currentToken.start;
+    end   = end   || currentToken.end;
+
+    // Remove symbols within error
+    symbols = symbols.filter(function(symbol) {
+      return !(symbol.start >= start && symbol.end <= end);
     });
-    symbols.push({
-      type:  'error',
-      error: message,
-      start: start || currentToken.start,
-      end:   end   || currentToken.end
-    });
+
+    // Add error
+    errors.push({ error: message, start: start, end: end });    
+    symbols.push({ type: 'error', error: message, start: start, end: end });
   }
 
   function nextToken() {
@@ -178,12 +176,20 @@ Polyhymnia.parse = function(tokensToParse, instruments) {
     var sequence = [];
     while (currentToken.type !== tokenType.EOL && tokensLeft) {
       if (currentToken.type == tokenType.NAME) {
-        sequence.push(currentToken.value);
+        sequence.push({
+          name:  currentToken.value,
+          start: currentToken.start,
+          end:   currentToken.end
+        });
         symbol(symbolType.REFERENCE);
       } else {
         // ERROR: Expected rule name
         error('Expected a rule name');
-        sequence.push('');
+        sequence.push({
+          name:  '',
+          start: currentToken.start,
+          end:   currentToken.end
+        });
       }
       nextToken();
     }
@@ -359,5 +365,30 @@ Polyhymnia.parse = function(tokensToParse, instruments) {
 
     symbol(symbolType.CONDITION, start, end);
     return { param: param, min: min, max: max };
-  } 
+  }
+
+  function checkRuleReferences(rule, path) {
+    rule.definitions.forEach(function(definition) {
+      if (definition.sequence) {
+        definition.sequence.forEach(function(reference) {
+          if (!reference.invalid) {
+            // Check that reference exists
+            var childRule = ruleDict[reference.name];
+            if (childRule) {
+              // Check that reference isn't circular
+              if (path.indexOf(reference.name) !== -1) {
+                error(reference.name + ' cannot reference itself', reference.start, reference.end);
+                reference.invalid = true;
+              } else {
+                checkRuleReferences(childRule, path + '/' + reference.name);
+              }
+            } else {
+              error('There is no rule ' + reference.name, reference.start, reference.end);
+              reference.invalid = true;
+            }
+          }
+        });
+      }
+    });
+  }
 };

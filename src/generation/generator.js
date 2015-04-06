@@ -60,10 +60,14 @@ Polyhymnia.Generator = function() {
       if (definition.sequence) {
         // Sequence definition, find its children recursively
         var children = [];
-        for (var i = 0; i < definition.sequence.length; i++) {
-          var rule = ruleDictionary[definition.sequence[i]];
-          children.push(buildTree(rule));
-        }
+        definition.sequence.forEach(function(reference) {
+          if (reference.invalid) {
+            children.push(buildTree());
+          } else {
+            var rule = ruleDictionary[reference.name];
+            children.push(buildTree(rule));
+          }
+        });
         node.definitions.push({ condition: definition.condition, sequence: children, index: 0 });
       } else if (definition.pattern) {
         // Pattern definition, just add it

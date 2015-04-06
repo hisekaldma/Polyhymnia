@@ -6,8 +6,8 @@ describe('Parser', function() {
     var rules = Polyhymnia.parse(Polyhymnia.tokenize('R1 -> R2 R3'));
 
     expect(rules[0].name).toBe('R1');
-    expect(rules[0].definitions[0].sequence[0]).toBe('R2');
-    expect(rules[0].definitions[0].sequence[1]).toBe('R3');
+    expect(rules[0].definitions[0].sequence[0].name).toBe('R2');
+    expect(rules[0].definitions[0].sequence[1].name).toBe('R3');
   });
 
   it('can parse a simple pattern rule', function() {
@@ -168,12 +168,12 @@ describe('Parser', function() {
     var rules3 = Polyhymnia.parse(Polyhymnia.tokenize('R1 ->\nR2 -> R3'));
     expect(rules3[0].name).toBe('R1');
     expect(rules3[1].name).toBe('R2');
-    expect(rules3[1].definitions[0].sequence[0]).toBe('R3');
+    expect(rules3[1].definitions[0].sequence[0].name).toBe('R3');
 
     var rules4 = Polyhymnia.parse(Polyhymnia.tokenize('R1 ->\n\nR2 -> R3'));
     expect(rules4[0].name).toBe('R1');
     expect(rules4[1].name).toBe('R2');
-    expect(rules4[1].definitions[0].sequence[0]).toBe('R3');
+    expect(rules4[1].definitions[0].sequence[0].name).toBe('R3');
   });
 
   it('can parse empty definitions with condition', function() {
@@ -184,8 +184,8 @@ describe('Parser', function() {
   it('ignores line breaks after arrow', function() {
     var rules = Polyhymnia.parse(Polyhymnia.tokenize('R1 ->\nR2\nR3'));
     expect(rules[0].name).toBe('R1');
-    expect(rules[0].definitions[0].sequence[0]).toBe('R2');
-    expect(rules[0].definitions[1].sequence[0]).toBe('R3');
+    expect(rules[0].definitions[0].sequence[0].name).toBe('R2');
+    expect(rules[0].definitions[1].sequence[0].name).toBe('R3');
   });
 
   it('ignores line breaks before the first rule', function() {
@@ -212,6 +212,16 @@ describe('Parser', function() {
   it('flags missing instruments', function() {
     var rules = Polyhymnia.parse(Polyhymnia.tokenize('R1 -> Piano: C'), {});
     expect(rules.errors[0].error).toBe('There is no instrument Piano');
+  });
+
+  it('flags circular references', function() {
+    var rules = Polyhymnia.parse(Polyhymnia.tokenize('R1 -> R1'), {});
+    expect(rules.errors[0].error).toBe('R1 cannot reference itself');
+  });
+
+  it('flags deep circular references', function() {
+    var rules = Polyhymnia.parse(Polyhymnia.tokenize('R1 -> R2\nR2 -> R3\nR3 -> R1'), {});
+    expect(rules.errors[0].error).toBe('R1 cannot reference itself');
   });
 
   it('ignores comments before the first rule', function() {
