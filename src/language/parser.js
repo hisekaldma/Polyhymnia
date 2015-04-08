@@ -42,23 +42,10 @@ Polyhymnia.parse = function(tokensToParse, instruments) {
     skipEmptyLines();
   }
 
-  // Check rules for validity
-  var ruleDict = {};
-  rules.forEach(function(rule) {
-    ruleDict[rule.name] = rule;
-  });
-  rules.forEach(function(rule) {
-    checkRuleReferences(rule, rule.name);
-  });
-
-  // Sort symbols
-  symbols = symbols.sort(function(a, b) {
-    return a.start - b.start;
-  });
-
   rules.symbols = symbols;
   rules.errors = errors;
   return rules;
+  
 
   function symbol(type, start, end) {
     symbols.push({
@@ -72,14 +59,10 @@ Polyhymnia.parse = function(tokensToParse, instruments) {
     start = start || currentToken.start;
     end   = end   || currentToken.end;
 
-    // Remove symbols within error
-    symbols = symbols.filter(function(symbol) {
-      return !(symbol.start >= start && symbol.end <= end);
-    });
-
-    // Add error
-    errors.push({ error: message, start: start, end: end });    
-    symbols.push({ type: 'error', error: message, start: start, end: end });
+    errors.push({ error: message, start: start, end: end });
+    if (start && end) {
+      symbols.push({ type: 'error', error: message, start: start, end: end });
+    }
   }
 
   function nextToken() {
@@ -198,14 +181,13 @@ Polyhymnia.parse = function(tokensToParse, instruments) {
 
   // Instrument: Note Note Note Note *
   function parsePattern() {
-    var instrument = currentToken.value;
+    var instrument = {
+      name:  currentToken.value,
+      start: currentToken.start,
+      end:   currentToken.end
+    };
 
-    // Check that instrument exists
-    if (instruments && !instruments[instrument]) {
-      error('There is no instrument ' + instrument );
-    } else {
-      symbol(symbolType.INSTRUMENT);
-    }
+    symbol(symbolType.INSTRUMENT);
     nextToken();
 
     var bar = [];
@@ -365,30 +347,5 @@ Polyhymnia.parse = function(tokensToParse, instruments) {
 
     symbol(symbolType.CONDITION, start, end);
     return { param: param, min: min, max: max };
-  }
-
-  function checkRuleReferences(rule, path) {
-    rule.definitions.forEach(function(definition) {
-      if (definition.sequence) {
-        definition.sequence.forEach(function(reference) {
-          if (!reference.invalid) {
-            // Check that reference exists
-            var childRule = ruleDict[reference.name];
-            if (childRule) {
-              // Check that reference isn't circular
-              if (path.indexOf(reference.name) !== -1) {
-                error(reference.name + ' cannot reference itself', reference.start, reference.end);
-                reference.invalid = true;
-              } else {
-                checkRuleReferences(childRule, path + '/' + reference.name);
-              }
-            } else {
-              error('There is no rule ' + reference.name, reference.start, reference.end);
-              reference.invalid = true;
-            }
-          }
-        });
-      }
-    });
   }
 };

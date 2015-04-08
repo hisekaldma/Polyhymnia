@@ -14,7 +14,7 @@ describe('Parser', function() {
     var rules = Polyhymnia.parse(Polyhymnia.tokenize('R1 -> Piano: C D E F'));
     
     expect(rules[0].name).toBe('R1');
-    expect(rules[0].definitions[0].instrument).toBe('Piano');
+    expect(rules[0].definitions[0].instrument.name).toBe('Piano');
     expect(rules[0].definitions[0].pattern[0][0].note).toEqual('C');
     expect(rules[0].definitions[0].pattern[0][0].octave).toEqual(undefined);
     expect(rules[0].definitions[0].pattern[0][0].type).toBe(noteType.NOTE);
@@ -33,7 +33,7 @@ describe('Parser', function() {
     var rules = Polyhymnia.parse(Polyhymnia.tokenize('R1 -> Piano: C D | E F'));
     
     expect(rules[0].name).toBe('R1');
-    expect(rules[0].definitions[0].instrument).toBe('Piano');
+    expect(rules[0].definitions[0].instrument.name).toBe('Piano');
     expect(rules[0].definitions[0].pattern[0][0].note).toEqual('C');
     expect(rules[0].definitions[0].pattern[0][0].octave).toEqual(undefined);
     expect(rules[0].definitions[0].pattern[0][0].type).toBe(noteType.NOTE);
@@ -202,26 +202,6 @@ describe('Parser', function() {
     var rules = Polyhymnia.parse(Polyhymnia.tokenize('R1 -> R2 R2\n\n\n\nR2 -> Piano: C'));
     expect(rules[0].name).toBe('R1');
     expect(rules[1].name).toBe('R2');
-  });
-
-  it('flags missing rules', function() {
-    var rules = Polyhymnia.parse(Polyhymnia.tokenize('R1 -> R2'));
-    expect(rules.errors[0].error).toBe('There is no rule R2');
-  });
-
-  it('flags missing instruments', function() {
-    var rules = Polyhymnia.parse(Polyhymnia.tokenize('R1 -> Piano: C'), {});
-    expect(rules.errors[0].error).toBe('There is no instrument Piano');
-  });
-
-  it('flags circular references', function() {
-    var rules = Polyhymnia.parse(Polyhymnia.tokenize('R1 -> R1'), {});
-    expect(rules.errors[0].error).toBe('R1 cannot reference itself');
-  });
-
-  it('flags deep circular references', function() {
-    var rules = Polyhymnia.parse(Polyhymnia.tokenize('R1 -> R2\nR2 -> R3\nR3 -> R1'), {});
-    expect(rules.errors[0].error).toBe('R1 cannot reference itself');
   });
 
   it('ignores comments before the first rule', function() {

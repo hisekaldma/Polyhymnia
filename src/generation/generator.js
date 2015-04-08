@@ -71,7 +71,7 @@ Polyhymnia.Generator = function() {
         node.definitions.push({ condition: definition.condition, sequence: children, index: 0 });
       } else if (definition.pattern) {
         // Pattern definition, just add it
-        node.definitions.push({ condition: definition.condition, pattern: definition.pattern, instrument: definition.instrument, index: 0 });
+        node.definitions.push({ condition: definition.condition, pattern: definition.pattern, instrument: definition.instrument.name, index: 0 });
       }
     });
 

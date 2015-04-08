@@ -60,7 +60,8 @@ Polyhymnia.Context = function(options) {
 
   function parse(code) {
     var tokens = Polyhymnia.tokenize(code);
-    var rules = Polyhymnia.parse(tokens, sequencer.instruments);
+    var rules  = Polyhymnia.parse(tokens);
+    rules      = Polyhymnia.validate(rules, sequencer.instruments);
     generator.setRules(rules);
     return rules;
   }
