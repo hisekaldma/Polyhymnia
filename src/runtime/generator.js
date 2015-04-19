@@ -53,6 +53,7 @@ Polyhymnia.Generator = function() {
     }
 
     // Fast-forward to where we were to allow hot-swapping the rules while playing
+    index = index % ruleTree.length;
     for (var i = 0; i < index; i++) {
       step(ruleTree);
     }
@@ -61,12 +62,13 @@ Polyhymnia.Generator = function() {
   function buildTree(rule) {
     // If we can't find the rule, return an empty node, so we can keep playing
     if (!rule) {
-      return { name: '', definitions: [] };
+      return { name: '', definitions: [], length: 0 };
     }
 
     var node = { name: rule.name, definitions: [] };
 
     rule.definitions.forEach(function(definition) {
+      var length = 0;
       if (definition.sequence) {
         // Sequence definition, find its children recursively
         var children = [];
@@ -78,12 +80,23 @@ Polyhymnia.Generator = function() {
             children.push(buildTree(rule));
           }
         });
-        node.definitions.push({ condition: definition.condition, instrument: definition.instrument, sequence: children, index: 0 });
+
+        // Calculate the length of the sequence
+        length = children.reduce(function(sum, child) {
+          return sum + child.length;
+        }, 0);
+        node.definitions.push({ condition: definition.condition, instrument: definition.instrument, sequence: children, index: 0, length: length });
       } else if (definition.pattern) {
         // Pattern definition, just add it
-        node.definitions.push({ condition: definition.condition, instrument: definition.instrument, pattern: definition.pattern, index: 0 });
+        length = definition.pattern.length;
+        node.definitions.push({ condition: definition.condition, instrument: definition.instrument, pattern: definition.pattern, index: 0, length: length });
       }
     });
+
+    // Calculate the length of the rule
+    node.length = node.definitions.reduce(function(longest, definition) {
+      return longest > definition.length ? longest : definition.length;
+    }, 0);
 
     return node;
   }
