@@ -11,7 +11,7 @@ Polyhymnia.tokenType = {
   DEGREE_CHORD:   'degree chord',
   DRUM_HIT:       'drum hit',
   BAR:            'bar',
-  ARROW:          'arrow',
+  EQUAL:          'equal',
   LEFT_PAREN:     'left paren',
   RIGHT_PAREN:    'right paren',
   PARAM:          'param',
@@ -192,8 +192,8 @@ Polyhymnia.tokenize = function(textToTokenize) {
         }
       } else {
         // Not inside a condition or pattern
-        if (str == '->') {
-          token = { type: tokenType.ARROW };
+        if (str == '=') {
+          token = { type: tokenType.EQUAL };
         } else if (str.search(namePattern) !== -1) {
           token = { type: tokenType.NAME, value: str };
         } else if (str.search(instrumentPattern) !== -1) {

@@ -11,7 +11,7 @@ Polyhymnia.noteType = {
 
 Polyhymnia.symbolType = {
   NAME:       'name',
-  ARROW:      'arrow',
+  EQUAL:      'equal',
   REFERENCE:  'reference',
   INSTRUMENT: 'instrument',
   NOTE:       'note',
@@ -92,14 +92,14 @@ Polyhymnia.parse = function(tokensToParse, instruments) {
       return true;
     } else if (currentToken.type == tokenType.EOL) {
       return true;
-    } else if (currentToken.type == tokenType.NAME && lookaheadToken && lookaheadToken.type == tokenType.ARROW) {
+    } else if (currentToken.type == tokenType.NAME && lookaheadToken && lookaheadToken.type == tokenType.EQUAL) {
       return true;
     } else {
       return false;
     }
   }
 
-  // Name -> Definitions
+  // Name = Definitions
   function parseRule() {
     var name = '';
     var definitions = [];
@@ -113,11 +113,11 @@ Polyhymnia.parse = function(tokensToParse, instruments) {
     }
     nextToken();
 
-    if (currentToken.type == tokenType.ARROW) {
-      symbol(symbolType.ARROW);
+    if (currentToken.type == tokenType.EQUAL) {
+      symbol(symbolType.EQUAL);
     } else {
-      // ERROR: Expected ->
-      error('Expected ->');
+      // ERROR: Expected =
+      error('Expected =');
     }
     nextToken();
 

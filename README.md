@@ -6,20 +6,22 @@ Polyhymnia is a programming language for composing generative, interactive music
 **Polyhymnia is still in the design stage. Some things will change. Some things won’t.**
 
 ```
-Play -> A1 A2
-
-A1 ->
+Play =
+  Chords
+  Melody
   Drums
-  Pad: C C C C
 
-A2 ->
-  Drums
-  Pad: D D D D
+Chords = Marimba: I | vi | IV vi | I | vi | IV V
 
-Drums ->
+Melody =
+  (x > 1) Marimba: 1 _ 5 _ | _ 5 | 6 _ 4 _
+  (x > 3) Marimba: _ 3 _ 3 | 3 _ | _ 4 _ 2
+
+Drums =
   Kick:          x _ _ _ _ _ x _ _ _ _ _ _ _ x _
-  (x > 3) Hihat: _ _ _ _ x _ _ _ _ _ x _ x x x x
-  (x > 6) Snare: _ _ _ x _ _ x _ _ _ _ _ x _ _ _
+  (x > 2) Snare: _ _ _ _ x _ _ _ _ _ x _ _ _ _ _
+  (x > 4) Clap:  _ _ _ _ _ _ _ _ _ _ _ _ x _ _ _
+  (x > 6) Hihat: x _ _ _ x _ X _ x _ X _ x X x X
 ```
 
 ## Getting started
@@ -63,7 +65,7 @@ To use Polyhymnia locally:
 4. Pass the code you want to play to the Context object:
 
   ```js
-  context.parse('Play -> Pad: C D E F');
+  context.parse('Play = Pad: C D E F');
   ```
 
 5. Play it:
