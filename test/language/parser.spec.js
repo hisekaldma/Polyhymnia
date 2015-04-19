@@ -2,7 +2,7 @@ describe('Parser', function() {
   'use strict';
   var noteType = Polyhymnia.noteType;
 
-  it('can parse a simple sequence rule', function() {
+  it('can parse sequences', function() {
     var rules = Polyhymnia.parse(Polyhymnia.tokenize('R1 = R2 R3'));
 
     expect(rules[0].name).toBe('R1');
@@ -10,11 +10,10 @@ describe('Parser', function() {
     expect(rules[0].definitions[0].sequence[1].name).toBe('R3');
   });
 
-  it('can parse a simple pattern rule', function() {
-    var rules = Polyhymnia.parse(Polyhymnia.tokenize('R1 = Piano: C D E F'));
+  it('can parse patterns', function() {
+    var rules = Polyhymnia.parse(Polyhymnia.tokenize('R1 = C D E F'));
     
     expect(rules[0].name).toBe('R1');
-    expect(rules[0].definitions[0].instrument.name).toBe('Piano');
     expect(rules[0].definitions[0].pattern[0][0].note).toEqual('C');
     expect(rules[0].definitions[0].pattern[0][0].octave).toEqual(undefined);
     expect(rules[0].definitions[0].pattern[0][0].type).toBe(noteType.NOTE);
@@ -29,11 +28,21 @@ describe('Parser', function() {
     expect(rules[0].definitions[0].pattern[0][3].type).toBe(noteType.NOTE);
   });
 
-  it('can parse multi bar patterns', function() {
-    var rules = Polyhymnia.parse(Polyhymnia.tokenize('R1 = Piano: C D | E F'));
-    
-    expect(rules[0].name).toBe('R1');
+  it('can parse sequences with an instrument', function() {
+    var rules = Polyhymnia.parse(Polyhymnia.tokenize('R1 = Piano: R2 R3'));
+
     expect(rules[0].definitions[0].instrument.name).toBe('Piano');
+  });
+
+  it('can parse patterns with an instrument', function() {
+    var rules = Polyhymnia.parse(Polyhymnia.tokenize('R1 = Piano: C D E F'));
+
+    expect(rules[0].definitions[0].instrument.name).toBe('Piano');
+  });
+
+  it('can parse multi bar patterns', function() {
+    var rules = Polyhymnia.parse(Polyhymnia.tokenize('R1 = C D | E F'));
+    
     expect(rules[0].definitions[0].pattern[0][0].note).toEqual('C');
     expect(rules[0].definitions[0].pattern[0][0].octave).toEqual(undefined);
     expect(rules[0].definitions[0].pattern[0][0].type).toBe(noteType.NOTE);
@@ -49,21 +58,21 @@ describe('Parser', function() {
   });
 
   it('can parse min conditions', function() {
-    var rules = Polyhymnia.parse(Polyhymnia.tokenize('R1 = (var > 0.1) Piano: C D E F'));
+    var rules = Polyhymnia.parse(Polyhymnia.tokenize('R1 = (var > 0.1) C D E F'));
 
     expect(rules[0].definitions[0].condition.param).toBe('var');
     expect(rules[0].definitions[0].condition.min).toBe(0.1);
   });
   
   it('can parse max conditions', function() {
-    var rules = Polyhymnia.parse(Polyhymnia.tokenize('R1 = (var < 1.0) Piano: C D E F'));
+    var rules = Polyhymnia.parse(Polyhymnia.tokenize('R1 = (var < 1.0) C D E F'));
 
     expect(rules[0].definitions[0].condition.param).toBe('var');
     expect(rules[0].definitions[0].condition.max).toBe(1.0);
   });
 
   it('can parse between conditions', function() {
-    var rules = Polyhymnia.parse(Polyhymnia.tokenize('R1 = (0.5 < var < 1.0) Piano: C D E F'));
+    var rules = Polyhymnia.parse(Polyhymnia.tokenize('R1 = (0.5 < var < 1.0) C D E F'));
 
     expect(rules[0].definitions[0].condition.param).toBe('var');
     expect(rules[0].definitions[0].condition.min).toBe(0.5);
@@ -71,25 +80,33 @@ describe('Parser', function() {
   });
 
   it('can parse reverse min conditions', function() {
-    var rules = Polyhymnia.parse(Polyhymnia.tokenize('R1 = (0.1 < var) Piano: C D E F'));
+    var rules = Polyhymnia.parse(Polyhymnia.tokenize('R1 = (0.1 < var) C D E F'));
 
     expect(rules[0].definitions[0].condition.param).toBe('var');
     expect(rules[0].definitions[0].condition.min).toBe(0.1);
   });
   
   it('can parse reverse max conditions', function() {
-    var rules = Polyhymnia.parse(Polyhymnia.tokenize('R1 = (1.0 > var) Piano: C D E F'));
+    var rules = Polyhymnia.parse(Polyhymnia.tokenize('R1 = (1.0 > var) C D E F'));
 
     expect(rules[0].definitions[0].condition.param).toBe('var');
     expect(rules[0].definitions[0].condition.max).toBe(1.0);
   });
 
   it('can parse reverse between conditions', function() {
-    var rules = Polyhymnia.parse(Polyhymnia.tokenize('R1 = (1.0 > var > 0.5) Piano: C D E F'));
+    var rules = Polyhymnia.parse(Polyhymnia.tokenize('R1 = (1.0 > var > 0.5) C D E F'));
 
     expect(rules[0].definitions[0].condition.param).toBe('var');
     expect(rules[0].definitions[0].condition.min).toBe(0.5);
     expect(rules[0].definitions[0].condition.max).toBe(1.0);
+  });
+
+  it('doesn\'t parse mixed sequences and patterns', function() {
+    var rules1 = Polyhymnia.validate(Polyhymnia.parse(Polyhymnia.tokenize('R1 = C R2')));
+    var rules2 = Polyhymnia.validate(Polyhymnia.parse(Polyhymnia.tokenize('R1 = R1 C')));
+
+    expect(rules1.errors[0].error).toBe('Expected a note, chord, drum hit or pause');
+    expect(rules2.errors[0].error).toBe('Expected a rule name');
   });
 
   it('doesn\'t parse rule names that could be confused with notes', function() {
@@ -97,6 +114,7 @@ describe('Parser', function() {
     var rules2 = Polyhymnia.validate(Polyhymnia.parse(Polyhymnia.tokenize('Am = R1')));
     var rules3 = Polyhymnia.validate(Polyhymnia.parse(Polyhymnia.tokenize('IV = R1')));
     var rules4 = Polyhymnia.validate(Polyhymnia.parse(Polyhymnia.tokenize('X = R1')));
+
     expect(rules1.errors[0].error).toBe('A is not a valid name, since it\'s a note');
     expect(rules2.errors[0].error).toBe('Am is not a valid name, since it\'s a chord');
     expect(rules3.errors[0].error).toBe('IV is not a valid name, since it\'s a degree chord');
@@ -160,7 +178,7 @@ describe('Parser', function() {
   });
 
   it('doesn\'t parse invalid notes', function() {
-    var rules = Polyhymnia.parse(Polyhymnia.tokenize('R1 = Piano: C / J Caug2'));
+    var rules = Polyhymnia.parse(Polyhymnia.tokenize('R1 = C / J Caug2'));
     expect(rules.errors[0].error).toBe('Expected a note, chord, drum hit or pause');
   });
 
@@ -200,41 +218,41 @@ describe('Parser', function() {
   });
 
   it('ignores line breaks before the first rule', function() {
-    var rules = Polyhymnia.parse(Polyhymnia.tokenize('\n\nR1 = R2 R1\n\nR2 = Piano: C'));
+    var rules = Polyhymnia.parse(Polyhymnia.tokenize('\n\nR1 = R2 R1\n\nR2 = C'));
     expect(rules[0].name).toBe('R1');
   });
 
   it('ignores line breaks after the last rule', function() {
-    var rules = Polyhymnia.parse(Polyhymnia.tokenize('R1 = R2 R1\n\nR2 = Piano: C\n\n'));
+    var rules = Polyhymnia.parse(Polyhymnia.tokenize('R1 = R2 R1\n\nR2 = C\n\n'));
     expect(rules[0].name).toBe('R1');
   });
 
   it('ignores extra line breaks between rules', function() {
-    var rules = Polyhymnia.parse(Polyhymnia.tokenize('R1 = R2 R2\n\n\n\nR2 = Piano: C'));
+    var rules = Polyhymnia.parse(Polyhymnia.tokenize('R1 = R2 R2\n\n\n\nR2 = C'));
     expect(rules[0].name).toBe('R1');
     expect(rules[1].name).toBe('R2');
   });
 
   it('ignores comments before the first rule', function() {
-    var rules = Polyhymnia.parse(Polyhymnia.tokenize('* No comment\nR1 = R2 R1\n\nR2 = Piano: C'));
+    var rules = Polyhymnia.parse(Polyhymnia.tokenize('* No comment\nR1 = R2 R1\n\nR2 = C'));
     expect(rules[0].name).toBe('R1');
     expect(rules[1].name).toBe('R2');
   });
 
   it('ignores comments after the last rule', function() {
-    var rules = Polyhymnia.parse(Polyhymnia.tokenize('R1 = R2 R1\n\nR2 = Piano: C\n* No comment'));
+    var rules = Polyhymnia.parse(Polyhymnia.tokenize('R1 = R2 R1\n\nR2 = C\n* No comment'));
     expect(rules[0].name).toBe('R1');
     expect(rules[1].name).toBe('R2');
   });
 
   it('ignores comments between rules', function() {
-    var rules = Polyhymnia.parse(Polyhymnia.tokenize('R1 = R2 R2\n\n* No comment\nR2 = Piano: C'));
+    var rules = Polyhymnia.parse(Polyhymnia.tokenize('R1 = R2 R2\n\n* No comment\nR2 = C'));
     expect(rules[0].name).toBe('R1');
     expect(rules[1].name).toBe('R2');
   });
 
   it('ignores comments at the end of line', function() {
-    var rules = Polyhymnia.parse(Polyhymnia.tokenize('R1 =\nR2 R2 * No comment\nR2 R2\n\nR2 = Piano: C'));
+    var rules = Polyhymnia.parse(Polyhymnia.tokenize('R1 =\nR2 R2 * No comment\nR2 R2\n\nR2 = C'));
     expect(rules[0].name).toBe('R1');
     expect(rules[1].name).toBe('R2');
   });

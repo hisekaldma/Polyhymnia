@@ -145,25 +145,52 @@ Polyhymnia.parse = function(tokensToParse, instruments) {
     return { name: name, definitions: definitions };
   }
 
-  // (Condition) Sequence | Pattern
+  // (Condition) Instrument: Sequence | Pattern
   function parseDefinition() {
-    var condition;
+    var condition, instrument;
 
+    // Condition is optional
     if (currentToken.type == tokenType.LEFT_PAREN) {
       condition = parseCondition();
     }
 
+    // Instrument is optional
     if (currentToken.type == tokenType.INSTRUMENT) {
-      var pattern = parsePattern();
-      return { condition: condition, instrument: pattern.instrument, pattern: pattern.pattern };
-    } else if (currentToken.type == tokenType.NAME) {
-      var sequence = parseSequence();
-      return { condition: condition, sequence: sequence };
-    } else {
-      // ERROR: Expected a sequence or pattern
-      error('Expected a sequence or pattern');
-      return {};
+      instrument = parseInstrument();
     }
+
+    // Decide if the definition is a pattern or sequence based on the first token
+    switch (currentToken.type) {
+      case tokenType.NOTE:
+      case tokenType.CHORD:
+      case tokenType.DEGREE_NOTE:
+      case tokenType.DEGREE_CHORD:
+      case tokenType.DRUM_HIT:
+      case tokenType.PAUSE:
+        var pattern = parsePattern();
+        return { condition: condition, instrument: instrument, pattern: pattern };
+      case tokenType.NAME:
+        var sequence = parseSequence();
+        return { condition: condition, instrument: instrument, sequence: sequence };
+      default:
+        // ERROR: Expected a sequence or pattern
+        error('Expected a sequence or pattern');
+        return {};
+    }
+  }
+
+  // Instrument
+  function parseInstrument() {
+    var instrument = {
+      name:  currentToken.value,
+      start: currentToken.start,
+      end:   currentToken.end
+    };
+
+    symbol(symbolType.INSTRUMENT);
+    nextToken();
+
+    return instrument;
   }
 
   // A1 A2 A3 *
@@ -191,17 +218,8 @@ Polyhymnia.parse = function(tokensToParse, instruments) {
     return sequence;
   }
 
-  // Instrument: Note Note Note Note *
+  // Note Note Note Note *
   function parsePattern() {
-    var instrument = {
-      name:  currentToken.value,
-      start: currentToken.start,
-      end:   currentToken.end
-    };
-
-    symbol(symbolType.INSTRUMENT);
-    nextToken();
-
     var bar = [];
     var bars = [bar];
     while (currentToken.type !== tokenType.EOL && tokensLeft) {
@@ -215,7 +233,7 @@ Polyhymnia.parse = function(tokensToParse, instruments) {
       }
     }
 
-    return { instrument: instrument, pattern: bars };
+    return bars;
   }
 
   // C# | Cm7 | x | _

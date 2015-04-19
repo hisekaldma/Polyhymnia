@@ -68,10 +68,10 @@ Polyhymnia.Generator = function() {
             children.push(buildTree(rule));
           }
         });
-        node.definitions.push({ condition: definition.condition, sequence: children, index: 0 });
+        node.definitions.push({ condition: definition.condition, instrument: definition.instrument, sequence: children, index: 0 });
       } else if (definition.pattern) {
         // Pattern definition, just add it
-        node.definitions.push({ condition: definition.condition, pattern: definition.pattern, instrument: definition.instrument.name, index: 0 });
+        node.definitions.push({ condition: definition.condition, instrument: definition.instrument, pattern: definition.pattern, index: 0 });
       }
     });
 
@@ -106,21 +106,29 @@ Polyhymnia.Generator = function() {
     return finished;
   }
 
-  function getCurrentBar(node) {
+  function getCurrentBar(node, instrument) {
     // Get all definitions whose conditions apply
     var definitions = getValidDefinitions(node.definitions);
 
     // Go through all definitions and evaluate them
     var patterns = [];
     definitions.forEach(function(definition) {
+      var inst;
+      // Instruments are overriden by parent instruments
+      if (instrument) {
+        inst = instrument;
+      } else if (definition.instrument) {
+        inst = definition.instrument.name;
+      }
+
       if (definition.sequence) {
         // Sequence definition
-        var childPatterns = getCurrentBar(definition.sequence[definition.index]);
+        var childPatterns = getCurrentBar(definition.sequence[definition.index], inst);
         childPatterns.forEach(function(p) { patterns.push(p); });
       } else if (definition.pattern) {
         // Pattern definition
         var midiNotes = definition.pattern[definition.index].map(toMidi);
-        patterns.push({ instrument: definition.instrument, pattern: midiNotes });
+        patterns.push({ instrument: inst, pattern: midiNotes });
       }
     });
 
