@@ -87,6 +87,12 @@ Polyhymnia.parse = function(tokensToParse, instruments) {
     }
   }
 
+  function skipToNextRule() {
+    while (!endOfRule() || currentToken.type == tokenType.EOL) {
+      nextToken();
+    }
+  }
+
   function endOfRule() {
     if (!tokensLeft) {
       return true;
@@ -129,21 +135,22 @@ Polyhymnia.parse = function(tokensToParse, instruments) {
     // Equals
     if (currentToken.type == tokenType.EQUAL) {
       symbol(symbolType.EQUAL);
+      nextToken();
+
+      // Optional line break
+      if (currentToken.type == tokenType.EOL) {
+        nextToken();
+      }
+
+      // Definitions
+      while (!endOfRule()) {
+        definitions.push(parseDefinition());
+        nextToken();
+      }      
     } else {
       // ERROR: Expected =
-      error('Expected =');      
-    }
-    nextToken();
-
-    // Optional line break
-    if (currentToken.type == tokenType.EOL) {
-      nextToken();
-    }
-
-    // Definitions
-    while (!endOfRule()) {
-      definitions.push(parseDefinition());
-      nextToken();
+      error('Expected =');
+      skipToNextRule();
     }
 
     return { name: name, definitions: definitions };
