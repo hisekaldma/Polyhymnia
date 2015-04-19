@@ -337,7 +337,7 @@ describe('Generator', function() {
     var generator = new Polyhymnia.Generator();
     generator.setRules([
       { name: 'Play', definitions: [{ sequence: [{ name: 'R1' }] }] },
-      { name: 'R1', definitions: [{ instrument: { name: 'Piano' }, pattern: [[{ type: noteType.NOTE, note: 'C' }]] }] }
+      { name: 'R1',   definitions: [{ instrument: { name: 'Piano' }, pattern: [[{ type: noteType.NOTE, note: 'C' }]] }] }
     ]);
     var output = generator.getCurrentBar();
 
@@ -349,7 +349,7 @@ describe('Generator', function() {
     var generator = new Polyhymnia.Generator();
     generator.setRules([
       { name: 'Play', definitions: [{ instrument: { name: 'Piano' }, sequence: [{ name: 'R1' }] }] },
-      { name: 'R1', definitions: [{ pattern: [[{ type: noteType.NOTE, note: 'C' }]] }] }
+      { name: 'R1',   definitions: [{ pattern: [[{ type: noteType.NOTE, note: 'C' }]] }] }
     ]);
     var output = generator.getCurrentBar();
 
@@ -361,11 +361,21 @@ describe('Generator', function() {
     var generator = new Polyhymnia.Generator();
     generator.setRules([
       { name: 'Play', definitions: [{ instrument: { name: 'Piano' }, sequence: [{ name: 'R1' }] }] },
-      { name: 'R1', definitions: [{ instrument: { name: 'Marimba' }, pattern: [[{ type: noteType.NOTE, note: 'C' }]] }] }
+      { name: 'R1',   definitions: [{ instrument: { name: 'Marimba' }, pattern: [[{ type: noteType.NOTE, note: 'C' }]] }] }
     ]);
     var output = generator.getCurrentBar();
 
     expect(output[0].instrument).toBe('Piano');
     expect(output[0].pattern[0].key).toBe(60);
-  });     
+  });
+
+  it('plays a single rule even if it isn\'t called Play', function() {
+    var generator = new Polyhymnia.Generator();
+    generator.setRules([
+      { name: 'R1', definitions: [{ instrument: { name: 'Conga' }, pattern: [[]]}] }
+    ]);
+    var output = generator.getCurrentBar();
+
+    expect(output[0].instrument).toBe('Conga');
+  });
 });

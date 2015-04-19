@@ -34,15 +34,23 @@ Polyhymnia.Generator = function() {
   };
 
   this.setRules = function(rules) {
-    // Prepare for playing
+    var oldRuleTree = ruleTree;
     ruleDictionary = {};
-    rules.forEach(function(rule) {
-      ruleDictionary[rule.name] = rule;
-    });
-    var oldRuleTree = ruleTree;    
-    ruleTree = buildTree(ruleDictionary[startRule]);
 
-    // Copy state to allow replacing the rules while playing
+    // Build the tree that will be evaluated each bar
+    if (rules.length > 1) {
+      rules.forEach(function(rule) {
+        ruleDictionary[rule.name] = rule;
+      });
+
+      // If we have more than one rule, find the starting point
+      ruleTree = buildTree(ruleDictionary[startRule]);      
+    } else {
+      // Otherwise, just start with the only rule
+      ruleTree = buildTree(rules[0]);
+    }
+
+    // Copy state to allow hot-swapping the rules while playing
     if (oldRuleTree) {
       copyState(oldRuleTree, ruleTree);
     }
