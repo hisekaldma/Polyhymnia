@@ -12,6 +12,7 @@ Polyhymnia.Generator = function() {
   var params = {};
   var ruleDictionary = null;
   var ruleTree = null;
+  var index = 0;
 
   this.setParam = function(name, value) {
     params[name] = value;
@@ -26,6 +27,7 @@ Polyhymnia.Generator = function() {
   };
 
   this.step = function() {
+    index++;
     step(ruleTree);
   };
 
@@ -50,9 +52,9 @@ Polyhymnia.Generator = function() {
       ruleTree = buildTree(rules[0]);
     }
 
-    // Copy state to allow hot-swapping the rules while playing
-    if (oldRuleTree) {
-      copyState(oldRuleTree, ruleTree);
+    // Fast-forward to where we were to allow hot-swapping the rules while playing
+    for (var i = 0; i < index; i++) {
+      step(ruleTree);
     }
   };
 
