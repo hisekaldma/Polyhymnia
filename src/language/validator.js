@@ -61,7 +61,7 @@ Polyhymnia.validate = function(rules, instruments) {
     if (!instrument.invalid) {
       // Check that instrument exists
       if (instruments && !instruments[instrument.name]) {
-        error('There is no instrument ' + instrument.name, instrument.start, instrument.end);
+        error('There is no instrument called ' + instrument.name, instrument.start, instrument.end);
         instrument.invalid = true;
       }
     }
@@ -80,7 +80,7 @@ Polyhymnia.validate = function(rules, instruments) {
           validateRule(childRule, path + '/' + reference.name);
         }
       } else {
-        error('There is no rule ' + reference.name, reference.start, reference.end);
+        error('There is no rule called ' + reference.name, reference.start, reference.end);
         reference.invalid = true;
       }
     }

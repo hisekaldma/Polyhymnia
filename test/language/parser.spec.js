@@ -92,9 +92,20 @@ describe('Parser', function() {
     expect(rules[0].definitions[0].condition.max).toBe(1.0);
   });
 
-  it('doesn\'t parse rules that don\'t start with a name' , function() {
-    var rules = Polyhymnia.parse(Polyhymnia.tokenize('x = R2 R3'));
-    expect(rules.errors[0].error).toBe('Rules must start with a name');
+  it('doesn\'t parse rule names that could be confused with notes', function() {
+    var rules1 = Polyhymnia.validate(Polyhymnia.parse(Polyhymnia.tokenize('A = R1')));
+    var rules2 = Polyhymnia.validate(Polyhymnia.parse(Polyhymnia.tokenize('Am = R1')));
+    var rules3 = Polyhymnia.validate(Polyhymnia.parse(Polyhymnia.tokenize('IV = R1')));
+    var rules4 = Polyhymnia.validate(Polyhymnia.parse(Polyhymnia.tokenize('X = R1')));
+    expect(rules1.errors[0].error).toBe('A is not a valid name, since it\'s a note');
+    expect(rules2.errors[0].error).toBe('Am is not a valid name, since it\'s a chord');
+    expect(rules3.errors[0].error).toBe('IV is not a valid name, since it\'s a degree chord');
+    expect(rules4.errors[0].error).toBe('X is not a valid name, since it\'s a drum hit');
+  });
+
+  it('doesn\'t parse rules that don\'t have valid names' , function() {
+    var rules = Polyhymnia.parse(Polyhymnia.tokenize('2 = R2 R3'));
+    expect(rules.errors[0].error).toBe('2 is not a valid name');
   });
 
   it('doesn\'t parse rules that don\'t have an equal sign', function() {

@@ -107,9 +107,21 @@ Polyhymnia.parse = function(tokensToParse, instruments) {
     if (currentToken.type == tokenType.NAME) {
       name = currentToken.value;
       symbol(symbolType.NAME);
+    } else if (currentToken.type == tokenType.NOTE) {
+      // ERROR: Name could be confused with note
+      error(currentToken.str + ' is not a valid name, since it\'s a note');
+    } else if (currentToken.type == tokenType.CHORD) {
+      // ERROR: Name could be confused with chord
+      error(currentToken.str + ' is not a valid name, since it\'s a chord');
+    } else if (currentToken.type == tokenType.DEGREE_CHORD) {
+      // ERROR: Name could be confused with degree chord
+      error(currentToken.str + ' is not a valid name, since it\'s a degree chord');
+    } else if (currentToken.type == tokenType.DRUM_HIT) {
+      // ERROR: Name could be confused with drum hit
+      error(currentToken.str + ' is not a valid name, since it\'s a drum hit');
     } else {
       // ERROR: Expected rule name
-      error('Rules must start with a name');
+      error(currentToken.str + ' is not a valid name');
     }
     nextToken();
 

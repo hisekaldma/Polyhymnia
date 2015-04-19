@@ -45,8 +45,7 @@ Polyhymnia.tokenize = function(textToTokenize) {
   var DELIMITERS = '()\n\t ';
   var COMMENT    = '*';
 
-  var CTX_DEFAULT   = 'sequence';
-  var CTX_PATTERN   = 'pattern';
+  var CTX_DEFAULT   = 'default';
   var CTX_CONDITION = 'condition';
 
   var namePattern           = new RegExp('^' + NAME_PATTERN +                            '$');
@@ -129,11 +128,11 @@ Polyhymnia.tokenize = function(textToTokenize) {
     } else if (currentChar == SPACE || currentChar == TAB) {
       nextChar();
     } else if (currentChar == '(') {
-      token = { type: tokenType.LEFT_PAREN };
+      token = { type: tokenType.LEFT_PAREN, str: '(' };
       context = CTX_CONDITION;
       nextChar();
     } else if (currentChar == ')') {
-      token = { type: tokenType.RIGHT_PAREN };
+      token = { type: tokenType.RIGHT_PAREN, str: ')' };
       context = CTX_DEFAULT;
       nextChar();
     } else if (currentChar == COMMENT) {
@@ -143,64 +142,64 @@ Polyhymnia.tokenize = function(textToTokenize) {
           str += currentChar;
           nextChar();
         }
-        token = { type: tokenType.COMMENT, value: str };
+        token = { type: tokenType.COMMENT, value: str, str: str };
     } else {
       str = readText();
       if (context == CTX_CONDITION) {
         // Inside a condition
         if (str == '>') {
-          token = { type: tokenType.GREATER_THAN };
+          token = { type: tokenType.GREATER_THAN, str: str };
         } else if (str == '<') {
-          token = { type: tokenType.LESS_THAN };
+          token = { type: tokenType.LESS_THAN, str: str };
         } else if (str.search(paramPattern) !== -1) {
-          token = { type: tokenType.PARAM, value: str };
+          token = { type: tokenType.PARAM, value: str, str: str };
         } else if (str.search(numberPattern) !== -1) {
-          token = { type: tokenType.NUMBER, value: parseFloat(str) };
+          token = { type: tokenType.NUMBER, value: parseFloat(str), str: str };
         } else {
-          token = { type: tokenType.ERROR, value: str };
+          token = { type: tokenType.ERROR, value: str, str: str };
         }
-      } else if (context == CTX_PATTERN) {
-        // Inside a pattern
-        if (str == '_') {
-          token = { type: tokenType.PAUSE };
+      } else {
+        // Not inside a condition
+        if (str == '=') {
+          token = { type: tokenType.EQUAL, str: str };
+        } else if (str == '_') {
+          token = { type: tokenType.PAUSE, str: str };
         } else if (str == '|') {
-          token = { type: tokenType.BAR };
-        } else if (str.search(drumPattern) !== -1) {
+          token = { type: tokenType.BAR, str: str };
+        }
+
+        // Pattern steps have higher precedence
+        else if (str.search(drumPattern) !== -1) {
           matches = str.match(drumPattern);
           velocity = getVelocity(matches[2]);
-          token = { type: tokenType.DRUM_HIT, value: matches[1], velocity: velocity };
+          token = { type: tokenType.DRUM_HIT, value: matches[1], velocity: velocity, str: str };
         } else if (str.search(notePattern) !== -1) {
           matches = str.match(notePattern);
           octave = getOctave(matches[2]);
           velocity = getVelocity(matches[3]);
-          token = { type: tokenType.NOTE, note: matches[1], octave: octave, velocity: velocity };
+          token = { type: tokenType.NOTE, note: matches[1], octave: octave, velocity: velocity, str: str };
         } else if (str.search(chordPattern) !== -1) {
           matches = str.match(chordPattern);
           octave = getOctave(matches[2]);
           velocity = getVelocity(matches[4]);
-          token = { type: tokenType.CHORD, note: matches[1], octave: octave, chord: matches[3], velocity: velocity };
+          token = { type: tokenType.CHORD, note: matches[1], octave: octave, chord: matches[3], velocity: velocity, str: str };
         } else if (str.search(degreeNotePattern) !== -1) {
           matches = str.match(degreeNotePattern);
           velocity = getVelocity(matches[2]);
-          token = { type: tokenType.DEGREE_NOTE, value: matches[1], velocity: velocity };
+          token = { type: tokenType.DEGREE_NOTE, value: matches[1], velocity: velocity, str: str };
         } else if (str.search(degreeChordPattern) !== -1) {
           matches = str.match(degreeChordPattern);
           velocity = getVelocity(matches[2]);
-          token = { type: tokenType.DEGREE_CHORD, value: matches[1], velocity: velocity };
-        } else {
-          token = { type: tokenType.ERROR, value: str };
-        }
-      } else {
-        // Not inside a condition or pattern
-        if (str == '=') {
-          token = { type: tokenType.EQUAL };
-        } else if (str.search(namePattern) !== -1) {
+          token = { type: tokenType.DEGREE_CHORD, value: matches[1], velocity: velocity, str: str };
+        } 
+
+        // Names have lower precedence
+        else if (str.search(namePattern) !== -1) {
           token = { type: tokenType.NAME, value: str };
         } else if (str.search(instrumentPattern) !== -1) {
-          token = { type: tokenType.INSTRUMENT, value: str.substr(0, str.length - 1) };
-          context = CTX_PATTERN;
+          token = { type: tokenType.INSTRUMENT, value: str.substr(0, str.length - 1), str: str };
         } else {
-          token = { type: tokenType.ERROR, value: str };
+          token = { type: tokenType.ERROR, value: str, str: str };
         }
       }
     }
