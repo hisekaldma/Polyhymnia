@@ -34,6 +34,21 @@ Polyhymnia.Sequencer = function() {
       var noteLength = getNoteLength(pattern.length);
       var noteNumber = Math.floor(stepInBar / noteLength);
 
+      // If there is no instrument, choose one
+      if (!instrument) {
+        // If piano is available, use that
+        if (self.instruments.Piano) {
+          instrument = 'Piano';
+        }
+        // Otherwise use the first instrument available
+        else {
+          for (var inst in self.instruments) {
+            instrument = inst;
+            break;
+          }
+        }
+      }
+
       if (noteNumber < pattern.length) {
         var notes = pattern[noteNumber];
         if (!Array.isArray(notes)) {
