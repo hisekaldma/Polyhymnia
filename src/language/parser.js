@@ -60,7 +60,7 @@ Polyhymnia.parse = function(tokensToParse, instruments) {
     end   = end   || currentToken.end;
 
     errors.push({ error: message, start: start, end: end });
-    if (start && end) {
+    if (start !== undefined && end !== undefined) {
       symbols.push({ type: 'error', error: message, start: start, end: end });
     }
   }
@@ -104,6 +104,7 @@ Polyhymnia.parse = function(tokensToParse, instruments) {
     var name = '';
     var definitions = [];
 
+    // Rule name
     if (currentToken.type == tokenType.NAME) {
       name = currentToken.value;
       symbol(symbolType.NAME);
@@ -125,18 +126,21 @@ Polyhymnia.parse = function(tokensToParse, instruments) {
     }
     nextToken();
 
+    // Equals
     if (currentToken.type == tokenType.EQUAL) {
       symbol(symbolType.EQUAL);
     } else {
       // ERROR: Expected =
-      error('Expected =');
+      error('Expected =');      
     }
     nextToken();
 
+    // Optional line break
     if (currentToken.type == tokenType.EOL) {
       nextToken();
     }
 
+    // Definitions
     while (!endOfRule()) {
       definitions.push(parseDefinition());
       nextToken();
