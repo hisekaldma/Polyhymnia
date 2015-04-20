@@ -110,30 +110,31 @@ Polyhymnia.parse = function(tokensToParse, instruments) {
     var name = '';
     var definitions = [];
 
-    // Rule name
-    if (currentToken.type == tokenType.NAME) {
-      name = currentToken.value;
-      symbol(symbolType.NAME);
-    } else if (currentToken.type == tokenType.NOTE) {
-      // ERROR: Name could be confused with note
-      error(currentToken.str + ' is not a valid name, since it\'s a note');
-    } else if (currentToken.type == tokenType.CHORD) {
-      // ERROR: Name could be confused with chord
-      error(currentToken.str + ' is not a valid name, since it\'s a chord');
-    } else if (currentToken.type == tokenType.DEGREE_CHORD) {
-      // ERROR: Name could be confused with degree chord
-      error(currentToken.str + ' is not a valid name, since it\'s a degree chord');
-    } else if (currentToken.type == tokenType.DRUM_HIT) {
-      // ERROR: Name could be confused with drum hit
-      error(currentToken.str + ' is not a valid name, since it\'s a drum hit');
-    } else {
-      // ERROR: Expected rule name
-      error(currentToken.str + ' is not a valid name');
-    }
-    nextToken();
+    // Rules can be given a name with =, or they can be anonymous
+    if (lookaheadToken && lookaheadToken.type == tokenType.EQUAL) {
+      // Named rule
+      if (currentToken.type == tokenType.NAME) {
+        name = currentToken.value;
+        symbol(symbolType.NAME);
+      } else if (currentToken.type == tokenType.NOTE) {
+        // ERROR: Name could be confused with note
+        error(currentToken.str + ' is not a valid name, since it\'s a note');
+      } else if (currentToken.type == tokenType.CHORD) {
+        // ERROR: Name could be confused with chord
+        error(currentToken.str + ' is not a valid name, since it\'s a chord');
+      } else if (currentToken.type == tokenType.DEGREE_CHORD) {
+        // ERROR: Name could be confused with degree chord
+        error(currentToken.str + ' is not a valid name, since it\'s a degree chord');
+      } else if (currentToken.type == tokenType.DRUM_HIT) {
+        // ERROR: Name could be confused with drum hit
+        error(currentToken.str + ' is not a valid name, since it\'s a drum hit');
+      } else {
+        // ERROR: Expected rule name
+        error(currentToken.str + ' is not a valid name');
+      }
+      nextToken();
 
-    // Equals
-    if (currentToken.type == tokenType.EQUAL) {
+      // Equals
       symbol(symbolType.EQUAL);
       nextToken();
 
@@ -141,16 +142,12 @@ Polyhymnia.parse = function(tokensToParse, instruments) {
       if (currentToken.type == tokenType.EOL) {
         nextToken();
       }
+    }
 
-      // Definitions
-      while (!endOfRule()) {
-        definitions.push(parseDefinition());
-        nextToken();
-      }      
-    } else {
-      // ERROR: Expected =
-      error('Expected =');
-      skipToNextRule();
+    // Definitions
+    while (!endOfRule()) {
+      definitions.push(parseDefinition());
+      nextToken();
     }
 
     return { name: name, definitions: definitions };
