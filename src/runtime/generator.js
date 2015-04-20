@@ -158,21 +158,6 @@ Polyhymnia.Generator = function() {
     return patterns;
   }
 
-  function copyState(oldNode, newNode) {
-    for (var i = 0; i < oldNode.definitions.length; i++) {
-      var oldDefinition = oldNode.definitions[i];
-      var newDefinition = newNode.definitions.length > i ? newNode.definitions[i] : undefined;
-      if (oldDefinition && newDefinition) {
-        newDefinition.index = oldDefinition.index;
-        if (oldDefinition.sequence && newDefinition.sequence) {
-          var oldCurrent = oldDefinition.sequence[oldDefinition.index];
-          var newCurrent = newDefinition.sequence[newDefinition.index];
-          copyState(oldCurrent, newCurrent);
-        }
-      }
-    }
-  }
-
   function resetState(node) {
     node.definitions.forEach(function(definition) {
       definition.index = 0;
