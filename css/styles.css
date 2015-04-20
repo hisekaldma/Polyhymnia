@@ -154,6 +154,23 @@ code .arrow {
 code .condition {
   color: rgba(255, 255, 255, 0.9);
 }
+table {
+  margin-top: 1.4rem;
+  margin-bottom: 1.4rem;
+  border-collapse: collapse;
+}
+table tr {
+  border-top: 1px solid rgba(255, 217, 178, 0.3);
+  border-bottom: 1px solid rgba(255, 217, 178, 0.3);
+}
+table td {
+  padding-bottom: 0.2em;
+  padding-bottom: 0.2em;
+  padding-right: 0.7em;
+}
+table td:last-child {
+  padding-right: 0;
+}
 
 /* Design */
 
