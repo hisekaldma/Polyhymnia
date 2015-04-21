@@ -1,13 +1,12 @@
 ---
 layout: text
-class: documentation
 title: Language guide
 ---
 
 # Language guide
 Polyhymnia is a live programming language for composing music. It combines ideas from generative grammars and music theory into a language that is both graceful and easy to learn, yet powerful and expressive.
 
-*Polyhymnia is still in the design stage. Some things will change. Some things won’t.*
+__Polyhymnia is still in the design stage. Some things will change. Some things won’t.__
 
 ## Patterns
 The basic unit in Polyhymnia is the pattern. Patterns are the building blocks that you use to build up your composition.
@@ -157,7 +156,7 @@ Just like you can name patterns, you can also name sequences. Then you can refer
 Note that a sequence can only contain names, and a pattern can only contain notes. You can’t mix the two in one definition.
 
 ### Names
-Pattern and sequence names have to start with an *uppercase* letter, but after that they can contain lower and uppercase letters, numbers, and underscore (_). However, names cannot be anything that could be confused with a note in a pattern, e.g. `A`, `A1`, `B`, `B1`, `Cm`, `I`, `IV`, or `X`.
+Pattern and sequence names have to start with an uppercase letter, but after that they can contain lower and uppercase letters, numbers, and underscore (_). However, names cannot be anything that could be confused with a note in a pattern, e.g. `A`, `A1`, `B`, `B1`, `Cm`, `I`, `IV`, or `X`.
 
 ### Instruments
 So far all patterns have been played on a piano. This is because we haven’t specified what instrument to play them on. If we instead wanted to play some patterns on a specific instrument we just write the name of the instrument and a colon (`:`) followed by the pattern that we want to play:
@@ -200,6 +199,6 @@ To make the music interactive, you can write conditions that have to be true for
       (1 < x < 2) Synth: G G G G
       (x > 2)     Synth: D D D D
 
-Parameter names have to start with a *lowercase letter*, and numbers have to be *integers*. The allowed comparisons are `<` and `>`, and they are inclusive, because that is what you want most of the time. Other comparisons, like `==` and `!=`, aren’t supported. The idea isn’t to check for specific values, but to react to changing inputs.
+Parameter names have to start with a lowercase letter, and numbers have to be integers. The allowed comparisons are `<` and `>`, and they are inclusive, because that is what you want most of the time. Other comparisons, like `==` and `!=`, aren’t supported. The idea isn’t to check for specific values, but to react to changing inputs.
 
 Conditions are evaluated at the start of a new bar. This means that even if a condition becomes valid in the middle of a bar, new patterns won’t start playing until the next bar, which is what you want musically.

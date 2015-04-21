@@ -1,0 +1,342 @@
+---
+---
+/* Resets */
+
+html, body, div, span, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+abbr, address, cite, code, del, dfn, em, img, ins, kbd, q, samp,
+small, strong, sub, sup, var, b, i, dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td,
+article, aside, canvas, details, figcaption, figure,
+footer, header, hgroup, menu, nav, section, summary,
+time, mark, audio, video {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font-size: 100%;
+  font: inherit;
+  vertical-align: baseline;
+}
+article, aside, details, figcaption, figure,
+footer, header, hgroup, menu, nav, section {
+  display: block;
+}
+body { font:13px/1.231 sans-serif; *font-size:small; } 
+html { overflow-y: scroll; }
+a, a:visited, a:hover { text-decoration: none; }
+a:hover, a:active { outline: none; }
+nav ul, nav li { margin: 0; list-style:none; list-style-image: none; }
+::-moz-selection{ background: #000; color:#fff; text-shadow: none; }
+::selection { background:#000; color:#fff; text-shadow: none; }
+a:link { -webkit-tap-highlight-color: transparent; }
+h1, h2, h3, h4, h5, h6 { font-weight: normal; }
+* { box-sizing: border-box; }
+
+
+/* Fix weird Typekit bug */
+
+body > span[aria-hidden=true] {
+  position: fixed !important;
+}
+
+
+/* Layout */
+
+html {
+  min-height: 100%;
+  position: relative;
+}
+body {
+  min-height: 100%;
+}
+header, section, footer {
+  width: 100%;
+  padding: 0 12px;
+  overflow: auto;
+
+  > div {
+    max-width: 942px;
+    margin: 0px auto;
+  }
+}
+.third, .half, .twothirds, .whole {
+  float: left;
+  padding: 0 12px;
+  margin: 1.4rem 0;
+}
+.third      { width: 33.333%; }
+.half       { width: 50%; }
+.twothirds  { width: 66.666%; }
+.whole      { width: 100%; }
+@media screen and (max-width: 590px) {
+  section, header, footer {
+    padding: 0 2%;
+  }
+  .third, .half, .twothirds, .whole {
+    width: 100%;
+    padding: 0 2%;
+    margin: 4% 0;
+  }
+}
+
+
+/* Typography */
+
+@font-face {
+  font-weight: normal;
+  font-style: normal;
+  font-family: Apercu;
+  src: url(/fonts/apercu_regular.otf);
+}
+
+@font-face {
+  font-weight: bold;
+  font-style: normal;
+  font-family: Apercu;
+  src: url(/fonts/apercu_bold.otf);
+}
+
+body {
+  font: 400 17px/1.4rem Apercu, "Helvetica Neue", Arial, sans-serif;
+  color: #fff;
+  -webkit-text-size-adjust: none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+p {
+  color: rgba(255,255,255,0.8);
+}
+p + p {
+  margin-top: 1rem;
+}
+strong {
+  font-weight: bold;
+}
+em {
+  font-style: italic;
+}
+
+/* Headings */
+
+h1 {
+  font-size: 22px;
+  font-weight: bold;
+  margin-top: 1.4rem;
+  margin-bottom: 0.7rem;
+}
+h2 {
+  font-size: 20px;
+  font-weight: bold;
+  padding-bottom: 0.5rem;
+  border-bottom: 3px solid rgba(255, 255, 255, 0.5);
+  margin-top: 3rem;
+  margin-bottom: 1.4rem;
+}
+h3 {
+  font-size: 17px;
+  font-weight: bold;
+  margin-top: 1.4rem;
+}
+
+/* Links */
+
+a {
+  color: #815ccc;
+
+  &:hover, &:active {
+    border-bottom: 3px solid #815ccc;
+  }
+
+  nav & {
+    color: inherit;
+    padding-bottom: 4px;
+    border-bottom: 3px solid rgba(255, 255, 255, 0.5);
+
+    &:hover, &:active {
+      border-bottom: 3px solid #fff;
+    }
+  }
+  h1 & {
+    color: inherit;
+    padding-bottom: 4px;
+
+    &:hover {
+      opacity: 0.5;
+      border: none;
+    }
+  }
+}
+
+/* Navigation */
+
+ul {
+  margin: 0;
+  padding: 0;
+}
+li {
+  list-style-type: none;
+}
+
+/* Code */
+
+pre {
+  padding-left: 1rem;
+  margin-left: 1rem;
+  margin-top: 1.4rem;
+  margin-bottom: 1.4rem;
+  border-left: 3px solid #815ccc;
+  white-space: pre-wrap;
+}
+code {
+  color: #815ccc;
+  font-family: Inconsolata, Consolas, "Andale Mono", "Lucida Console", monospace;
+
+  p & {
+    padding: 0px 2px;
+  }
+}
+
+/* Tables */
+
+table {
+  width: 100%;
+  margin-top: 1.4rem;
+  margin-bottom: 1.4rem;
+  border-collapse: collapse;
+
+  tr {
+    border-top: 1px solid #fff;
+    border-bottom: 1px solid #fff;
+  }
+  td {
+    padding-top: 0.2em;
+    padding-bottom: 0.2em;
+    padding-right: 1.4em;
+  }
+  td:last-child {
+    padding-right: 0;
+  }
+}
+
+
+/* Design */
+
+body {
+  background: linear-gradient(170deg, #815ccc, #73b9ff);
+}
+
+header {
+  .logo {
+    width: 68px;
+    height: 68px;
+    float: left;
+    margin-right: 1.4em;
+  }
+  h1 {
+    float: left;
+    font-weight: normal;
+
+    @media screen and (max-width: 450px) {
+      width: 100%;
+    }
+  }
+
+  nav {
+    float: right;
+    width: 50%;
+    margin: 0;
+    padding: 1.4rem 0 0.7rem;
+    text-align: right;
+
+    @media screen and (max-width: 450px) {
+      width: 100%;
+      float: left;
+      padding: 0;
+      text-align: left;
+    }
+
+    li {
+      display: inline-block;
+      list-style-type: none;
+      margin-left: 1em;
+
+      @media screen and (max-width: 450px) {
+        display: block;
+        width: 100%;
+        float: left;
+        margin: 0;
+      }
+    }
+  }
+}
+
+footer {
+  nav {
+    padding: 0.7rem 0;
+
+    li {
+      display: inline-block;
+      list-style-type: none;
+      margin-right: 1em;
+    }
+    li.right {
+      float: right;
+    }
+    li.right:last-child {
+      margin-right: 0;
+    }
+  }
+}
+
+
+/* Layout: Playground */
+
+.playground {
+  .ref {
+    padding-left: 5%;
+
+    @media screen and (max-width: 590px) {
+      padding: 0 2%;
+    }
+  }
+  .contents h1 {
+    margin-top: 0;
+  }
+}
+
+
+/* Layout: Text */
+
+.text {
+  .contents, footer {
+    color: rgb(40,40,40);
+    font-size: 16px;
+  }
+  .contents {
+    background: #fff;
+    padding-bottom: 3em;
+  }
+  footer {
+    background: #eee;
+
+    nav a {
+      border-color: #ccc;
+
+      &:hover, &:active {
+        border-color: #000;
+      }
+    }
+  }
+  h2 {
+    border-color: rgba(40,40,40,0.15);
+  }
+  p, table {
+    color: rgba(40,40,40,0.8);
+  }
+  tr {
+    border-width: 3px;
+    border-color: #ddd;
+  }
+}
