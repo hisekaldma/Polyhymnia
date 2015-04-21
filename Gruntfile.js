@@ -1,8 +1,6 @@
 module.exports = function(grunt) {
   var src = 'src/**/*.js';
   var tests = 'test/**/*.spec.js';
-  var less = 'src/**/*.less';
-  var templates = makeTemplates();
 
   // Project configuration
   grunt.initConfig({
@@ -18,7 +16,7 @@ module.exports = function(grunt) {
         src: src,
         dest: 'build/<%= pkg.name %>.js',
         options: {
-          banner: '<%= banner %>' + templates
+          banner: '<%= banner %>'
         }
       }
     },
@@ -26,15 +24,6 @@ module.exports = function(grunt) {
       build: {
         src: '<%= concat.build.dest %>',
         dest: 'build/<%= pkg.name %>.min.js',
-        options: {
-          banner: '<%= banner %>'
-        }
-      }
-    },
-    less: {
-      build: {
-        src: less,
-        dest: 'build/<%= pkg.name %>.css',
         options: {
           banner: '<%= banner %>'
         }
@@ -90,22 +79,14 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-concat');
   grunt.loadNpmTasks('grunt-contrib-jasmine');
   grunt.loadNpmTasks('grunt-contrib-jshint');
-  grunt.loadNpmTasks('grunt-contrib-less');
   grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-gh-pages');
 
   // Register tasks
-  grunt.registerTask('build',   ['jshint', 'concat', 'uglify', 'less']);
+  grunt.registerTask('build',   ['jshint', 'concat', 'uglify']);
   grunt.registerTask('test',    ['jasmine']);
   grunt.registerTask('dist',    ['build', 'test', 'compress']);
   grunt.registerTask('default', ['build', 'test']);
   grunt.registerTask('pages',   ['build', 'test', 'gh-pages']);
-
-  function makeTemplates() {
-    var str = grunt.file.read('src/editor/editor.html');
-    str = str.replace(/\n/g, ' ');
-    str = 'var Polyhymnia = Polyhymnia || {}; Polyhymnia.templates = { \'editor\': \'' + str + '\' };\n\n';
-    return str;
-  }
 };
