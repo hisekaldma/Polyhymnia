@@ -1,433 +1,9 @@
-var Polyhymnia = Polyhymnia || {}; Polyhymnia.templates = { 'editor': '<div class="polyhymnia-editor">    <div class="code">     <div class="display">       <div class="text"></div>       <div class="cursor-layer">         <div class="cursor blink">&nbsp;</div>       </div>     </div>     <textarea class="editor" spellcheck="false"></textarea>   </div>    <div class="controls">      <button class="play">       <svg x="0px" y="0px" width="18px" height="18px">         <path fill="none" stroke="#FF884D" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" d="M16,9L2,17V1L16,9z"/>       </svg>     </button>      <button class="stop" style="display: none">       <svg x="0px" y="0px" width="18px" height="18px">         <rect x="2" y="2" fill="none" stroke="#FF884D" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" width="14" height="14"/>       </svg>     </button>      <div class="slider">       <div class="output hide">x = 0</div>       <input type="range" min="0" max="10" value="0" step="0.1" />     </div>      <div class="settings">           <input class="tempo" type="number" min="1" max="320" value="120" step="1" maxlength="3" /><label>bpm</label>       <select class="time">         <option>3/4</option>         <option selected>4/4</option>         <option>5/4</option>         <option>6/8</option>         <option>7/8</option>       </select>       <select class="tonic short">         <option selected>C</option>         <option>C#</option>         <option>D</option>         <option>Db</option>         <option>D#</option>         <option>E</option>         <option>Eb</option>         <option>F</option>         <option>F#</option>         <option>G</option>         <option>Gb</option>         <option>G#</option>         <option>A</option>         <option>Ab</option>         <option>A#</option>         <option>B</option>         <option>Bb</option>       </select>       <select class="scale">         <option value="major" selected>maj</option>         <option value="minor">min</option>       </select>     </div>   </div>    <div class="not-supported" style="display: none">     Your browser doesn’t support web audio. Why don’t you try <a href="https://www.google.com/chrome/browser/desktop/">Chrome</a>?   </div> </div>' };
-
-var Polyhymnia = Polyhymnia || {};
-
-Polyhymnia.Editor = function(element, context) {
-  'use strict';
-
-  // Code
-  var contents = element.textContent;
-
-  // Music
-  var rules = [];
-  var music = context;
-  var symbols = [];
-  music.setAnimCallback(highlightNotes);
-
-  // Elements
-  element.innerHTML = Polyhymnia.templates.editor;
-  var controls =     element.querySelector('.controls');
-  var playButton =   element.querySelector('.play');
-  var stopButton =   element.querySelector('.stop');
-  var paramSlider =  element.querySelector('.slider input');
-  var paramOutput =  element.querySelector('.slider .output');
-  var tempoInput =   element.querySelector('.settings .tempo');
-  var tonicInput =   element.querySelector('.settings .tonic');
-  var scaleInput =   element.querySelector('.settings .scale');
-  var timeInput =    element.querySelector('.settings .time');
-  var codeEditor =   element.querySelector('.code .editor');
-  var codeDisplay =  element.querySelector('.code .display');
-  var codeText =     element.querySelector('.code .text');
-  var codeCursor =   element.querySelector('.code .cursor');
-  var notSupportedMessage = element.querySelector('.not-supported');
-  var noteElems = [];
-  codeEditor.value = contents;
-
-  // Private vars
-  var cursorPos;
-  var isPlaying = false;
-
-  // Functions
-  function play() {
-    parse();
-    music.play();
-    playButton.style.display = 'none';
-    stopButton.style.display = 'block';
-    isPlaying = true;
-  }
-
-  function stop() {
-    music.stop();
-    playButton.style.display = 'block';
-    stopButton.style.display = 'none';
-    isPlaying = false;
-    highlightNotes([]);
-  }
-
-  function parse() {
-    // Parse rules
-    var rules = music.parse(codeEditor.value);
-    symbols = rules.symbols;
-
-    // Render the code
-    renderCode();
-  } 
-
-  function changeTempo() {
-    if (tempoInput.value === '') {
-      tempoInput.value = 120;
-    } else if (tempoInput.value > parseInt(tempoInput.max)) {
-      tempoInput.value = tempoInput.max;
-    } else if (tempoInput.value < parseInt(tempoInput.min)) {
-      tempoInput.value = tempoInput.min;
-    }
-    music.setTempo(tempoInput.value);
-  }
-
-  function changeTonic() {
-    music.setTonic(tonicInput.value);
-
-    // Tweak layout to account for length
-    if (tonicInput.value.length == 1) {
-      tonicInput.classList.add('short');
-    } else {
-      tonicInput.classList.remove('short');
-    }
-  }
-
-  function changeScale() {
-    music.setScale(scaleInput.value);
-  }
-  
-  function changeTimeSignature() {
-    var val = timeInput.value.split('/');
-    var num = parseInt(val[0]);
-    var den = parseInt(val[1]);
-    music.setTimeSignature(num, den);
-  }
-
-  function changeParam() {
-    // Update the value
-    music.setParam('x', paramSlider.valueAsNumber);
-
-    // Show the value
-    paramOutput.textContent = 'x = ' + paramSlider.value;
-    paramOutput.classList.remove('hide');
-    paramOutput.classList.add('show');
-
-    // Move the value with the slider
-    var pos = paramSlider.value / (paramSlider.max - paramSlider.min);
-    var nudge = 8 * (1 - pos) - 8 * pos; // Offset for handle size 16px
-    paramOutput.style.left = pos * paramSlider.offsetWidth - paramOutput.offsetWidth/2 + nudge + 'px';
-
-    // Hide the value again
-    setTimeout(function() {
-      paramOutput.classList.add('hide');
-      paramOutput.classList.remove('show');
-    }, 2000);
-  }
-
-  function renderCode() {
-    // Get the code
-    var code = codeEditor.value;
-
-    // Wrap symbols in spans
-    var html = '';
-    var s = 0;
-    for (var i = 0; i < code.length; i++) {
-      if (s < symbols.length && symbols[s].start == i) {
-        html += '<span class="' + symbols[s].type + '" data-start="' + symbols[s].start + '">';
-      }
-
-      html += code.charAt(i);
-
-      if (s < symbols.length && symbols[s].end == i + 1) {
-        html += '</span>';
-        s++;
-      }
-    }
-
-    // Replace contents of the code display
-    codeText.innerHTML = html;
-
-    // Get all note elements for later highlighting
-    noteElems = [];
-    var elems = codeText.querySelectorAll('.note');
-    for (var e = 0; e < elems.length; e++) {
-      noteElems.push({ elem: elems[e], start: elems[e].dataset.start });
-    }
-  }
-
-  function render() {
-    var newCursorPos = codeEditor.selectionDirection == 'forward' ? codeEditor.selectionEnd : codeEditor.selectionStart;
-
-    // Draw the cursor
-    if (document.activeElement === codeEditor) {
-      codeCursor.style.display = 'block';
-
-      // Only redraw the cursor if it's moved
-      if (newCursorPos !== cursorPos) {
-        cursorPos = newCursorPos;
-
-        // Measure text sizes
-        var rect = codeCursor.getBoundingClientRect();
-        var lineHeight = rect.height - (codeCursor.offsetHeight - codeCursor.clientHeight);
-        var characterWidth = rect.width - (codeCursor.offsetWidth - codeCursor.clientWidth);
-
-        // Calculate position
-        var lines = codeEditor.value.substr(0, cursorPos).split('\n');
-        var top = (lines.length - 1) * lineHeight;
-        var left = lines[lines.length - 1].length * characterWidth;
-
-        // Move the cursor
-        codeCursor.classList.remove('blink');
-        codeCursor.style.top = top + 'px';
-        codeCursor.style.left = left - 1 + 'px';
-        var reflow = codeCursor.offsetWidth; // Trigger animation reset
-        codeCursor.classList.add('blink');
-      }
-    } else {
-      codeCursor.style.display = 'none';
-    }
-
-    // Sync scroll
-    codeDisplay.scrollTop = codeEditor.scrollTop;
-
-    // Repaint
-    window.requestAnimationFrame(render);    
-  }
-
-  function highlightNotes(notes) {
-    for (var i = 0; i < noteElems.length; i++) {
-      var highlight = false;
-      for (var j = 0; j < notes.length; j++) {
-        if (noteElems[i].start == notes[j].start) {
-          highlight = true;
-        }
-      }
-      if (isPlaying && highlight) {
-        noteElems[i].elem.className = 'playing';
-      } else {
-        noteElems[i].elem.className = 'note';
-      }
-    }
-  }
-
-  // Events
-  if (Polyhymnia.isSupported()) {
-    playButton.addEventListener('click',  play);
-    stopButton.addEventListener('click',  stop);
-    paramSlider.addEventListener('input', changeParam);
-    tempoInput.addEventListener('input',  changeTempo);
-    tonicInput.addEventListener('input',  changeTonic);
-    scaleInput.addEventListener('input',  changeScale);
-    timeInput.addEventListener('input',   changeTimeSignature);
-    codeEditor.addEventListener('input',  parse);
-  } else {
-    controls.style.display = 'none';
-    notSupportedMessage.style.display = 'block';
-  }
-
-  // Rendering
-  parse();
-  window.requestAnimationFrame(render);
-};
-var Polyhymnia = Polyhymnia || {};
-
-Polyhymnia.Generator = function() {
-  'use strict';
-  var noteType = Polyhymnia.noteType;
-  var self = this;
-
-  this.tonic = 'C';
-  this.scale = 'major';
-
-  var startRule = 'Play';
-  var params = {};
-  var ruleDictionary = null;
-  var ruleTree = null;
-
-  this.setParam = function(name, value) {
-    params[name] = value;
-  };
-
-  this.getParam = function(name) {
-    return params[name] || 0.0;
-  };
-
-  this.getPatterns = function() {
-    return getPatterns(ruleTree);
-  };
-
-  this.step = function() {
-    step(ruleTree);
-  };
-
-  this.setRules = function(rules) {
-    // Prepare for playing
-    ruleDictionary = {};
-    rules.forEach(function(rule) {
-      ruleDictionary[rule.name] = rule;
-    });
-    var oldRuleTree = ruleTree;    
-    ruleTree = buildTree(ruleDictionary[startRule]);
-
-    // Copy state to allow replacing the rules while playing
-    if (oldRuleTree) {
-      copyState(oldRuleTree, ruleTree);
-    }
-  };
-
-  function buildTree(rule) {
-    // If we can't find the rule, return an empty node, so we can keep playing
-    if (!rule) {
-      return { name: '', definitions: [] };
-    }
-
-    var node = { name: rule.name, definitions: [] };
-
-    rule.definitions.forEach(function(definition) {
-      if (definition.sequence) {
-        // Sequence definition, find its children recursively
-        var children = [];
-        for (var i = 0; i < definition.sequence.length; i++) {
-          var rule = ruleDictionary[definition.sequence[i]];
-          children.push(buildTree(rule));
-        }
-        node.definitions.push({ condition: definition.condition, sequence: children, index: 0 });
-      } else if (definition.pattern) {
-        // Pattern definition, just add it
-        node.definitions.push({ condition: definition.condition, pattern: definition.pattern, instrument: definition.instrument });
-      }
-    });
-
-    return node;
-  }
-
-  function step(node) {
-    var finished = true;
-    node.definitions.forEach(function(definition) {
-      if (definition.sequence) {
-        // Sequence definition, step it's current child
-        var currentRule = definition.sequence[definition.index];
-        var currentFinished = step(currentRule);
-        if (currentFinished) {
-          definition.index++;
-        }
-        if (definition.index >= definition.sequence.length) {
-          definition.index = 0;          
-        } else {
-          finished = false;
-        }
-      } else if (definition.pattern) {
-        // Pattern definition, nothing to step
-      }
-    });
-    return finished;
-  }
-
-  function getPatterns(node) {
-    // Get all definitions whose conditions apply
-    var definitions = getValidDefinitions(node.definitions);
-
-    // Go through all definitions and evaluate them
-    var patterns = [];
-    definitions.forEach(function(definition) {
-      if (definition.sequence) {
-        // Sequence definition
-        var childPatterns = getPatterns(definition.sequence[definition.index]);
-        childPatterns.forEach(function(p) { patterns.push(p); });
-      } else if (definition.pattern) {
-        // Pattern definition
-        var midiNotes = definition.pattern.map(toMidi);
-        patterns.push({ instrument: definition.instrument, pattern: midiNotes });
-      }
-    });
-
-    return patterns;
-  }
-
-  function copyState(oldNode, newNode) {
-    for (var i = 0; i < oldNode.definitions.length; i++) {
-      var oldDefinition = oldNode.definitions[i];
-      var newDefinition = newNode.definitions.length > i ? newNode.definitions[i] : undefined;
-      if (oldDefinition && newDefinition && oldDefinition.sequence && newDefinition.sequence) {
-        newDefinition.index = oldDefinition.index;
-        var oldCurrent = oldDefinition.sequence[oldDefinition.index];
-        var newCurrent = newDefinition.sequence[newDefinition.index];
-        copyState(oldCurrent, newCurrent);
-      }
-    }
-  }
-
-  function getValidDefinitions(definitions) {
-    var validDefinitions = [];
-    definitions.forEach(function(definition) {
-      var condition = definition.condition;
-      if (condition) {
-        // Check if condition applies
-        var param = self.getParam(condition.param);
-        var min = condition.min !== undefined ? condition.min : -Infinity;
-        var max = condition.max !== undefined ? condition.max : Infinity;
-        if (min <= param && param < max) {
-          validDefinitions.push(definition);
-        }
-      } else {
-        // No condition, always valid
-        validDefinitions.push(definition);
-      }
-    });
-    return validDefinitions;
-  }
-
-  function toMidi(note) {
-    var keys;
-    switch (note.type) {
-      case noteType.NOTE:
-        keys = [Polyhymnia.Notes.fromName(note.note, note.octave)];
-        break;
-      case noteType.CHORD:
-        keys = Polyhymnia.Chords.fromName(note.chord, note.note, note.octave);
-        break;
-      case noteType.DEGREE_NOTE:
-        keys = [Polyhymnia.Scales.fromName(self.scale, self.tonic)[note.value - 1]];
-        break;
-      case noteType.DEGREE_CHORD:
-        keys = Polyhymnia.Degrees.fromName(note.value, self.tonic, self.scale);
-        break;
-      case noteType.DRUM:
-        keys = [Polyhymnia.Notes.fromName('C')];
-        break;
-      case noteType.PAUSE:
-        keys = [undefined];
-        break;
-      default:
-        keys = [undefined];
-    }
-
-    var velocity;
-    if (typeof note.velocity === 'string') {
-      velocity = Polyhymnia.Velocities.fromName(note.velocity);
-    } else if (note.velocity) {
-      velocity = note.velocity;
-    } else if (note.value === 'X' || note.value === 'O') {
-      velocity = 127; // Hard drum hits
-    } else if (note.value === 'x' || note.value === 'o') {
-      velocity = 64; // Soft drum hits
-    } else {
-      velocity = 72; // Default
-    }
-
-    var midiNotes = keys.map(function(k) {
-      return {
-        key:      k,
-        velocity: velocity,
-        start:    note.start,
-        end:      note.end
-      };
-    });
-
-    if (midiNotes.length == 1) {
-      return midiNotes[0];
-    } else {
-      return midiNotes;
-    }
-  }
-
-  function getRandom(array) {
-    return array[Math.floor(Math.random() * array.length)];
-  }
-};
+/*!
+ * Polyhymnia v0.2.0 (https://polyhymnia.io)
+ *
+ * Copyright (c) 2014-2015 Jonathan Hise Kaldma
+ * Released under the MIT license
+ */
 var Polyhymnia = Polyhymnia || {};
 
 Polyhymnia.noteType = {
@@ -441,11 +17,12 @@ Polyhymnia.noteType = {
 
 Polyhymnia.symbolType = {
   NAME:       'name',
-  ARROW:      'arrow',
+  EQUAL:      'equal',
   REFERENCE:  'reference',
   INSTRUMENT: 'instrument',
   NOTE:       'note',
-  CONDITION:  'condition'
+  CONDITION:  'condition',
+  COMMENT:    'comment'
 };
 
 Polyhymnia.parse = function(tokensToParse, instruments) {
@@ -471,25 +48,10 @@ Polyhymnia.parse = function(tokensToParse, instruments) {
     skipEmptyLines();
   }
 
-  // Check that all rule references have definitions
-  rules.forEach(function(rule) {
-    rule.definitions.forEach(function(definition) {
-      if (definition.sequence) {
-        definition.sequence.forEach(function(name) {
-          var exists = rules.some(function(element) {
-            return element.name == name;
-          });
-          if (!exists) {
-            errors.push({ error: 'There is no rule ' + name });
-          }
-        });
-      }
-    });
-  });
-
   rules.symbols = symbols;
   rules.errors = errors;
   return rules;
+  
 
   function symbol(type, start, end) {
     symbols.push({
@@ -500,27 +62,39 @@ Polyhymnia.parse = function(tokensToParse, instruments) {
   }
 
   function error(message, start, end) {
-    errors.push({
-      error: message,
-      start: start || currentToken.start,
-      end:   end   || currentToken.end
-    });
-    symbols.push({
-      type:  'error',
-      error: message,
-      start: start || currentToken.start,
-      end:   end   || currentToken.end
-    });
+    start = start || currentToken.start;
+    end   = end   || currentToken.end;
+
+    errors.push({ error: message, start: start, end: end });
+    if (start !== undefined && end !== undefined) {
+      symbols.push({ type: 'error', error: message, start: start, end: end });
+    }
   }
 
   function nextToken() {
     tokensLeft     = tokens.length > 0;
     currentToken   = tokens.length > 0 ? tokens.shift() : {};
     lookaheadToken = tokens.length > 0 ? tokens[0] : {};
+
+    // Skip over comments
+    if (currentToken.type == tokenType.COMMENT) {
+      symbols.push({
+        type:  'comment',
+        start: currentToken.start,
+        end:   currentToken.end
+      });
+      nextToken();
+    }
   }
 
   function skipEmptyLines() {
     while (currentToken && currentToken.type == tokenType.EOL) {
+      nextToken();
+    }
+  }
+
+  function skipToNextRule() {
+    while (!endOfRule() || currentToken.type == tokenType.EOL) {
       nextToken();
     }
   }
@@ -530,39 +104,53 @@ Polyhymnia.parse = function(tokensToParse, instruments) {
       return true;
     } else if (currentToken.type == tokenType.EOL) {
       return true;
-    } else if (currentToken.type == tokenType.NAME && lookaheadToken && lookaheadToken.type == tokenType.ARROW) {
+    } else if (currentToken.type == tokenType.NAME && lookaheadToken && lookaheadToken.type == tokenType.EQUAL) {
       return true;
     } else {
       return false;
     }
   }
 
-  // Name -> Definitions
+  // Name = Definitions
   function parseRule() {
     var name = '';
     var definitions = [];
 
-    if (currentToken.type == tokenType.NAME) {
-      name = currentToken.value;
-      symbol(symbolType.NAME);
-    } else {
-      // ERROR: Expected rule name
-      error('Rules must start with a name');
-    }
-    nextToken();
-
-    if (currentToken.type == tokenType.ARROW) {
-      symbol(symbolType.ARROW);
-    } else {
-      // ERROR: Expected ->
-      error('Expected ->');
-    }
-    nextToken();
-
-    if (currentToken.type == tokenType.EOL) {
+    // Rules can be given a name with =, or they can be anonymous
+    if (lookaheadToken && lookaheadToken.type == tokenType.EQUAL) {
+      // Named rule
+      if (currentToken.type == tokenType.NAME) {
+        name = currentToken.value;
+        symbol(symbolType.NAME);
+      } else if (currentToken.type == tokenType.NOTE) {
+        // ERROR: Name could be confused with note
+        error(currentToken.str + ' is not a valid name, since it\'s a note');
+      } else if (currentToken.type == tokenType.CHORD) {
+        // ERROR: Name could be confused with chord
+        error(currentToken.str + ' is not a valid name, since it\'s a chord');
+      } else if (currentToken.type == tokenType.DEGREE_CHORD) {
+        // ERROR: Name could be confused with degree chord
+        error(currentToken.str + ' is not a valid name, since it\'s a degree chord');
+      } else if (currentToken.type == tokenType.DRUM_HIT) {
+        // ERROR: Name could be confused with drum hit
+        error(currentToken.str + ' is not a valid name, since it\'s a drum hit');
+      } else {
+        // ERROR: Expected rule name
+        error(currentToken.str + ' is not a valid name');
+      }
       nextToken();
+
+      // Equals
+      symbol(symbolType.EQUAL);
+      nextToken();
+
+      // Optional line break
+      if (currentToken.type == tokenType.EOL) {
+        nextToken();
+      }
     }
 
+    // Definitions
     while (!endOfRule()) {
       definitions.push(parseDefinition());
       nextToken();
@@ -571,25 +159,52 @@ Polyhymnia.parse = function(tokensToParse, instruments) {
     return { name: name, definitions: definitions };
   }
 
-  // (Condition) Sequence | Pattern
+  // (Condition) Instrument: Sequence | Pattern
   function parseDefinition() {
-    var condition;
+    var condition, instrument;
 
+    // Condition is optional
     if (currentToken.type == tokenType.LEFT_PAREN) {
       condition = parseCondition();
     }
 
+    // Instrument is optional
     if (currentToken.type == tokenType.INSTRUMENT) {
-      var pattern = parsePattern();
-      return { condition: condition, instrument: pattern.instrument, pattern: pattern.pattern };
-    } else if (currentToken.type == tokenType.NAME) {
-      var sequence = parseSequence();
-      return { condition: condition, sequence: sequence };
-    } else {
-      // ERROR: Expected a sequence or pattern
-      error('Expected a sequence or pattern');
-      return {};
+      instrument = parseInstrument();
     }
+
+    // Decide if the definition is a pattern or sequence based on the first token
+    switch (currentToken.type) {
+      case tokenType.NOTE:
+      case tokenType.CHORD:
+      case tokenType.DEGREE_NOTE:
+      case tokenType.DEGREE_CHORD:
+      case tokenType.DRUM_HIT:
+      case tokenType.PAUSE:
+        var pattern = parsePattern();
+        return { condition: condition, instrument: instrument, pattern: pattern };
+      case tokenType.NAME:
+        var sequence = parseSequence();
+        return { condition: condition, instrument: instrument, sequence: sequence };
+      default:
+        // ERROR: Expected a sequence or pattern
+        error('Expected a sequence or pattern');
+        return {};
+    }
+  }
+
+  // Instrument
+  function parseInstrument() {
+    var instrument = {
+      name:  currentToken.value,
+      start: currentToken.start,
+      end:   currentToken.end
+    };
+
+    symbol(symbolType.INSTRUMENT);
+    nextToken();
+
+    return instrument;
   }
 
   // A1 A2 A3 *
@@ -597,36 +212,42 @@ Polyhymnia.parse = function(tokensToParse, instruments) {
     var sequence = [];
     while (currentToken.type !== tokenType.EOL && tokensLeft) {
       if (currentToken.type == tokenType.NAME) {
-        sequence.push(currentToken.value);
+        sequence.push({
+          name:  currentToken.value,
+          start: currentToken.start,
+          end:   currentToken.end
+        });
         symbol(symbolType.REFERENCE);
       } else {
         // ERROR: Expected rule name
         error('Expected a rule name');
-        sequence.push('');
+        sequence.push({
+          name:  '',
+          start: currentToken.start,
+          end:   currentToken.end
+        });
       }
       nextToken();
     }
     return sequence;
   }
 
-  // Instrument: Note Note Note Note *
+  // Note Note Note Note *
   function parsePattern() {
-    var instrument = currentToken.value;
-
-    // Check that instrument exists
-    if (instruments && !instruments[instrument]) {
-      error('There is no instrument ' + instrument );
-    } else {
-      symbol(symbolType.INSTRUMENT);
-    }
-    nextToken();
-
-    var pattern = [];
+    var bar = [];
+    var bars = [bar];
     while (currentToken.type !== tokenType.EOL && tokensLeft) {
-      pattern.push(parseNote());
+      if (currentToken.type == tokenType.BAR) {
+        // New bar
+        bar = [];
+        bars.push(bar);
+        nextToken();
+      } else {
+        bar.push(parseNote());
+      }
     }
 
-    return { instrument: instrument, pattern: pattern };
+    return bars;
   }
 
   // C# | Cm7 | x | _
@@ -770,7 +391,7 @@ Polyhymnia.parse = function(tokensToParse, instruments) {
 
     symbol(symbolType.CONDITION, start, end);
     return { param: param, min: min, max: max };
-  } 
+  }
 };
 var Polyhymnia = Polyhymnia || {};
 
@@ -784,7 +405,8 @@ Polyhymnia.tokenType = {
   DEGREE_NOTE:    'degree note',
   DEGREE_CHORD:   'degree chord',
   DRUM_HIT:       'drum hit',
-  ARROW:          'arrow',
+  BAR:            'bar',
+  EQUAL:          'equal',
   LEFT_PAREN:     'left paren',
   RIGHT_PAREN:    'right paren',
   PARAM:          'param',
@@ -809,16 +431,16 @@ Polyhymnia.tokenize = function(textToTokenize) {
   var CHORD_PATTERN        = NOTE_PATTERN + '((?:M|m|dom|aug|dim)7?)';
   var DEGREE_NOTE_PATTERN  = '([1-7])';
   var DEGREE_CHORD_PATTERN = '((?:(?:I|II|III|IV|V|VI|VII)\\+?|(?:i|ii|iii|iv|v|vi|vii)°?)7?)';
-  var DRUM_PATTERN         = '([xX])';
+  var DRUM_PATTERN         = '([xXoO])';
   var VELOCITY_PATTERN     = '(\\.(?:(?:ppp|fff|pp|ff|mp|mf|p|f)|(?:12[0-7]|1[0-1][0-9]|[1-9][0-9]|[0-9])))?';
 
   var NEWLINE    = '\n';
   var SPACE      = ' ';
   var TAB        = '\t';
   var DELIMITERS = '()\n\t ';
+  var COMMENT    = '*';
 
-  var CTX_DEFAULT   = 'sequence';
-  var CTX_PATTERN   = 'pattern';
+  var CTX_DEFAULT   = 'default';
   var CTX_CONDITION = 'condition';
 
   var namePattern           = new RegExp('^' + NAME_PATTERN +                            '$');
@@ -901,68 +523,78 @@ Polyhymnia.tokenize = function(textToTokenize) {
     } else if (currentChar == SPACE || currentChar == TAB) {
       nextChar();
     } else if (currentChar == '(') {
-      token = { type: tokenType.LEFT_PAREN };
+      token = { type: tokenType.LEFT_PAREN, str: '(' };
       context = CTX_CONDITION;
       nextChar();
     } else if (currentChar == ')') {
-      token = { type: tokenType.RIGHT_PAREN };
+      token = { type: tokenType.RIGHT_PAREN, str: ')' };
       context = CTX_DEFAULT;
       nextChar();
+    } else if (currentChar == COMMENT) {
+        // Comment
+        str = '';
+        while (moreToRead && currentChar !== NEWLINE) {
+          str += currentChar;
+          nextChar();
+        }
+        token = { type: tokenType.COMMENT, value: str, str: str };
     } else {
       str = readText();
       if (context == CTX_CONDITION) {
         // Inside a condition
         if (str == '>') {
-          token = { type: tokenType.GREATER_THAN };
+          token = { type: tokenType.GREATER_THAN, str: str };
         } else if (str == '<') {
-          token = { type: tokenType.LESS_THAN };
+          token = { type: tokenType.LESS_THAN, str: str };
         } else if (str.search(paramPattern) !== -1) {
-          token = { type: tokenType.PARAM, value: str };
+          token = { type: tokenType.PARAM, value: str, str: str };
         } else if (str.search(numberPattern) !== -1) {
-          token = { type: tokenType.NUMBER, value: parseFloat(str) };
+          token = { type: tokenType.NUMBER, value: parseFloat(str), str: str };
         } else {
-          token = { type: tokenType.ERROR, value: str };
+          token = { type: tokenType.ERROR, value: str, str: str };
         }
-      } else if (context == CTX_PATTERN) {
-        // Inside a pattern
-        if (str == '_') {
-          token = { type: tokenType.PAUSE };
-        } else if (str.search(drumPattern) !== -1) {
+      } else {
+        // Not inside a condition
+        if (str == '=') {
+          token = { type: tokenType.EQUAL, str: str };
+        } else if (str == '_') {
+          token = { type: tokenType.PAUSE, str: str };
+        } else if (str == '|') {
+          token = { type: tokenType.BAR, str: str };
+        }
+
+        // Pattern steps have higher precedence
+        else if (str.search(drumPattern) !== -1) {
           matches = str.match(drumPattern);
           velocity = getVelocity(matches[2]);
-          token = { type: tokenType.DRUM_HIT, value: matches[1], velocity: velocity };
+          token = { type: tokenType.DRUM_HIT, value: matches[1], velocity: velocity, str: str };
         } else if (str.search(notePattern) !== -1) {
           matches = str.match(notePattern);
           octave = getOctave(matches[2]);
           velocity = getVelocity(matches[3]);
-          token = { type: tokenType.NOTE, note: matches[1], octave: octave, velocity: velocity };
+          token = { type: tokenType.NOTE, note: matches[1], octave: octave, velocity: velocity, str: str };
         } else if (str.search(chordPattern) !== -1) {
           matches = str.match(chordPattern);
           octave = getOctave(matches[2]);
           velocity = getVelocity(matches[4]);
-          token = { type: tokenType.CHORD, note: matches[1], octave: octave, chord: matches[3], velocity: velocity };
+          token = { type: tokenType.CHORD, note: matches[1], octave: octave, chord: matches[3], velocity: velocity, str: str };
         } else if (str.search(degreeNotePattern) !== -1) {
           matches = str.match(degreeNotePattern);
           velocity = getVelocity(matches[2]);
-          token = { type: tokenType.DEGREE_NOTE, value: matches[1], velocity: velocity };
+          token = { type: tokenType.DEGREE_NOTE, value: matches[1], velocity: velocity, str: str };
         } else if (str.search(degreeChordPattern) !== -1) {
           matches = str.match(degreeChordPattern);
           velocity = getVelocity(matches[2]);
-          token = { type: tokenType.DEGREE_CHORD, value: matches[1], velocity: velocity };
-        } else {
-          token = { type: tokenType.ERROR, value: str };
-        }
-      } else {
-        // Not inside a condition or pattern
-        if (str == '->') {
-          token = { type: tokenType.ARROW };
-        } else if (str.search(namePattern) !== -1) {
+          token = { type: tokenType.DEGREE_CHORD, value: matches[1], velocity: velocity, str: str };
+        } 
+
+        // Names have lower precedence
+        else if (str.search(namePattern) !== -1) {
           token = { type: tokenType.NAME, value: str };
         } else if (str.search(instrumentPattern) !== -1) {
-          token = { type: tokenType.INSTRUMENT, value: str.substr(0, str.length - 1) };
-          context = CTX_PATTERN;
+          token = { type: tokenType.INSTRUMENT, value: str.substr(0, str.length - 1), str: str };
         } else {
-          token = { type: tokenType.ERROR, value: str };
+          token = { type: tokenType.ERROR, value: str, str: str };
         }
       }
     }
@@ -976,6 +608,94 @@ Polyhymnia.tokenize = function(textToTokenize) {
   }
   
   return tokens;
+};
+var Polyhymnia = Polyhymnia || {};
+
+Polyhymnia.validate = function(rules, instruments) {
+  'use strict';
+
+  var noteType = Polyhymnia.noteType;
+  var symbolType = Polyhymnia.symbolType;
+
+  // Prepare for validation
+  var ruleDict = {};
+  rules.forEach(function(rule) {
+    ruleDict[rule.name] = rule;
+  });
+
+  // Validate rules
+  rules.forEach(function(rule) {
+    validateRule(rule, rule.name);
+  });
+
+  // Sort symbols
+  rules.symbols = rules.symbols.sort(function(a, b) {
+    return a.start - b.start;
+  });
+
+  return rules;
+
+  function symbol(type, start, end) {
+    rules.symbols.push({
+      type:  type,
+      start: start,
+      end:   end
+    });
+  }
+
+  function error(message, start, end) {
+    // Remove symbols within error
+    rules.symbols = rules.symbols.filter(function(symbol) {
+      return !(symbol.start >= start && symbol.end <= end);
+    });
+
+    // Add error
+    rules.errors.push({ error: message, start: start, end: end });    
+    rules.symbols.push({ type: 'error', error: message, start: start, end: end });
+  }
+
+  function validateRule(rule, path) {
+    rule.definitions.forEach(function(definition) {
+      if (definition.sequence) {
+        // Check that references are valid
+        definition.sequence.forEach(function(reference) {
+          validateReference(reference, path);
+        });
+      } else if (definition.instrument) {
+        // Check that the instrument is valid
+        validateInstrument(definition.instrument);
+      }
+    });
+  }
+
+  function validateInstrument(instrument) {
+    if (!instrument.invalid) {
+      // Check that instrument exists
+      if (instruments && !instruments[instrument.name]) {
+        error('There is no instrument called ' + instrument.name, instrument.start, instrument.end);
+        instrument.invalid = true;
+      }
+    }
+  }
+
+  function validateReference(reference, path) {
+    if (!reference.invalid) {
+      // Check that reference exists
+      var childRule = ruleDict[reference.name];
+      if (childRule) {
+        // Check that reference isn't circular
+        if (path.indexOf(reference.name) !== -1) {
+          error(reference.name + ' cannot reference itself', reference.start, reference.end);
+          reference.invalid = true;
+        } else {
+          validateRule(childRule, path + '/' + reference.name);
+        }
+      } else {
+        error('There is no rule called ' + reference.name, reference.start, reference.end);
+        reference.invalid = true;
+      }
+    }
+  }  
 };
 var Polyhymnia = Polyhymnia || {};
 
@@ -1337,7 +1057,14 @@ Polyhymnia.Sampler = function(options) {
   'use strict';
   var self = this;
 
+  options = options || {};
+  var attack  = options.attack  || 0.01; // s
+  var decay   = options.decay   || 0.1;  // s
+  var sustain = options.sustain || 1.0;  // gain
+  var release = options.release || 0.7;  // s
+
   var audioContext = Polyhymnia.getAudioContext();
+  var voices = {};
   var samples = [];
   var buffers = [];
   var loaded = 0;
@@ -1426,100 +1153,52 @@ Polyhymnia.Sampler = function(options) {
     }
   }
 
-  this.scheduleNote = function(midiNumber, velocity, time) {
+  this.scheduleNoteOn = function(midiNumber, velocity, time) {
+    if (voices[midiNumber]) {
+      self.scheduleNoteOff(midiNumber, velocity, time);
+    }
+
+    var voice = {};
+    var volume = velocity / 127;
+
     // Gain
-    var gain = audioContext.createGain();
-    gain.connect(audioContext.destination);
-    gain.gain.value = velocity / 127;
+    voice.gain = audioContext.createGain();
+    voice.gain.connect(audioContext.destination);
+    voice.gain.gain.value = 0;
 
     // Source
-    var source = audioContext.createBufferSource();
-    source.buffer = samples[midiNumber].buffer;
-    source.playbackRate.value = samples[midiNumber].pitch;
-    source.connect(gain);
-    source.start(time);
+    voice.source = audioContext.createBufferSource();
+    voice.source.buffer = samples[midiNumber].buffer;
+    voice.source.playbackRate.value = samples[midiNumber].pitch;
+    voice.source.connect(voice.gain);
+
+    // Play, attack, decay
+    voice.source.start(time);
+    voice.gain.gain.linearRampToValueAtTime(0.0,              time + 0.0001); // Offset to avoid click/pop
+    voice.gain.gain.linearRampToValueAtTime(volume,           time + attack);
+    voice.gain.gain.linearRampToValueAtTime(volume * sustain, time + attack + decay);
+
+    voices[midiNumber] = voice;
   };
-};
-var Polyhymnia = Polyhymnia || {};
 
-Polyhymnia.Sequencer = function() {
-  'use strict';
-  var noteType = Polyhymnia.noteType;
-  var self = this;
-  
-  this.instruments = {};
-  this.timeSignature = { num: 4, den: 4 };
-  this.stepsPerBeat = 16;
-  this.generator = null;
-  this.animCallback = undefined;
+  this.scheduleNoteOff = function(midiNumber, velocity, time) {
+    var voice = voices[midiNumber];
 
-  var patterns = [];
-  var audioContext = Polyhymnia.getAudioContext();
+    if (voice) {
+      // Release, stop
+      voice.gain.gain.linearRampToValueAtTime(0.0, time + release);
+      voice.source.stop(time + release + 0.0001);
 
-  this.scheduleStep = function(step, time) {
-    // Calculate where we're at
-    var stepInBar = step % (self.stepsPerBeat * self.timeSignature.num);
-
-    // If we've reached the end of a bar, generate new patterns
-    if (stepInBar === 0) {
-      if (step > 0) {
-        self.generator.step();
-      }
-      patterns = self.generator.getPatterns();
-    }
-
-    // Play the patterns
-    var animateNotes = [];
-    for (var i = 0; i < patterns.length; i++) {
-      var instrument = patterns[i].instrument;
-      var pattern    = patterns[i].pattern;
-      var noteLength = getNoteLength(pattern.length);
-      var noteNumber = Math.floor(stepInBar / noteLength);
-
-      if (noteNumber < pattern.length) {
-        var notes = pattern[noteNumber];
-        if (!Array.isArray(notes)) {
-          notes = [notes];
-        }
-
-        for (var n = 0; n < notes.length; n++) {
-          // Only trigger the note if we're on step 0 of it
-          if (stepInBar % noteLength === 0) {
-            scheduleNote(instrument, notes[n], time);
-          }
-
-          // But always animate it
-          animateNotes.push(notes[n]);
-        }
-      }
-    }
-
-    // Set up callback for animation
-    var delay = time - audioContext.currentTime; 
-    if (animateNotes.length > 0 && self.animCallback) {
-      window.setTimeout(function() {
-        self.animCallback(animateNotes);
-      }, delay);
+      delete voices[midiNumber];
     }
   };
 
-  function scheduleNote(instrument, note, time) {
-    if (self.instruments[instrument] && note.key) {
-      self.instruments[instrument].scheduleNote(note.key, note.velocity, time);
+  this.allNotesOff = function() {
+    for (var voice in voices) {
+      voices[voice].source.stop();
+      delete voices[voice];
     }
-  }
-
-  function getNoteLength(patternLength) {
-    var noteLengths = [1, 2, 4, 8, 16, 32, 64];
-    var noteLength = self.stepsPerBeat;
-    for (var n = 0; n < noteLengths.length; n++) {
-      if (patternLength < self.timeSignature.num * noteLengths[n] / 4) {
-        break;
-      }
-      noteLength = self.stepsPerBeat * 4 / noteLengths[n];
-    }
-    return noteLength;
-  }
+  };  
 };
 var Polyhymnia = Polyhymnia || {};
 
@@ -1528,34 +1207,60 @@ Polyhymnia.Synthesizer = function(options) {
   var self = this;
   
   options = options || {};
-  var wave =    options.wave    || 'square';
-  var attack =  options.attack  || 0.05; // s
-  var decay =   options.decay   || 0.1;  // s
+  var wave    = options.wave    || 'square';
+  var attack  = options.attack  || 0.05; // s
+  var decay   = options.decay   || 0.1;  // s
   var sustain = options.sustain || 0.8;  // gain
   var release = options.release || 0.3;  // s
 
   var audioContext = Polyhymnia.getAudioContext();
+  var voices = {};
 
-  this.scheduleNote = function(midiNumber, velocity, time) {
+  this.scheduleNoteOn = function(midiNumber, velocity, time) {
+    if (voices[midiNumber]) {
+      self.scheduleNoteOff(midiNumber, velocity, time);
+    }
+
+    var voice = {};
+
     // Gain
-    var gain = audioContext.createGain();
-    gain.connect(audioContext.destination);
-    gain.gain.value = 0;
+    voice.gain = audioContext.createGain();
+    voice.gain.connect(audioContext.destination);
+    voice.gain.gain.value = 0;
 
     // Oscillator
-    var osc = audioContext.createOscillator();
-    osc.type = wave;
-    osc.frequency.value = Polyhymnia.Notes.toFrequency(midiNumber);
-    osc.connect(gain);
+    voice.osc = audioContext.createOscillator();
+    voice.osc.type = wave;
+    voice.osc.frequency.value = Polyhymnia.Notes.toFrequency(midiNumber);
+    voice.osc.connect(voice.gain);
 
-    // Play, envelope, stop
-    osc.start(time);
+    // Play, attack, decay
+    voice.osc.start(time);
     var volume = velocity / 127;
-    gain.gain.linearRampToValueAtTime(0.0,              time + 0.0001); // Offset to avoid click/pop
-    gain.gain.linearRampToValueAtTime(volume,           time + attack);
-    gain.gain.linearRampToValueAtTime(volume * sustain, time + attack + decay);
-    gain.gain.linearRampToValueAtTime(0.0,              time + attack + decay + release);
-    osc.stop(time + attack + decay + release + 0.0001);
+    voice.gain.gain.linearRampToValueAtTime(0.0,              time + 0.0001); // Offset to avoid click/pop
+    voice.gain.gain.linearRampToValueAtTime(volume,           time + attack);
+    voice.gain.gain.linearRampToValueAtTime(volume * sustain, time + attack + decay);
+
+    voices[midiNumber] = voice;
+  };
+
+  this.scheduleNoteOff = function(midiNumber, velocity, time) {
+    var voice = voices[midiNumber];
+
+    if (voice) {
+      // Release, stop
+      voice.gain.gain.linearRampToValueAtTime(0.0, time + release);
+      voice.osc.stop(time + release + 0.0001);
+
+      delete voices[midiNumber];
+    }
+  };
+
+  this.allNotesOff = function() {
+    for (var voice in voices) {
+      voices[voice].osc.stop();
+      delete voices[voice];
+    }
   };
 };
 var Polyhymnia = Polyhymnia || {};
@@ -1620,9 +1325,20 @@ Polyhymnia.Context = function(options) {
 
   function parse(code) {
     var tokens = Polyhymnia.tokenize(code);
-    var rules = Polyhymnia.parse(tokens, sequencer.instruments);
+    var rules  = Polyhymnia.parse(tokens);
+    rules      = Polyhymnia.validate(rules, sequencer.instruments);
     generator.setRules(rules);
     return rules;
+  }
+
+  function play() {
+    metronome.play();
+  }
+
+  function stop() {
+    metronome.stop();
+    sequencer.stop();
+    generator.reset();
   }
 
   function setTempo(tempo) {
@@ -1648,8 +1364,8 @@ Polyhymnia.Context = function(options) {
 
   return {
     parse: parse,
-    play: metronome.play,
-    stop: metronome.stop,
+    play: play,
+    stop: stop,
     setParam: generator.setParam,
     setTempo: setTempo,
     setTonic: setTonic,
@@ -1657,4 +1373,368 @@ Polyhymnia.Context = function(options) {
     setTimeSignature: setTimeSignature,
     setAnimCallback: setAnimCallback
   };
+};
+var Polyhymnia = Polyhymnia || {};
+
+Polyhymnia.Generator = function() {
+  'use strict';
+  var noteType = Polyhymnia.noteType;
+  var self = this;
+
+  this.tonic = 'C';
+  this.scale = 'major';
+
+  var startRule = 'Play';
+  var params = {};
+  var ruleDictionary = null;
+  var ruleTree = null;
+  var index = 0;
+
+  this.setParam = function(name, value) {
+    params[name] = value;
+  };
+
+  this.getParam = function(name) {
+    return params[name] || 0.0;
+  };
+
+  this.getCurrentBar = function() {
+    return getCurrentBar(ruleTree);
+  };
+
+  this.step = function() {
+    index++;
+    step(ruleTree);
+  };
+
+  this.reset = function() {
+    resetState(ruleTree);
+  };
+
+  this.setRules = function(rules) {
+    var oldRuleTree = ruleTree;
+    ruleDictionary = {};
+
+    // Build the tree that will be evaluated each bar
+    if (rules.length > 1) {
+      rules.forEach(function(rule) {
+        ruleDictionary[rule.name] = rule;
+      });
+
+      // If we have more than one rule, find the starting point
+      ruleTree = buildTree(ruleDictionary[startRule]);      
+    } else {
+      // Otherwise, just start with the only rule
+      ruleTree = buildTree(rules[0]);
+    }
+
+    // Fast-forward to where we were to allow hot-swapping the rules while playing
+    index = index % ruleTree.length;
+    for (var i = 0; i < index; i++) {
+      step(ruleTree);
+    }
+  };
+
+  function buildTree(rule) {
+    // If we can't find the rule, return an empty node, so we can keep playing
+    if (!rule) {
+      return { name: '', definitions: [], length: 0 };
+    }
+
+    var node = { name: rule.name, definitions: [] };
+
+    rule.definitions.forEach(function(definition) {
+      var length = 0;
+      if (definition.sequence) {
+        // Sequence definition, find its children recursively
+        var children = [];
+        definition.sequence.forEach(function(reference) {
+          if (reference.invalid) {
+            children.push(buildTree());
+          } else {
+            var rule = ruleDictionary[reference.name];
+            children.push(buildTree(rule));
+          }
+        });
+
+        // Calculate the length of the sequence
+        length = children.reduce(function(sum, child) {
+          return sum + child.length;
+        }, 0);
+        node.definitions.push({ condition: definition.condition, instrument: definition.instrument, sequence: children, index: 0, length: length });
+      } else if (definition.pattern) {
+        // Pattern definition, just add it
+        length = definition.pattern.length;
+        node.definitions.push({ condition: definition.condition, instrument: definition.instrument, pattern: definition.pattern, index: 0, length: length });
+      }
+    });
+
+    // Calculate the length of the rule
+    node.length = node.definitions.reduce(function(longest, definition) {
+      return longest > definition.length ? longest : definition.length;
+    }, 0);
+
+    return node;
+  }
+
+  function step(node) {
+    var finished = true;
+    var length = 0;
+    node.definitions.forEach(function(definition) {
+      if (definition.sequence) {
+        // Sequence definition, step it's current child
+        var currentRule = definition.sequence[definition.index];
+        var currentFinished = step(currentRule);
+        if (currentFinished) {
+          definition.index++;
+        }
+        length = definition.sequence.length;
+      } else if (definition.pattern) {
+        // Pattern definition, step current bar
+        definition.index++;
+        length = definition.pattern.length;
+      }
+
+      // Check if finished
+      if (definition.index >= length) {
+        definition.index = 0;          
+      } else {
+        finished = false;
+      }
+    });
+    return finished;
+  }
+
+  function getCurrentBar(node, instrument) {
+    // Get all definitions whose conditions apply
+    var definitions = getValidDefinitions(node.definitions);
+
+    // Go through all definitions and evaluate them
+    var patterns = [];
+    definitions.forEach(function(definition) {
+      var inst;
+      // Instruments are overriden by parent instruments
+      if (instrument) {
+        inst = instrument;
+      } else if (definition.instrument) {
+        inst = definition.instrument.name;
+      }
+
+      if (definition.sequence) {
+        // Sequence definition
+        var childPatterns = getCurrentBar(definition.sequence[definition.index], inst);
+        childPatterns.forEach(function(p) { patterns.push(p); });
+      } else if (definition.pattern) {
+        // Pattern definition
+        var midiNotes = definition.pattern[definition.index].map(toMidi);
+        patterns.push({ instrument: inst, pattern: midiNotes });
+      }
+    });
+
+    return patterns;
+  }
+
+  function resetState(node) {
+    node.definitions.forEach(function(definition) {
+      definition.index = 0;
+      if (definition.sequence) {
+        definition.sequence.forEach(function(childNode) {
+          resetState(childNode);
+        });
+      }
+    });
+  }
+
+  function getValidDefinitions(definitions) {
+    var validDefinitions = [];
+    definitions.forEach(function(definition) {
+      var condition = definition.condition;
+      if (condition) {
+        // Check if condition applies
+        var param = self.getParam(condition.param);
+        var min = condition.min !== undefined ? condition.min : -Infinity;
+        var max = condition.max !== undefined ? condition.max : Infinity;
+        if (min <= param && param < max) {
+          validDefinitions.push(definition);
+        }
+      } else {
+        // No condition, always valid
+        validDefinitions.push(definition);
+      }
+    });
+    return validDefinitions;
+  }
+
+  function toMidi(note) {
+    var keys;
+    switch (note.type) {
+      case noteType.NOTE:
+        keys = [Polyhymnia.Notes.fromName(note.note, note.octave)];
+        break;
+      case noteType.CHORD:
+        keys = Polyhymnia.Chords.fromName(note.chord, note.note, note.octave);
+        break;
+      case noteType.DEGREE_NOTE:
+        keys = [Polyhymnia.Scales.fromName(self.scale, self.tonic)[note.value - 1]];
+        break;
+      case noteType.DEGREE_CHORD:
+        keys = Polyhymnia.Degrees.fromName(note.value, self.tonic, self.scale);
+        break;
+      case noteType.DRUM:
+        keys = [Polyhymnia.Notes.fromName('C')];
+        break;
+      case noteType.PAUSE:
+        keys = [undefined];
+        break;
+      default:
+        keys = [undefined];
+    }
+
+    var velocity;
+    if (typeof note.velocity === 'string') {
+      velocity = Polyhymnia.Velocities.fromName(note.velocity);
+    } else if (note.velocity) {
+      velocity = note.velocity;
+    } else if (note.value === 'X' || note.value === 'O') {
+      velocity = 127; // Hard drum hits
+    } else if (note.value === 'x' || note.value === 'o') {
+      velocity = 64; // Soft drum hits
+    } else {
+      velocity = 72; // Default
+    }
+
+    var midiNotes = keys.map(function(k) {
+      return {
+        key:      k,
+        velocity: velocity,
+        start:    note.start,
+        end:      note.end
+      };
+    });
+
+    if (midiNotes.length == 1) {
+      return midiNotes[0];
+    } else {
+      return midiNotes;
+    }
+  }
+
+  function getRandom(array) {
+    return array[Math.floor(Math.random() * array.length)];
+  }
+};
+var Polyhymnia = Polyhymnia || {};
+
+Polyhymnia.Sequencer = function() {
+  'use strict';
+  var noteType = Polyhymnia.noteType;
+  var self = this;
+  
+  this.instruments = {};
+  this.timeSignature = { num: 4, den: 4 };
+  this.stepsPerBeat = 16;
+  this.generator = null;
+  this.animCallback = undefined;
+
+  var output = [];
+  var audioContext = Polyhymnia.getAudioContext();
+
+  this.scheduleStep = function(step, time) {
+    // Calculate where we're at
+    var stepInBar = step % (self.stepsPerBeat * self.timeSignature.num);
+
+    // If we've reached the end of a bar, generate new output
+    if (stepInBar === 0) {
+      if (step > 0) {
+        self.generator.step();
+      }
+      output = self.generator.getCurrentBar();
+    }
+
+    // Play the output
+    var animateNotes = [];
+    for (var i = 0; i < output.length; i++) {
+      var instrument = output[i].instrument;
+      var pattern    = output[i].pattern;
+      var noteLength = getNoteLength(pattern.length);
+      var noteNumber = Math.floor(stepInBar / noteLength);
+
+      // If there is no instrument, choose one
+      if (!instrument) {
+        // If piano is available, use that
+        if (self.instruments.Piano) {
+          instrument = 'Piano';
+        }
+        // Otherwise use the first instrument available
+        else {
+          for (var inst in self.instruments) {
+            instrument = inst;
+            break;
+          }
+        }
+      }
+
+      if (noteNumber < pattern.length) {
+        var notes = pattern[noteNumber];
+        if (!Array.isArray(notes)) {
+          notes = [notes];
+        }
+
+        for (var n = 0; n < notes.length; n++) {
+          // Only trigger real notes, not pauses
+          if (notes[n].key) {
+            // Trigger NOTE ON if we're on the first step of a note
+            if (stepInBar % noteLength === 0) {
+              scheduleNoteOn(instrument, notes[n], time);
+            }
+            // Trigger NOTE OFF if we're on the last step of the note
+            if (stepInBar % noteLength === noteLength - 1) {
+              scheduleNoteOff(instrument, notes[n], time);
+            }
+          }
+
+          // But animate all notes, even pauses
+          animateNotes.push(notes[n]);
+        }
+      }
+    }
+
+    // Set up callback for animation
+    var delay = time - audioContext.currentTime; 
+    if (animateNotes.length > 0 && self.animCallback) {
+      window.setTimeout(function() {
+        self.animCallback(animateNotes);
+      }, delay);
+    }
+  };
+
+  this.stop = function() {
+    for (var instrument in self.instruments) {
+      self.instruments[instrument].allNotesOff();
+    }
+  };
+
+  function scheduleNoteOn(instrument, note, time) {
+    if (self.instruments[instrument]) {
+      self.instruments[instrument].scheduleNoteOn(note.key, note.velocity, time);
+    }
+  }
+
+  function scheduleNoteOff(instrument, note, time) {
+    if (self.instruments[instrument]) {
+      self.instruments[instrument].scheduleNoteOff(note.key, note.velocity, time);
+    }
+  }
+
+  function getNoteLength(patternLength) {
+    var noteLengths = [1, 2, 4, 8, 16, 32, 64];
+    var noteLength = self.stepsPerBeat;
+    for (var n = 0; n < noteLengths.length; n++) {
+      if (patternLength < self.timeSignature.num * noteLengths[n] / 4) {
+        break;
+      }
+      noteLength = self.stepsPerBeat * 4 / noteLengths[n];
+    }
+    return noteLength;
+  }
 };
