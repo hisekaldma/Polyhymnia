@@ -1,10 +1,10 @@
 ---
 ---
-$interaction-color: rgb(255, 136, 77);
-$active-color:      rgb(229, 0, 77);
+$interaction-color: #825ccc;
+$active-color:      #3399ff;
 $highlight-color:   rgb(255, 255, 179);
 $error-color:       rgb(255, 50, 60);
-$selection-color:   rgba(229, 0, 77, 0.2);
+$selection-color:   rgba(130, 92, 204, 0.2);
 
 .editor {
   position: relative;
@@ -59,8 +59,6 @@ $selection-color:   rgba(229, 0, 77, 0.2);
     width: 100%;
     height: 500px;
     background: rgba(255,255,255,0.8);
-    border-top-left-radius: 3px;
-    border-top-right-radius: 3px;
     font-size: 17px;
     line-height: 1.4em;
 
@@ -130,7 +128,7 @@ $selection-color:   rgba(229, 0, 77, 0.2);
         }
 
         span.comment {
-          color: #009fbf;
+          color: #79c95e;
         }
 
         span.playing {
@@ -150,7 +148,7 @@ $selection-color:   rgba(229, 0, 77, 0.2);
       .cursor {
         display: inline-block;
         position: absolute;
-        border-left: $active-color 2px solid;
+        border-left: $interaction-color 2px solid;
       }
 
       .blink {
@@ -181,9 +179,7 @@ $selection-color:   rgba(229, 0, 77, 0.2);
     position: relative;
     width: 100%;
     height: 64px;
-    background: rgb(255,255,255);
-    border-bottom-left-radius: 3px;
-    border-bottom-right-radius: 3px;
+    background: #fff;
     color: $interaction-color;
     cursor: default;
 
@@ -196,7 +192,7 @@ $selection-color:   rgba(229, 0, 77, 0.2);
       left: 16px;
       width: 40px;
       height: 40px;
-      border: 1px solid $interaction-color;
+      border: 2px solid $interaction-color;
       border-radius: 50%;
       background: none;
       cursor: pointer;
@@ -207,7 +203,7 @@ $selection-color:   rgba(229, 0, 77, 0.2);
 
       svg path,
       svg rect {
-        stroke-width: 1;
+        stroke-width: 2;
       }
 
       &:hover {
@@ -220,14 +216,14 @@ $selection-color:   rgba(229, 0, 77, 0.2);
 
     .play svg {
       position: absolute;
-      top: 10px;
-      left: 12px;
+      top: 8px;
+      left: 11px;
     }
 
     .stop svg {
       position: absolute;
-      top: 10px;
-      left: 10px;
+      top: 8px;
+      left: 8px;
     }
 
 
@@ -264,7 +260,7 @@ $selection-color:   rgba(229, 0, 77, 0.2);
         width: 100%;
 
         &::-webkit-slider-runnable-track {
-          height: 1px;
+          height: 2px;
           margin-top: 8px;
           background: $interaction-color;
         }
@@ -272,10 +268,10 @@ $selection-color:   rgba(229, 0, 77, 0.2);
         &::-webkit-slider-thumb {
           -webkit-appearance: none;
           position: relative;
-          top: -8px;
+          top: -7px;
           height: 16px;
           width: 16px;
-          border: 1px solid $interaction-color;
+          border: 2px solid $interaction-color;
           background: #ffffff;
           border-radius: 50%;
 
