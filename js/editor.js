@@ -1,8 +1,6 @@
 ---
 ---
-var Polyhymnia = Polyhymnia || {};
-
-Polyhymnia.Editor = function(element, context) {
+Editor = function(element, context) {
   'use strict';
 
   // Code

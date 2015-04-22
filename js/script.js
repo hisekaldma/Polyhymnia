@@ -1,4 +1,3 @@
-<script type="text/javascript">
 document.addEventListener('DOMContentLoaded', function() {
   var context = new Polyhymnia.Context({
     instruments: [
@@ -37,6 +36,16 @@ document.addEventListener('DOMContentLoaded', function() {
       { name: 'Shake',     samples: [{ url: '/audio/Shake.mp3' }] }
     ]
   });
-  var editor = new Polyhymnia.Editor(document.querySelector('.editor'), context);
+
+  // Editor
+  var editor = document.querySelector('.editor');
+  if (editor) {
+    new Editor(editor, context);    
+  }
+
+  // Code examples
+  var codeExamples = document.querySelectorAll('pre');
+  for (var i = 0; i < codeExamples.length; i++) {
+    new MiniPlayer(codeExamples[i], context);
+  }  
 });
-</script>

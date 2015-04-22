@@ -49,7 +49,7 @@ Writing notes this way is that it makes it easy to stay within the current scale
 ### Scale Chords
 Just like you can write notes relative to the current scale, you can write chords relative to the current scale. This is done using roman numerals corresponding to the numbers 1-7. An uppercase numeral means a major chord (`I`), and a lowercase numeral means a minor chord (`i`). The character `°` means a diminished chord, and `+` means an augmented chord.
 
-    I ii+ vii° V
+    I II+ vii° V
 
 This way of writing chords is very useful for exploring chord progressions, since much of music literature writes chords this way. For example, a common chord progression is:
 
@@ -123,7 +123,7 @@ You can even make patterns where the number of steps isn’t divisible by the ti
 ### Bars
 To create patterns that are longer than just one bar, use the pipe character (`|`). The steps between each pipe will then be interpreted as one bar.
 
-		x x | x x x x | x x x | x
+    x x | x x x x | x x x | x
 
 ## Sequences
 When your entire composition is just one pattern, it plays without any fuzz. But to actually make something more interesting, we usually want to create sequences of patterns. The first thing we have to do is to name our patterns. To do that, we use the equal sign (`=`).
@@ -177,9 +177,9 @@ Everything we’ve looked at so far has only played one thing at a time. But you
 You can add any number of definitions you want to a rule, and you can even mix pattern definitions and sequence definitions.
 
     Play =
-      Kick:  K1 K2
-      Synth: C D C G
-      Pad:   C _ _ _
+      Kick:    K1 K2
+      Marimba: C D C G
+      Pad:     C _ _ _
 
     K1 = x _ x _
     K2 = x x x x
@@ -189,20 +189,20 @@ If you have parallel definitions that are of different lengths, they will loop u
     Play = S1 S2
 
     S1 =
-      Kick:  x _ x _ | x _ x _ | x x x x
-      Synth: C C C C | E E E E
+      Kick:    x _ x _ | x _ x _ | x x x x
+      Marimba: C C C C | E E E E
 
     S2 =
-      Kick:  x x x x
-      Synth: G G G G
+      Kick:    x x x x
+      Marimba: G G G G
 
 ## Conditions
 To make the music react to inputs, you can write conditions that have to be true for a definition to be played. A condition consists of a named input and a comparison with one or two numbers:
 
     R1 =
-      (x < 1)     Synth: C C C C
-      (1 < x < 2) Synth: G G G G
-      (x > 2)     Synth: D D D D
+      (x < 1)     C C C C
+      (1 < x < 2) G G G G
+      (x > 2)     D D D D
 
 Input names have to start with a lowercase letter, and numbers have to be integers. The allowed comparisons are `<` and `>`, and they are inclusive, because that is what you want most of the time. Other comparisons, like `==` and `!=`, aren’t supported. The idea isn’t to check for specific values, but to react to changing inputs.
 

@@ -2,8 +2,6 @@
 ---
 $interaction-color: #825ccc;
 $active-color:      #3399ff;
-$highlight-color:   rgb(255, 255, 179);
-$error-color:       rgb(255, 50, 60);
 $selection-color:   rgba(130, 92, 204, 0.2);
 
 .editor {
@@ -105,35 +103,6 @@ $selection-color:   rgba(130, 92, 204, 0.2);
         position: absolute;
         width: 100%;
         color: rgba(0,0,0,0.7);
-
-        span.error { 
-          color: $error-color;
-          border-bottom: 2px solid $error-color;
-        }
-
-        span.equal {
-          color: #f03a76;
-        }
-
-        span.reference {
-          color: #815ccc;
-        }
-
-        span.note {
-          color: #3399ff;
-        }
-
-        span.condition {
-          color: #ff854c;
-        }
-
-        span.comment {
-          color: #79c95e;
-        }
-
-        span.playing {
-          color: $highlight-color;
-        }
       }
 
       .cursor-layer {

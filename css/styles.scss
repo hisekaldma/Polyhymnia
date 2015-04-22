@@ -197,6 +197,14 @@ code {
     padding: 0px 2px;
   }
 }
+pre code       { color: #505050; }
+span.error     { color: #ff323c; border-bottom: 2px solid #ff323c; }
+span.equal     { color: #f03a76; }
+span.reference { color: #815ccc; }
+span.note      { color: #3399ff; }
+span.condition { color: #ff854c; }
+span.comment   { color: #79c95e; }
+span.playing   { color: #ffffb3; }
 
 /* Tables */
 
@@ -293,7 +301,7 @@ footer {
 
 /* Layout: Playground */
 
-.playground {
+body.playground {
   .ref {
     padding-left: 5%;
 
@@ -309,14 +317,11 @@ footer {
 
 /* Layout: Text */
 
-.text {
-  .contents, footer {
-    color: rgb(40,40,40);
-    font-size: 16px;
-  }
-  .contents {
-    background: #fff;
-    padding-bottom: 3em;
+body.text {
+  background: #fff;
+
+  header {
+    background: linear-gradient(130deg, #815ccc, #779ef0);
   }
   footer {
     background: #eee;
@@ -328,6 +333,13 @@ footer {
         border-color: #000;
       }
     }
+  }
+  .contents, footer {
+    color: rgb(40,40,40);
+    font-size: 16px;
+  }
+  .contents {
+    padding-bottom: 3em;
   }
   h2 {
     border-color: rgba(40,40,40,0.15);
