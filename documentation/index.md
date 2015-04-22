@@ -207,3 +207,14 @@ To make the music react to inputs, you can write conditions that have to be true
 Input names have to start with a lowercase letter, and numbers have to be integers. The allowed comparisons are `<` and `>`, and they are inclusive, because that is what you want most of the time. Other comparisons, like `==` and `!=`, aren’t supported. The idea isn’t to check for specific values, but to react to changing inputs.
 
 Conditions are evaluated at the start of a new bar. This means that even if a condition becomes valid in the middle of a bar, new patterns won’t start playing until the next bar, which is what you want musically.
+
+## Comments
+You can comment your code with the `*` character.
+
+    * This is a comment.
+
+Comments won’t affect what is playing. But they’re great for structuring your composition, or making notes to yourself. Comments can either be on their own lines, or at the end of another line.
+
+    Play = P1 P2
+    P1 = C D E F  * This is a comment at the end of a line.
+    P2 = C C C C
