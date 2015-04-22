@@ -56,7 +56,7 @@ Polyhymnia.Synthesizer = function(options) {
 
   this.allNotesOff = function() {
     for (var voice in voices) {
-      voices[voice].osc.stop();
+      voices[voice].osc.stop(0.0001);
       delete voices[voice];
     }
   };

@@ -142,7 +142,7 @@ Polyhymnia.Sampler = function(options) {
 
   this.allNotesOff = function() {
     for (var voice in voices) {
-      voices[voice].source.stop();
+      voices[voice].source.stop(0.0001);
       delete voices[voice];
     }
   };  
