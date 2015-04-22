@@ -10,14 +10,6 @@ $selection-color:   rgba(130, 92, 204, 0.2);
 
   /* Resets */
 
-  * {
-    box-sizing: border-box;
-  }
-
-  *:focus {
-    outline: none;
-  }
-
   input, select {
     display: inline-block;
     font-size: inherit;

@@ -32,7 +32,7 @@ nav ul, nav li { margin: 0; list-style:none; list-style-image: none; }
 a:link { -webkit-tap-highlight-color: transparent; }
 h1, h2, h3, h4, h5, h6 { font-weight: normal; }
 * { box-sizing: border-box; }
-
+*:focus { outline: none; }
 
 /* Fix weird Typekit bug */
 
@@ -82,20 +82,6 @@ header, section, footer {
 
 
 /* Typography */
-
-@font-face {
-  font-weight: normal;
-  font-style: normal;
-  font-family: Apercu;
-  src: url(/fonts/apercu_regular.otf);
-}
-
-@font-face {
-  font-weight: bold;
-  font-style: normal;
-  font-family: Apercu;
-  src: url(/fonts/apercu_bold.otf);
-}
 
 body {
   font: 400 17px/1.4rem Apercu, "Helvetica Neue", Arial, sans-serif;
@@ -182,12 +168,55 @@ li {
 /* Code */
 
 pre {
-  padding-left: 1rem;
-  margin-left: 1rem;
+  padding-left: 1.7rem;
+  margin-left: 12px;
   margin-top: 1.4rem;
   margin-bottom: 1.4rem;
-  border-left: 3px solid #815ccc;
+  border-left: 2px solid #ddd;
   white-space: pre-wrap;
+  position: relative;
+
+  button {
+    cursor: pointer;
+
+    &.play, &.stop {
+      position: absolute;
+      left: -15px;
+      top: -2px;
+      width: 28px;
+      height: 28px;
+      background: none;
+      border: none;
+    }
+    &.stop {
+      display: none;
+    }
+    svg {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+    }
+    &:hover, &:active {
+      circle {
+        stroke: #815ccc;
+      }
+      rect, path {
+        fill: #815ccc;
+      }
+    }
+  }
+}
+pre.active {
+  border-color: #815ccc;
+
+  circle {
+    stroke: #815ccc;
+  }
+  rect, path {
+    fill: #815ccc;
+  }
 }
 code {
   color: #815ccc;
@@ -197,6 +226,9 @@ code {
     padding: 0px 2px;
   }
 }
+
+/* Syntax highlighting */
+
 pre code       { color: #505050; }
 span.error     { color: #ff323c; border-bottom: 2px solid #ff323c; }
 span.equal     { color: #f03a76; }
@@ -205,6 +237,7 @@ span.note      { color: #3399ff; }
 span.condition { color: #ff854c; }
 span.comment   { color: #79c95e; }
 span.playing   { color: #ffffb3; }
+
 
 /* Tables */
 
