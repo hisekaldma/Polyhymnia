@@ -14,7 +14,7 @@ The basic unit in Polyhymnia is the pattern. Patterns are the building blocks th
     C D E F
 
 ### Notes
-A note is simply a standard note on the western musical scale.
+A note is simply a standard note on the Western chromatic scale.
 
     C D E F G A B C
 
@@ -22,9 +22,12 @@ Notes can be sharp (`#`) or flat (`b`).
 
     C# Eb F# Ab
 
-Notes are assumed to be in the in the middle octave if you don’t write anything else. To play notes in other octaves, just add the octave after the note.
+### Octaves
+Notes are assumed to be in the in the middle octave by default. To play notes in other octaves, just add the number of the octave after the note.
 
     C4 Eb5 F2 Ab3
+
+Octaves are numbered the way they are in most MIDI software, where middle C is C3. This means that the lowest octave is -2, and the highest octave is 8.
 
 ### Chords
 A chord is a set of three or more notes played together. They are based on a root note, and can be major (`M`), minor (`m`), diminished (`dim`), augmented (`aug`), or dominant (`dom`).
