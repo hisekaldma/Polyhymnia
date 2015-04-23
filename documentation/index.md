@@ -1,5 +1,5 @@
 ---
-layout: text
+layout: sidenav
 title: Language guide
 ---
 

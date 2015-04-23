@@ -127,7 +127,7 @@ h3 {
   font-size: 17px;
   font-family: $bold;
   font-weight: bold;
-  margin-top: 1.4rem;
+  margin-top: 2rem;
 }
 
 /* Links */
@@ -265,7 +265,6 @@ table {
   }
 }
 
-
 /* Design */
 
 body {
@@ -388,5 +387,29 @@ body.text {
   tr {
     border-width: 3px;
     border-color: #ddd;
+  }
+}
+
+/* Sidenav */
+
+.sidenav {
+  float: right;
+  width: 150px;
+  font-size: 16px;
+  margin-top: 1.4rem;
+
+  ul {
+    border-left: 3px solid #ddd;
+    padding-left: 1.4rem;
+    margin-left: 2px;
+  }
+  li {
+    margin: 8px 0;
+  }
+  a {
+    color: #999999;
+  }
+  @media screen and (max-width: 590px) {
+    display: none;
   }
 }
