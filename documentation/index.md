@@ -101,7 +101,7 @@ To make it easier to write dynamic drum patterns, you can use uppercase `X` or `
 
     X x O o
 
-### Rest
+### Rests
 Sometimes you want to have steps in your patterns that are silent. You can do that with the underscore (`_`).
 
     C E _ G
@@ -133,7 +133,7 @@ When your entire composition is just one pattern, it plays without any fuzz. But
 
     P1 = C D E F
 
-Now, we can refer to this pattern by its name in a sequence. Creating a sequence is just as simple as creating a pattern. Just write the name, equals, and the sequence.
+Now, we can refer to this pattern by its name in a sequence. Creating a sequence is just as simple as creating a pattern. Just write the name, an equal sign, and the sequence.
 
     Play = P1 P1
     P1 = C D E F
@@ -144,6 +144,7 @@ Note that the sequence is named `Play`. This is a special name. When we have mor
     P1 = C D E F
     P2 = F E D C
 
+### Nested Sequences
 Just like you can name patterns, you can also name sequences. You can then refer to them in other sequences, just like you can with patterns.
 
     Play = P1 P1 P2 S1
@@ -152,13 +153,18 @@ Just like you can name patterns, you can also name sequences. You can then refer
     P2 = F E D C
     P3 = F F F F
 
-Note that a sequence can only contain names, and a pattern can only contain pattern steps. You can’t mix the two in one definition.
+Note that a sequence can only contain names, and a pattern can only contain pattern steps. If you try to mix the two in one definition you will get an error.
 
-### Names
-Pattern and sequence names have to start with an uppercase letter, but after that they can contain lower and uppercase letters, numbers, and underscore (`_`). However, names cannot be anything that could be confused with a step in a pattern, e.g. `A`, `A1`, `B`, `B1`, `Cm`, `I`, `IV`, or `X`.
+    Play = Cm Bdim P1
+    P1 = C D E F
+
+Also note that you cannot make recursive sequences, i.e. sequences that refer to themselves. Doing so will give you an error.
+
+    Play = P1 Play
+    P1 = C D E F
 
 ### Instruments
-So far all patterns have been played on a piano. This is because we haven’t specified what instrument to play them on. To play a pattern on a specific instrument we just write the name of the instrument and a colon (`:`) followed by the pattern.
+So far all everything has been played on a piano. This is because we haven’t specified what instrument to play things on. To play a pattern on a specific instrument we write the name of the instrument and a colon (`:`) followed by the pattern.
 
     Play = Marimba: C D E F
 
@@ -170,8 +176,16 @@ To play an entire sequence on a specific instrument, we just write the sequence 
 
 You can set up which instruments are available when setting up Polyhymnia.
 
+## Rules
+Patterns and sequences are collectively called rules. On the left hand side is the name of the rule, and on the right hand side is its definition. A rule is simply a way of saying ”when you find this name, replace it with it’s definition.”
+
+    Name = D E F
+
+### Names
+Rule names have to start with an uppercase letter, but after that they can contain lower and uppercase letters, numbers, and underscore (`_`). However, names cannot be anything that could be confused with a step in a pattern, like a note or a drum hit. So names like `A`, `A1`, `Cm`, `I`, `IV`, and `X` are out.
+
 ### Polyphony
-Everything we’ve looked at so far has only played one thing at a time. But you actually play things in parallel. You do that by giving a name multiple definitions. Just write each definition on a separate line, and they will be played in parallel. It’s a good idea to indent the definitions for readability, but you don’t have to.
+All rules we’ve looked at so far has only played one thing at a time. But you actually play things in parallel. You do that by giving a rule multiple definitions. Just write each definition on a separate line, and they will be played in parallel. It’s a good idea to indent the definitions for readability, but you don’t have to.
 
     Play =
       Kick:  x _ x _
@@ -187,7 +201,7 @@ You can add any number of definitions you want to a rule, and you can even mix p
     K1 = x _ x _
     K2 = x x x x
 
-If you have parallel definitions that are of different lengths, they will loop until they all end at the same time. For example, if one definition is two bars, and another is three bars, the entire thing will play 2 x 3 = 6 bars.
+If you have parallel definitions that are of different lengths, they will loop until they all end at the same time. For example, if one definition is two bars, and another is three bars, the entire rule will play 2 x 3 = 6 bars.
 
     Play = S1 S2
 
