@@ -12,6 +12,7 @@ MiniPlayer = function(element, context) {
   var playButton, stopButton;
   var codeElement = element.querySelector('code');
   var code = codeElement.textContent;
+  var highlightElems = [];
 
   // Functions
   self.play = function() {
@@ -23,6 +24,7 @@ MiniPlayer = function(element, context) {
     });
     
     // Play this player
+    context.setAnimCallback(highlight);    
     context.parse(code);
     context.play();
     playButton.style.display = 'none';
@@ -33,13 +35,15 @@ MiniPlayer = function(element, context) {
 
   self.stop = function() {
     context.stop();
+    context.setAnimCallback(function() {});  
     playButton.style.display = 'block';
     stopButton.style.display = 'none';
     element.classList.remove('active');
     self.isPlaying = false;
+    highlight([]);    
   }
 
-  function highlightCode() {
+  function color() {
     // Get symbols
     var rules = context.parse(code);
     var symbols = rules.symbols;
@@ -60,6 +64,29 @@ MiniPlayer = function(element, context) {
       }
     }
     codeElement.innerHTML = html;
+
+    // Get all notes and references for later highlighting
+    highlightElems = [];
+    var elems = codeElement.querySelectorAll('.note, .reference');
+    for (var e = 0; e < elems.length; e++) {
+      highlightElems.push({ elem: elems[e], start: elems[e].dataset.start });
+    }
+  }
+
+  function highlight(symbols) {
+    for (var i = 0; i < highlightElems.length; i++) {
+      var highlight = false;
+      for (var j = 0; j < symbols.length; j++) {
+        if (highlightElems[i].start == symbols[j].start) {
+          highlight = true;
+        }
+      }
+      if (self.isPlaying && highlight) {
+        highlightElems[i].elem.classList.add('playing');
+      } else {
+        highlightElems[i].elem.classList.remove('playing');
+      }
+    }
   }
 
   // Only create play/stop buttons if playing is supported
@@ -81,7 +108,7 @@ MiniPlayer = function(element, context) {
   }
 
   // Rendering
-  highlightCode();
+  color();
 };
 
 MiniPlayer.instances = [];

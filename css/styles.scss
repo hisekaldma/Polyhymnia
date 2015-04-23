@@ -242,7 +242,7 @@ span.note      { color: #3399ff; }
 span.condition { color: #ff854c; }
 span.comment   { color: #79c95e; }
 span.playing   { color: #ffffb3; }
-
+.text span.playing { color: #000; border-bottom: 2px solid #000; }
 
 /* Tables */
 
