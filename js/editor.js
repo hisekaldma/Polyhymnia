@@ -10,7 +10,7 @@ Editor = function(element, context) {
   var rules = [];
   var music = context;
   var symbols = [];
-  music.setAnimCallback(highlightNotes);
+  music.setAnimCallback(highlight);
 
   // Elements
   {% capture template %}{% include editor.html %}{% endcapture %}
@@ -29,7 +29,7 @@ Editor = function(element, context) {
   var codeText =     element.querySelector('.code .text');
   var codeCursor =   element.querySelector('.code .cursor');
   var notSupportedMessage = element.querySelector('.not-supported');
-  var noteElems = [];
+  var highlightElems = [];
   codeEditor.value = contents;
 
   // Private vars
@@ -50,7 +50,7 @@ Editor = function(element, context) {
     playButton.style.display = 'block';
     stopButton.style.display = 'none';
     isPlaying = false;
-    highlightNotes([]);
+    highlight([]);
   }
 
   function parse() {
@@ -139,11 +139,11 @@ Editor = function(element, context) {
     // Replace contents of the code display
     codeText.innerHTML = html;
 
-    // Get all note elements for later highlighting
-    noteElems = [];
-    var elems = codeText.querySelectorAll('.note');
+    // Get all notes and references for later highlighting
+    highlightElems = [];
+    var elems = codeText.querySelectorAll('.note, .reference');
     for (var e = 0; e < elems.length; e++) {
-      noteElems.push({ elem: elems[e], start: elems[e].dataset.start });
+      highlightElems.push({ elem: elems[e], start: elems[e].dataset.start });
     }
   }
 
@@ -186,18 +186,18 @@ Editor = function(element, context) {
     window.requestAnimationFrame(render);    
   }
 
-  function highlightNotes(notes) {
-    for (var i = 0; i < noteElems.length; i++) {
+  function highlight(symbols) {
+    for (var i = 0; i < highlightElems.length; i++) {
       var highlight = false;
-      for (var j = 0; j < notes.length; j++) {
-        if (noteElems[i].start == notes[j].start) {
+      for (var j = 0; j < symbols.length; j++) {
+        if (highlightElems[i].start == symbols[j].start) {
           highlight = true;
         }
       }
       if (isPlaying && highlight) {
-        noteElems[i].elem.className = 'playing';
+        highlightElems[i].elem.classList.add('playing');
       } else {
-        noteElems[i].elem.className = 'note';
+        highlightElems[i].elem.classList.remove('playing');
       }
     }
   }
