@@ -7,20 +7,22 @@ Polyhymnia.Sequencer = function() {
   
   this.instruments = {};
   this.timeSignature = { num: 4, den: 4 };
-  this.stepsPerBeat = 16;
+  this.ticksPerQuarter = 48;
   this.generator = null;
   this.animCallback = undefined;
 
   var output = [];
   var audioContext = Polyhymnia.getAudioContext();
 
-  this.scheduleStep = function(step, time) {
+  this.scheduleTick = function(tick, time) {
     // Calculate where we're at
-    var stepInBar = step % (self.stepsPerBeat * self.timeSignature.num);
+    var quartersInBar = self.timeSignature.num * 4 / self.timeSignature.den;
+    var ticksInBar = self.ticksPerQuarter * quartersInBar;
+    var tickInBar = tick % ticksInBar;
 
     // If we've reached the end of a bar, generate new output
-    if (stepInBar === 0) {
-      if (step > 0) {
+    if (tickInBar === 0) {
+      if (tick > 0) {
         self.generator.step();
       }
       output = self.generator.getCurrentBar();
@@ -31,8 +33,8 @@ Polyhymnia.Sequencer = function() {
     for (var i = 0; i < output.length; i++) {
       var instrument = output[i].instrument;
       var pattern    = output[i].pattern;
-      var noteLength = getNoteLength(pattern.length);
-      var noteNumber = Math.floor(stepInBar / noteLength);
+      var stepLength = Math.round(ticksInBar / pattern.length);
+      var stepNumber = Math.floor(tickInBar / stepLength);
 
       // If there is no instrument, choose one
       if (!instrument) {
@@ -49,8 +51,8 @@ Polyhymnia.Sequencer = function() {
         }
       }
 
-      if (noteNumber < pattern.length) {
-        var notes = pattern[noteNumber];
+      if (stepNumber < pattern.length) {
+        var notes = pattern[stepNumber];
         if (!Array.isArray(notes)) {
           notes = [notes];
         }
@@ -59,11 +61,11 @@ Polyhymnia.Sequencer = function() {
           // Only trigger real notes, not pauses
           if (notes[n].key) {
             // Trigger NOTE ON if we're on the first step of a note
-            if (stepInBar % noteLength === 0) {
+            if (tickInBar % stepLength === 0) {
               scheduleNoteOn(instrument, notes[n], time);
             }
             // Trigger NOTE OFF if we're on the last step of the note
-            if (stepInBar % noteLength === noteLength - 1) {
+            if (tickInBar % stepLength === stepLength - 1) {
               scheduleNoteOff(instrument, notes[n], time);
             }
           }
@@ -99,17 +101,5 @@ Polyhymnia.Sequencer = function() {
     if (self.instruments[instrument]) {
       self.instruments[instrument].scheduleNoteOff(note.key, note.velocity, time);
     }
-  }
-
-  function getNoteLength(patternLength) {
-    var noteLengths = [1, 2, 4, 8, 16, 32, 64];
-    var noteLength = self.stepsPerBeat;
-    for (var n = 0; n < noteLengths.length; n++) {
-      if (patternLength < self.timeSignature.num * noteLengths[n] / 4) {
-        break;
-      }
-      noteLength = self.stepsPerBeat * 4 / noteLengths[n];
-    }
-    return noteLength;
   }
 };
