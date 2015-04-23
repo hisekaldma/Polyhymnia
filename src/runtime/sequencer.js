@@ -28,11 +28,11 @@ Polyhymnia.Sequencer = function() {
       output = self.generator.getCurrentBar();
     }
 
-    // Play the output
-    var animateNotes = [];
-    for (var i = 0; i < output.length; i++) {
-      var instrument = output[i].instrument;
-      var pattern    = output[i].pattern;
+    // Play the output patterns
+    var highlightSymbols = [];
+    for (var i = 0; i < output.patterns.length; i++) {
+      var instrument = output.patterns[i].instrument;
+      var pattern    = output.patterns[i].pattern;
       var stepLength = Math.round(ticksInBar / pattern.length);
       var stepNumber = Math.floor(tickInBar / stepLength);
 
@@ -70,17 +70,33 @@ Polyhymnia.Sequencer = function() {
             }
           }
 
-          // But animate all notes, even pauses
-          animateNotes.push(notes[n]);
+          // But highlight all notes, even pauses
+          highlightSymbols.push({
+            start: notes[n].start,
+            end:   notes[n].end
+          });
         }
       }
     }
 
+    // Also highlight all references
+    for (var r = 0; r < output.references.length; r++) {
+      highlightSymbols.push({
+        start: output.references[r].start,
+        end:   output.references[r].end
+      });
+    }
+
+    // Sort highlight symbols
+    highlightSymbols = highlightSymbols.sort(function(a, b) {
+      return a.start - b.start;
+    });
+
     // Set up callback for animation
     var delay = time - audioContext.currentTime; 
-    if (animateNotes.length > 0 && self.animCallback) {
+    if (highlightSymbols.length > 0 && self.animCallback) {
       window.setTimeout(function() {
-        self.animCallback(animateNotes);
+        self.animCallback(highlightSymbols);
       }, delay);
     }
   };

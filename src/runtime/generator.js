@@ -73,12 +73,16 @@ Polyhymnia.Generator = function() {
         // Sequence definition, find its children recursively
         var children = [];
         definition.sequence.forEach(function(reference) {
+          var child;
           if (reference.invalid) {
-            children.push(buildTree());
+            child = buildTree();
           } else {
             var rule = ruleDictionary[reference.name];
-            children.push(buildTree(rule));
+            child = buildTree(rule);
           }
+          child.start = reference.start;
+          child.end   = reference.end;
+          children.push(child);
         });
 
         // Calculate the length of the sequence
@@ -134,7 +138,8 @@ Polyhymnia.Generator = function() {
     var definitions = getValidDefinitions(node.definitions);
 
     // Go through all definitions and evaluate them
-    var patterns = [];
+    var references = [];
+    var patterns  = [];
     definitions.forEach(function(definition) {
       var inst;
       // Instruments are overriden by parent instruments
@@ -146,8 +151,14 @@ Polyhymnia.Generator = function() {
 
       if (definition.sequence) {
         // Sequence definition
-        var childPatterns = getCurrentBar(definition.sequence[definition.index], inst);
-        childPatterns.forEach(function(p) { patterns.push(p); });
+        references.push({
+          name:  definition.sequence[definition.index].name,
+          start: definition.sequence[definition.index].start,
+          end:   definition.sequence[definition.index].end
+        });
+        var child = getCurrentBar(definition.sequence[definition.index], inst);
+        child.references.forEach(function(p) { references.push(p); });
+        child.patterns.forEach(function(p) { patterns.push(p); });
       } else if (definition.pattern) {
         // Pattern definition
         var midiNotes = definition.pattern[definition.index].map(toMidi);
@@ -155,7 +166,7 @@ Polyhymnia.Generator = function() {
       }
     });
 
-    return patterns;
+    return { references: references, patterns: patterns };
   }
 
   function resetState(node) {
@@ -241,9 +252,5 @@ Polyhymnia.Generator = function() {
     } else {
       return midiNotes;
     }
-  }
-
-  function getRandom(array) {
-    return array[Math.floor(Math.random() * array.length)];
   }
 };

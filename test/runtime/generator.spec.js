@@ -12,8 +12,8 @@ describe('Generator', function() {
     var output1 = generator.getCurrentBar(); generator.step();
     var output2 = generator.getCurrentBar();
 
-    expect(output1[0].instrument).toBe('Piano');
-    expect(output2[0].instrument).toBe('Conga');
+    expect(output1.patterns[0].instrument).toBe('Piano');
+    expect(output2.patterns[0].instrument).toBe('Conga');
   });
 
   it('can interpret nested sequences', function() {
@@ -28,9 +28,9 @@ describe('Generator', function() {
     var output2 = generator.getCurrentBar(); generator.step();
     var output3 = generator.getCurrentBar();
 
-    expect(output1[0].instrument).toBe('Piano');
-    expect(output2[0].instrument).toBe('Conga');
-    expect(output3[0].instrument).toBe('Conga');
+    expect(output1.patterns[0].instrument).toBe('Piano');
+    expect(output2.patterns[0].instrument).toBe('Conga');
+    expect(output3.patterns[0].instrument).toBe('Conga');
   });
 
   it('can interpret parallel sequences', function() {
@@ -44,10 +44,10 @@ describe('Generator', function() {
     var output1 = generator.getCurrentBar(); generator.step();
     var output2 = generator.getCurrentBar();
 
-    expect(output1[0].instrument).toBe('Piano');
-    expect(output1[1].instrument).toBe('Conga');
-    expect(output2[0].instrument).toBe('Conga');
-    expect(output2[1].instrument).toBe('Piano');
+    expect(output1.patterns[0].instrument).toBe('Piano');
+    expect(output1.patterns[1].instrument).toBe('Conga');
+    expect(output2.patterns[0].instrument).toBe('Conga');
+    expect(output2.patterns[1].instrument).toBe('Piano');
   });
 
   it('can interpret nested parallel sequences of different length', function() {
@@ -65,14 +65,14 @@ describe('Generator', function() {
     var output2 = generator.getCurrentBar(); generator.step();
     var output3 = generator.getCurrentBar();
 
-    expect(output1.length).toBe(2);
-    expect(output2.length).toBe(2);
-    expect(output3.length).toBe(1);
-    expect(output1[0].instrument).toBe('Piano');
-    expect(output1[1].instrument).toBe('Viola');
-    expect(output2[0].instrument).toBe('Conga');
-    expect(output2[1].instrument).toBe('Viola');
-    expect(output3[0].instrument).toBe('Synth');
+    expect(output1.patterns.length).toBe(2);
+    expect(output2.patterns.length).toBe(2);
+    expect(output3.patterns.length).toBe(1);
+    expect(output1.patterns[0].instrument).toBe('Piano');
+    expect(output1.patterns[1].instrument).toBe('Viola');
+    expect(output2.patterns[0].instrument).toBe('Conga');
+    expect(output2.patterns[1].instrument).toBe('Viola');
+    expect(output3.patterns[0].instrument).toBe('Synth');
   });
 
   it('can interpret mixed output and sequences', function() {
@@ -86,10 +86,10 @@ describe('Generator', function() {
     var output1 = generator.getCurrentBar(); generator.step();
     var output2 = generator.getCurrentBar();
 
-    expect(output1[0].instrument).toBe('Piano');
-    expect(output1[1].instrument).toBe('Viola');
-    expect(output2[0].instrument).toBe('Conga');
-    expect(output2[1].instrument).toBe('Viola');
+    expect(output1.patterns[0].instrument).toBe('Piano');
+    expect(output1.patterns[1].instrument).toBe('Viola');
+    expect(output2.patterns[0].instrument).toBe('Conga');
+    expect(output2.patterns[1].instrument).toBe('Viola');
   });
 
   it('only chooses sequence definitions whose min conditions apply', function() {
@@ -109,8 +109,8 @@ describe('Generator', function() {
     var output1 = generator.getCurrentBar(); generator.step();
     var output2 = generator.getCurrentBar();
 
-    expect(output1[0].instrument).toBe('Piano');
-    expect(output2[0].instrument).toBe('Conga');
+    expect(output1.patterns[0].instrument).toBe('Piano');
+    expect(output2.patterns[0].instrument).toBe('Conga');
   });
 
   it('only chooses sequence definitions whose max conditions apply', function() {
@@ -130,8 +130,8 @@ describe('Generator', function() {
     var output1 = generator.getCurrentBar(); generator.step();
     var output2 = generator.getCurrentBar();
 
-    expect(output1[0].instrument).toBe('Conga');
-    expect(output2[0].instrument).toBe('Piano');
+    expect(output1.patterns[0].instrument).toBe('Conga');
+    expect(output2.patterns[0].instrument).toBe('Piano');
   });
 
   it('only chooses sequence definitions whose between conditions apply', function() {
@@ -152,8 +152,8 @@ describe('Generator', function() {
     var output1 = generator.getCurrentBar(); generator.step();
     var output2 = generator.getCurrentBar();
 
-    expect(output1[0].instrument).toBe('Piano');
-    expect(output2[0].instrument).toBe('Conga');
+    expect(output1.patterns[0].instrument).toBe('Piano');
+    expect(output2.patterns[0].instrument).toBe('Conga');
   });
 
   it('can interpret simple patterns', function() {
@@ -174,11 +174,11 @@ describe('Generator', function() {
     ]);
     var output = generator.getCurrentBar();
 
-    expect(output[0].instrument).toBe('Piano');
-    expect(output[0].pattern[0].key).toBe(60);
-    expect(output[0].pattern[1].key).toBe(62);
-    expect(output[0].pattern[2].key).toBe(64);
-    expect(output[0].pattern[3].key).toBe(65);
+    expect(output.patterns[0].instrument).toBe('Piano');
+    expect(output.patterns[0].pattern[0].key).toBe(60);
+    expect(output.patterns[0].pattern[1].key).toBe(62);
+    expect(output.patterns[0].pattern[2].key).toBe(64);
+    expect(output.patterns[0].pattern[3].key).toBe(65);
   });
 
   it('can interpret multi bar patterns', function() {
@@ -204,12 +204,12 @@ describe('Generator', function() {
     var output1 = generator.getCurrentBar(); generator.step();
     var output2 = generator.getCurrentBar();
 
-    expect(output1[0].instrument).toBe('Piano');
-    expect(output1[0].pattern[0].key).toBe(60);
-    expect(output1[0].pattern[1].key).toBe(62);
-    expect(output2[0].instrument).toBe('Piano');    
-    expect(output2[0].pattern[0].key).toBe(64);
-    expect(output2[0].pattern[1].key).toBe(65);
+    expect(output1.patterns[0].instrument).toBe('Piano');
+    expect(output1.patterns[0].pattern[0].key).toBe(60);
+    expect(output1.patterns[0].pattern[1].key).toBe(62);
+    expect(output2.patterns[0].instrument).toBe('Piano');    
+    expect(output2.patterns[0].pattern[0].key).toBe(64);
+    expect(output2.patterns[0].pattern[1].key).toBe(65);
   });
 
   it('can interpret parallel patterns', function() {
@@ -239,16 +239,16 @@ describe('Generator', function() {
 
     var output = generator.getCurrentBar();
 
-    expect(output[0].instrument).toBe('Piano');
-    expect(output[0].pattern[0].key).toBe(60);
-    expect(output[0].pattern[1].key).toBe(62);
-    expect(output[0].pattern[2].key).toBe(64);
-    expect(output[0].pattern[3].key).toBe(65);
-    expect(output[1].instrument).toBe('Zoombasa');
-    expect(output[1].pattern[0].key).toBe(71);
-    expect(output[1].pattern[1].key).toBe(69);
-    expect(output[1].pattern[2].key).toBe(67);
-    expect(output[1].pattern[3].key).toBe(65);
+    expect(output.patterns[0].instrument).toBe('Piano');
+    expect(output.patterns[0].pattern[0].key).toBe(60);
+    expect(output.patterns[0].pattern[1].key).toBe(62);
+    expect(output.patterns[0].pattern[2].key).toBe(64);
+    expect(output.patterns[0].pattern[3].key).toBe(65);
+    expect(output.patterns[1].instrument).toBe('Zoombasa');
+    expect(output.patterns[1].pattern[0].key).toBe(71);
+    expect(output.patterns[1].pattern[1].key).toBe(69);
+    expect(output.patterns[1].pattern[2].key).toBe(67);
+    expect(output.patterns[1].pattern[3].key).toBe(65);
   });
 
   it('can interpret nested patterns', function() {
@@ -269,12 +269,12 @@ describe('Generator', function() {
     ]);
     var output = generator.getCurrentBar();
 
-    expect(output[0].instrument).toBe('Piano');
-    expect(output[0].pattern[0].key).toBe(60);
-    expect(output[1].instrument).toBe('Kick');
-    expect(output[1].pattern[0].key).toBe(60);
-    expect(output[2].instrument).toBe('Snare');
-    expect(output[2].pattern[0].key).toBe(60);
+    expect(output.patterns[0].instrument).toBe('Piano');
+    expect(output.patterns[0].pattern[0].key).toBe(60);
+    expect(output.patterns[1].instrument).toBe('Kick');
+    expect(output.patterns[1].pattern[0].key).toBe(60);
+    expect(output.patterns[2].instrument).toBe('Snare');
+    expect(output.patterns[2].pattern[0].key).toBe(60);
   });
 
   it('only chooses pattern definitions whose min conditions apply', function() {
@@ -291,8 +291,8 @@ describe('Generator', function() {
     generator.setParam('x', 0.2);
     var output = generator.getCurrentBar();
 
-    expect(output.length).toBe(1);
-    expect(output[0].instrument).toBe('Piano');
+    expect(output.patterns.length).toBe(1);
+    expect(output.patterns[0].instrument).toBe('Piano');
   });
 
   it('only chooses pattern definitions whose max conditions apply', function() {
@@ -309,8 +309,8 @@ describe('Generator', function() {
     generator.setParam('x', 0.7);
     var output = generator.getCurrentBar();
 
-    expect(output.length).toBe(1);
-    expect(output[0].instrument).toBe('Conga');
+    expect(output.patterns.length).toBe(1);
+    expect(output.patterns[0].instrument).toBe('Conga');
   });
 
   it('only chooses pattern definitions whose between conditions apply', function() {
@@ -328,8 +328,8 @@ describe('Generator', function() {
     generator.setParam('x', 0.5);
     var output = generator.getCurrentBar();
 
-    expect(output.length).toBe(1);
-    expect(output[0].instrument).toBe('Synth');
+    expect(output.patterns.length).toBe(1);
+    expect(output.patterns[0].instrument).toBe('Synth');
   });
 
 
@@ -341,8 +341,8 @@ describe('Generator', function() {
     ]);
     var output = generator.getCurrentBar();
 
-    expect(output[0].instrument).toBe('Piano');
-    expect(output[0].pattern[0].key).toBe(60);
+    expect(output.patterns[0].instrument).toBe('Piano');
+    expect(output.patterns[0].pattern[0].key).toBe(60);
   });
 
   it('uses instruments defined on sequences', function() {
@@ -353,8 +353,8 @@ describe('Generator', function() {
     ]);
     var output = generator.getCurrentBar();
 
-    expect(output[0].instrument).toBe('Piano');
-    expect(output[0].pattern[0].key).toBe(60);
+    expect(output.patterns[0].instrument).toBe('Piano');
+    expect(output.patterns[0].pattern[0].key).toBe(60);
   });
 
   it('overrides instruments defined on referenced rules', function() {
@@ -365,8 +365,8 @@ describe('Generator', function() {
     ]);
     var output = generator.getCurrentBar();
 
-    expect(output[0].instrument).toBe('Piano');
-    expect(output[0].pattern[0].key).toBe(60);
+    expect(output.patterns[0].instrument).toBe('Piano');
+    expect(output.patterns[0].pattern[0].key).toBe(60);
   });
 
   it('plays a single rule even if it isn\'t called Play', function() {
@@ -376,6 +376,6 @@ describe('Generator', function() {
     ]);
     var output = generator.getCurrentBar();
 
-    expect(output[0].instrument).toBe('Conga');
+    expect(output.patterns[0].instrument).toBe('Conga');
   });
 });
