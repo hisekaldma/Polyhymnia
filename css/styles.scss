@@ -49,6 +49,7 @@ html {
 }
 body {
   min-height: 100%;
+  position: relative;
 }
 header, section, footer {
   width: 100%;
@@ -393,23 +394,46 @@ body.text {
 /* Sidenav */
 
 .sidenav {
-  float: right;
   width: 150px;
-  font-size: 16px;
   margin-top: 1.4rem;
+  margin-left: 100px;
 
-  ul {
+  .dropdown-menu {
+    display: none;
     border-left: 3px solid #ddd;
     padding-left: 1.4rem;
     margin-left: 2px;
   }
   li {
     margin: 8px 0;
+
+    a {
+      color: #999999;
+
+      &:hover {
+        color: #815ccc;
+      }
+    }
+    &.active {
+      > a {
+        color: #815ccc;
+        font-family: $bold;
+        font-weight: bold;
+      }
+
+      .dropdown-menu {
+        display: block;
+      }
+    }
   }
-  a {
-    color: #999999;
-  }
+  @media screen and (max-width: 768px) {
+    margin-left: 60px;
+  }  
   @media screen and (max-width: 590px) {
     display: none;
+  }
+  &.affix {
+    position: fixed;
+    top: 0;
   }
 }

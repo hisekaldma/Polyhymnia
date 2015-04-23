@@ -61,16 +61,18 @@ document.addEventListener('DOMContentLoaded', function() {
   if (sidenav) {
     // Headings
     var headings = document.querySelectorAll('h2, h3');
+    var base = sidenav.querySelector('ul');
     for (var i = 0; i < headings.length; i++) {
       var heading = headings[i];
       var parent;
 
       // Handle subnavs
       if (heading.nodeName == 'H2') {
-        parent = sidenav;
+        parent = base;
       } else if (heading.nodeName == 'H3') {
-        if (parent == sidenav) {
+        if (parent == base) {
           var ul = document.createElement('ul');
+          ul.className = 'dropdown-menu';
           li.appendChild(ul);
           parent = ul;
         }
@@ -80,5 +82,8 @@ document.addEventListener('DOMContentLoaded', function() {
       li.innerHTML = '<a href="#' + heading.id + '">' + heading.textContent + '</a>';
       parent.appendChild(li);
     }
+
+    // Scrollspy
+    $('body').scrollspy({ target: '.sidenav' });
   }
 });
