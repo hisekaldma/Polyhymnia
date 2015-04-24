@@ -79,6 +79,7 @@ document.addEventListener('DOMContentLoaded', function() {
       }
 
       var li = document.createElement('li');
+      li.className = heading.id;
       li.innerHTML = '<a href="#' + heading.id + '">' + heading.textContent + '</a>';
       parent.appendChild(li);
     }

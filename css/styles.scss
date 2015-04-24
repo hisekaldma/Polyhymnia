@@ -1,5 +1,17 @@
 ---
 ---
+/* Variables */
+
+$color-error:       #ff323c;
+$color-equal:       #f03a76;
+$color-reference:   #815ccc;
+$color-note:        #3399ff;
+$color-condition:   #ff854c;
+$color-comment:     #79c95e;
+$color-playing:     #ffffb3;
+
+$color-interaction: #815ccc;
+
 /* Resets */
 
 html, body, div, span, object, iframe,
@@ -134,10 +146,10 @@ h3 {
 /* Links */
 
 a {
-  color: #815ccc;
+  color: $color-interaction;
 
   &:hover, &:active {
-    border-bottom: 3px solid #815ccc;
+    border-bottom: 3px solid $color-interaction;
   }
 
   nav & {
@@ -205,26 +217,26 @@ pre {
     }
     &:hover, &:active {
       circle {
-        stroke: #815ccc;
+        stroke: $color-interaction;
       }
       rect, path {
-        fill: #815ccc;
+        fill: $color-interaction;
       }
     }
   }
 }
 pre.active {
-  border-color: #815ccc;
+  border-color: $color-interaction;
 
   circle {
-    stroke: #815ccc;
+    stroke: $color-interaction;
   }
   rect, path {
-    fill: #815ccc;
+    fill: $color-interaction;
   }
 }
 code {
-  color: #815ccc;
+  color: $color-interaction;
   font-family: Inconsolata, Consolas, "Andale Mono", "Lucida Console", monospace;
 
   p & {
@@ -235,13 +247,13 @@ code {
 /* Syntax highlighting */
 
 pre code       { color: #505050; }
-span.error     { color: #ff323c; border-bottom: 2px solid #ff323c; }
-span.equal     { color: #f03a76; }
-span.reference { color: #815ccc; }
-span.note      { color: #3399ff; }
-span.condition { color: #ff854c; }
-span.comment   { color: #79c95e; }
-span.playing   { color: #ffffb3; }
+span.error     { color: $color-error; border-bottom: 2px solid $color-error; }
+span.equal     { color: $color-equal; }
+span.reference { color: $color-reference; }
+span.note      { color: $color-note; }
+span.condition { color: $color-condition; }
+span.comment   { color: $color-comment; }
+span.playing   { color: $color-playing; }
 pre span.playing { color: #000; border-bottom: 2px solid #000; }
 
 /* Tables */
@@ -269,7 +281,7 @@ table {
 /* Design */
 
 body {
-  background: linear-gradient(170deg, #815ccc, #73b9ff);
+  background: linear-gradient(170deg, $color-interaction, #73b9ff);
 }
 
 header {
@@ -358,17 +370,17 @@ body.text {
   background: #fff;
 
   header {
-    background: linear-gradient(130deg, #815ccc, #779ef0);
+    background: linear-gradient(130deg, $color-interaction, #779ef0);
   }
   footer {
     background: #eee;
 
     nav a {
-      color: #815ccc;
+      color: $color-interaction;
       border-color: transparent;
 
       &:hover, &:active {
-        border-color: #815ccc;
+        border-color: $color-interaction;
       }
     }
   }
@@ -409,14 +421,9 @@ body.text {
 
     a {
       color: #999999;
-
-      &:hover {
-        color: #815ccc;
-      }
     }
     &.active {
       > a {
-        color: #815ccc;
         font-family: $bold;
         font-weight: bold;
       }
@@ -424,6 +431,33 @@ body.text {
       .dropdown-menu {
         display: block;
       }
+    }
+  }
+  li.active {
+    &.patterns > a,
+    &.patterns a:hover,
+    &.patterns li.active > a {
+      color: $color-note;
+    }
+    &.sequences > a,
+    &.sequences a:hover,
+    &.sequences li.active > a {
+      color: $color-reference;
+    }
+    &.rules > a,
+    &.rules a:hover,
+    &.rules li.active > a {
+      color: $color-equal;
+    }
+    &.conditions > a,
+    &.conditions a:hover,
+    &.conditions li.active > a {
+      color: $color-condition;
+    }
+    &.comments > a,
+    &.comments a:hover,
+    &.comments li.active > a {
+      color: $color-comment;
     }
   }
   @media screen and (max-width: 768px) {
