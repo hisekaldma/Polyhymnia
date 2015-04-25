@@ -1,5 +1,5 @@
 /*!
- * Polyhymnia v0.2.0 (https://polyhymnia.io)
+ * Polyhymnia v0.3.0 (https://polyhymnia.io)
  *
  * Copyright (c) 2014-2015 Jonathan Hise Kaldma
  * Released under the MIT license
@@ -1003,21 +1003,21 @@ Polyhymnia.Metronome = function() {
   'use strict';
   var self = this;
   this.tempo = 120.0;
-  this.stepsPerBeat = 16;
+  this.ticksPerBeat = 48;
   this.interval = 25.0; // ms
   this.lookahead = 0.1; // s
   this.sequencer = null;
 
   var isPlaying = false;
-  var currentStep = 0;
-  var nextStepTime = 0.0;
+  var currentTick = 0;
+  var nextTickTime = 0.0;
   var timer = 0;
   var audioContext = Polyhymnia.getAudioContext();
 
   this.play = function() {
     if (!isPlaying) {
-      currentStep = 0;
-      nextStepTime = audioContext.currentTime;
+      currentTick = 0;
+      nextTickTime = audioContext.currentTime;
       schedule();
       isPlaying = true;      
     }
@@ -1034,21 +1034,21 @@ Polyhymnia.Metronome = function() {
     // Don't play if the tab is in the background
     if (!document.hidden) {
       // Schedule all beats to play during the lookahead    
-      while (nextStepTime < audioContext.currentTime + self.lookahead) {
-        self.sequencer.scheduleStep(currentStep, nextStepTime);
-        step();
+      while (nextTickTime < audioContext.currentTime + self.lookahead) {
+        self.sequencer.scheduleTick(currentTick, nextTickTime);
+        tick();
       }
     }
     timer = window.setTimeout(schedule, self.interval);
   }
 
-  function step() {
+  function tick() {
     // Advance time
     var secondsPerBeat = 60.0 / self.tempo; // Recalculate, so we can change tempo
-    nextStepTime += secondsPerBeat / self.stepsPerBeat;
+    nextTickTime += secondsPerBeat / self.ticksPerBeat;
 
-    // Advance the step counter
-    currentStep++;
+    // Advance the tick counter
+    currentTick++;
   }
 };
 var Polyhymnia = Polyhymnia || {};
@@ -1059,8 +1059,6 @@ Polyhymnia.Sampler = function(options) {
 
   options = options || {};
   var attack  = options.attack  || 0.01; // s
-  var decay   = options.decay   || 0.1;  // s
-  var sustain = options.sustain || 1.0;  // gain
   var release = options.release || 0.7;  // s
 
   var audioContext = Polyhymnia.getAudioContext();
@@ -1158,8 +1156,7 @@ Polyhymnia.Sampler = function(options) {
       self.scheduleNoteOff(midiNumber, velocity, time);
     }
 
-    var voice = {};
-    var volume = velocity / 127;
+    var voice = { volume: velocity / 127 };
 
     // Gain
     voice.gain = audioContext.createGain();
@@ -1172,11 +1169,10 @@ Polyhymnia.Sampler = function(options) {
     voice.source.playbackRate.value = samples[midiNumber].pitch;
     voice.source.connect(voice.gain);
 
-    // Play, attack, decay
+    // Attack
     voice.source.start(time);
-    voice.gain.gain.linearRampToValueAtTime(0.0,              time + 0.0001); // Offset to avoid click/pop
-    voice.gain.gain.linearRampToValueAtTime(volume,           time + attack);
-    voice.gain.gain.linearRampToValueAtTime(volume * sustain, time + attack + decay);
+    voice.gain.gain.setValueAtTime(0.001, time);
+    voice.gain.gain.exponentialRampToValueAtTime(voice.volume, time + attack);
 
     voices[midiNumber] = voice;
   };
@@ -1185,83 +1181,21 @@ Polyhymnia.Sampler = function(options) {
     var voice = voices[midiNumber];
 
     if (voice) {
-      // Release, stop
-      voice.gain.gain.linearRampToValueAtTime(0.0, time + release);
-      voice.source.stop(time + release + 0.0001);
+      // Release
+      voice.gain.gain.cancelScheduledValues(time);
+      voice.gain.gain.setValueAtTime(voice.volume, time);
+      voice.gain.gain.exponentialRampToValueAtTime(0.001, time + release);
 
       delete voices[midiNumber];
     }
   };
 
   this.allNotesOff = function() {
+    var now = audioContext.currentTime;
     for (var voice in voices) {
-      voices[voice].source.stop();
-      delete voices[voice];
+      self.scheduleNoteOff(voice, 0, now);
     }
   };  
-};
-var Polyhymnia = Polyhymnia || {};
-
-Polyhymnia.Synthesizer = function(options) {
-  'use strict';
-  var self = this;
-  
-  options = options || {};
-  var wave    = options.wave    || 'square';
-  var attack  = options.attack  || 0.05; // s
-  var decay   = options.decay   || 0.1;  // s
-  var sustain = options.sustain || 0.8;  // gain
-  var release = options.release || 0.3;  // s
-
-  var audioContext = Polyhymnia.getAudioContext();
-  var voices = {};
-
-  this.scheduleNoteOn = function(midiNumber, velocity, time) {
-    if (voices[midiNumber]) {
-      self.scheduleNoteOff(midiNumber, velocity, time);
-    }
-
-    var voice = {};
-
-    // Gain
-    voice.gain = audioContext.createGain();
-    voice.gain.connect(audioContext.destination);
-    voice.gain.gain.value = 0;
-
-    // Oscillator
-    voice.osc = audioContext.createOscillator();
-    voice.osc.type = wave;
-    voice.osc.frequency.value = Polyhymnia.Notes.toFrequency(midiNumber);
-    voice.osc.connect(voice.gain);
-
-    // Play, attack, decay
-    voice.osc.start(time);
-    var volume = velocity / 127;
-    voice.gain.gain.linearRampToValueAtTime(0.0,              time + 0.0001); // Offset to avoid click/pop
-    voice.gain.gain.linearRampToValueAtTime(volume,           time + attack);
-    voice.gain.gain.linearRampToValueAtTime(volume * sustain, time + attack + decay);
-
-    voices[midiNumber] = voice;
-  };
-
-  this.scheduleNoteOff = function(midiNumber, velocity, time) {
-    var voice = voices[midiNumber];
-
-    if (voice) {
-      // Release, stop
-      voice.gain.gain.linearRampToValueAtTime(0.0, time + release);
-      voice.osc.stop(time + release + 0.0001);
-
-      delete voices[midiNumber];
-    }
-  };
-
-  this.allNotesOff = function() {
-    for (var voice in voices) {
-      voices[voice].osc.stop();
-      delete voices[voice];
-    }
-  };
 };
 var Polyhymnia = Polyhymnia || {};
 
@@ -1317,9 +1251,7 @@ Polyhymnia.Context = function(options) {
   // Instruments
   if (options && options.instruments) {
     options.instruments.forEach(function(instrument) {
-      sequencer.instruments[instrument.name] = new Polyhymnia.Sampler({
-        samples: instrument.samples
-      });
+      sequencer.instruments[instrument.name] = new Polyhymnia.Sampler(instrument);
     });
   }
 
@@ -1449,12 +1381,16 @@ Polyhymnia.Generator = function() {
         // Sequence definition, find its children recursively
         var children = [];
         definition.sequence.forEach(function(reference) {
+          var child;
           if (reference.invalid) {
-            children.push(buildTree());
+            child = buildTree();
           } else {
             var rule = ruleDictionary[reference.name];
-            children.push(buildTree(rule));
+            child = buildTree(rule);
           }
+          child.start = reference.start;
+          child.end   = reference.end;
+          children.push(child);
         });
 
         // Calculate the length of the sequence
@@ -1510,7 +1446,8 @@ Polyhymnia.Generator = function() {
     var definitions = getValidDefinitions(node.definitions);
 
     // Go through all definitions and evaluate them
-    var patterns = [];
+    var references = [];
+    var patterns  = [];
     definitions.forEach(function(definition) {
       var inst;
       // Instruments are overriden by parent instruments
@@ -1522,8 +1459,14 @@ Polyhymnia.Generator = function() {
 
       if (definition.sequence) {
         // Sequence definition
-        var childPatterns = getCurrentBar(definition.sequence[definition.index], inst);
-        childPatterns.forEach(function(p) { patterns.push(p); });
+        references.push({
+          name:  definition.sequence[definition.index].name,
+          start: definition.sequence[definition.index].start,
+          end:   definition.sequence[definition.index].end
+        });
+        var child = getCurrentBar(definition.sequence[definition.index], inst);
+        child.references.forEach(function(p) { references.push(p); });
+        child.patterns.forEach(function(p) { patterns.push(p); });
       } else if (definition.pattern) {
         // Pattern definition
         var midiNotes = definition.pattern[definition.index].map(toMidi);
@@ -1531,7 +1474,7 @@ Polyhymnia.Generator = function() {
       }
     });
 
-    return patterns;
+    return { references: references, patterns: patterns };
   }
 
   function resetState(node) {
@@ -1618,10 +1561,6 @@ Polyhymnia.Generator = function() {
       return midiNotes;
     }
   }
-
-  function getRandom(array) {
-    return array[Math.floor(Math.random() * array.length)];
-  }
 };
 var Polyhymnia = Polyhymnia || {};
 
@@ -1632,32 +1571,34 @@ Polyhymnia.Sequencer = function() {
   
   this.instruments = {};
   this.timeSignature = { num: 4, den: 4 };
-  this.stepsPerBeat = 16;
+  this.ticksPerQuarter = 48;
   this.generator = null;
   this.animCallback = undefined;
 
   var output = [];
   var audioContext = Polyhymnia.getAudioContext();
 
-  this.scheduleStep = function(step, time) {
+  this.scheduleTick = function(tick, time) {
     // Calculate where we're at
-    var stepInBar = step % (self.stepsPerBeat * self.timeSignature.num);
+    var quartersInBar = self.timeSignature.num * 4 / self.timeSignature.den;
+    var ticksInBar = self.ticksPerQuarter * quartersInBar;
+    var tickInBar = tick % ticksInBar;
 
     // If we've reached the end of a bar, generate new output
-    if (stepInBar === 0) {
-      if (step > 0) {
+    if (tickInBar === 0) {
+      if (tick > 0) {
         self.generator.step();
       }
       output = self.generator.getCurrentBar();
     }
 
-    // Play the output
-    var animateNotes = [];
-    for (var i = 0; i < output.length; i++) {
-      var instrument = output[i].instrument;
-      var pattern    = output[i].pattern;
-      var noteLength = getNoteLength(pattern.length);
-      var noteNumber = Math.floor(stepInBar / noteLength);
+    // Play the output patterns
+    var highlightSymbols = [];
+    for (var i = 0; i < output.patterns.length; i++) {
+      var instrument = output.patterns[i].instrument;
+      var pattern    = output.patterns[i].pattern;
+      var stepLength = Math.round(ticksInBar / pattern.length);
+      var stepNumber = Math.floor(tickInBar / stepLength);
 
       // If there is no instrument, choose one
       if (!instrument) {
@@ -1674,8 +1615,8 @@ Polyhymnia.Sequencer = function() {
         }
       }
 
-      if (noteNumber < pattern.length) {
-        var notes = pattern[noteNumber];
+      if (stepNumber < pattern.length) {
+        var notes = pattern[stepNumber];
         if (!Array.isArray(notes)) {
           notes = [notes];
         }
@@ -1684,26 +1625,42 @@ Polyhymnia.Sequencer = function() {
           // Only trigger real notes, not pauses
           if (notes[n].key) {
             // Trigger NOTE ON if we're on the first step of a note
-            if (stepInBar % noteLength === 0) {
+            if (tickInBar % stepLength === 0) {
               scheduleNoteOn(instrument, notes[n], time);
             }
             // Trigger NOTE OFF if we're on the last step of the note
-            if (stepInBar % noteLength === noteLength - 1) {
+            if (tickInBar % stepLength === stepLength - 1) {
               scheduleNoteOff(instrument, notes[n], time);
             }
           }
 
-          // But animate all notes, even pauses
-          animateNotes.push(notes[n]);
+          // But highlight all notes, even pauses
+          highlightSymbols.push({
+            start: notes[n].start,
+            end:   notes[n].end
+          });
         }
       }
     }
 
+    // Also highlight all references
+    for (var r = 0; r < output.references.length; r++) {
+      highlightSymbols.push({
+        start: output.references[r].start,
+        end:   output.references[r].end
+      });
+    }
+
+    // Sort highlight symbols
+    highlightSymbols = highlightSymbols.sort(function(a, b) {
+      return a.start - b.start;
+    });
+
     // Set up callback for animation
     var delay = time - audioContext.currentTime; 
-    if (animateNotes.length > 0 && self.animCallback) {
+    if (highlightSymbols.length > 0 && self.animCallback) {
       window.setTimeout(function() {
-        self.animCallback(animateNotes);
+        self.animCallback(highlightSymbols);
       }, delay);
     }
   };
@@ -1724,17 +1681,5 @@ Polyhymnia.Sequencer = function() {
     if (self.instruments[instrument]) {
       self.instruments[instrument].scheduleNoteOff(note.key, note.velocity, time);
     }
-  }
-
-  function getNoteLength(patternLength) {
-    var noteLengths = [1, 2, 4, 8, 16, 32, 64];
-    var noteLength = self.stepsPerBeat;
-    for (var n = 0; n < noteLengths.length; n++) {
-      if (patternLength < self.timeSignature.num * noteLengths[n] / 4) {
-        break;
-      }
-      noteLength = self.stepsPerBeat * 4 / noteLengths[n];
-    }
-    return noteLength;
   }
 };
