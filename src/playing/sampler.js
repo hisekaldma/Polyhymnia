@@ -6,8 +6,6 @@ Polyhymnia.Sampler = function(options) {
 
   options = options || {};
   var attack  = options.attack  || 0.01; // s
-  var decay   = options.decay   || 0.1;  // s
-  var sustain = options.sustain || 1.0;  // gain
   var release = options.release || 0.7;  // s
 
   var audioContext = Polyhymnia.getAudioContext();
@@ -121,9 +119,8 @@ Polyhymnia.Sampler = function(options) {
 
     // Play, attack, decay
     voice.source.start(time);
-    voice.gain.gain.linearRampToValueAtTime(0.0,              time + 0.0001); // Offset to avoid click/pop
-    voice.gain.gain.linearRampToValueAtTime(volume,           time + attack);
-    voice.gain.gain.linearRampToValueAtTime(volume * sustain, time + attack + decay);
+    voice.gain.gain.linearRampToValueAtTime(0.0,    time + 0.0001); // Offset to avoid click/pop
+    voice.gain.gain.linearRampToValueAtTime(volume, time + attack);
 
     voices[midiNumber] = voice;
   };
@@ -141,9 +138,9 @@ Polyhymnia.Sampler = function(options) {
   };
 
   this.allNotesOff = function() {
+    var now = audioContext.currentTime;
     for (var voice in voices) {
-      voices[voice].source.stop(0.0001);
-      delete voices[voice];
+      this.scheduleNoteOff(voice, 0, now);
     }
   };  
 };
