@@ -52,9 +52,7 @@ Polyhymnia.Context = function(options) {
   // Instruments
   if (options && options.instruments) {
     options.instruments.forEach(function(instrument) {
-      sequencer.instruments[instrument.name] = new Polyhymnia.Sampler({
-        samples: instrument.samples
-      });
+      sequencer.instruments[instrument.name] = new Polyhymnia.Sampler(instrument);
     });
   }
 
