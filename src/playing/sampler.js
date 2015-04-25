@@ -103,8 +103,7 @@ Polyhymnia.Sampler = function(options) {
       self.scheduleNoteOff(midiNumber, velocity, time);
     }
 
-    var voice = {};
-    var volume = velocity / 127;
+    var voice = { volume: velocity / 127 };
 
     // Gain
     voice.gain = audioContext.createGain();
@@ -117,10 +116,10 @@ Polyhymnia.Sampler = function(options) {
     voice.source.playbackRate.value = samples[midiNumber].pitch;
     voice.source.connect(voice.gain);
 
-    // Play, attack, decay
+    // Attack
     voice.source.start(time);
-    voice.gain.gain.linearRampToValueAtTime(0.0,    time + 0.0001); // Offset to avoid click/pop
-    voice.gain.gain.linearRampToValueAtTime(volume, time + attack);
+    voice.gain.gain.setValueAtTime(0.001, time);
+    voice.gain.gain.exponentialRampToValueAtTime(voice.volume, time + attack);
 
     voices[midiNumber] = voice;
   };
@@ -129,9 +128,10 @@ Polyhymnia.Sampler = function(options) {
     var voice = voices[midiNumber];
 
     if (voice) {
-      // Release, stop
-      voice.gain.gain.linearRampToValueAtTime(0.0, time + release);
-      voice.source.stop(time + release + 0.0001);
+      // Release
+      voice.gain.gain.cancelScheduledValues(time);
+      voice.gain.gain.setValueAtTime(voice.volume, time);
+      voice.gain.gain.exponentialRampToValueAtTime(0.001, time + release);
 
       delete voices[midiNumber];
     }
@@ -140,7 +140,7 @@ Polyhymnia.Sampler = function(options) {
   this.allNotesOff = function() {
     var now = audioContext.currentTime;
     for (var voice in voices) {
-      this.scheduleNoteOff(voice, 0, now);
+      self.scheduleNoteOff(voice, 0, now);
     }
   };  
 };
