@@ -27,7 +27,7 @@ Notes are assumed to be in the in the middle octave by default. To play notes in
 
     C4 Eb5 F2 Ab3
 
-Octaves are numbered the way they are in most MIDI software, where middle C is C3. This means that the lowest octave is -2, and the highest octave is 8.
+Octaves are numbered as they are in most MIDI software, so middle C is C3. The lowest octave is -2, and the highest octave is 8.
 
 ### Chords
 A chord is a set of three or more notes played together. They are based on a root note, and can be major (`M`), minor (`m`), diminished (`dim`), augmented (`aug`), or dominant (`dom`).
@@ -38,7 +38,7 @@ Chords can also be extended with a fourth note, the so-called seventh. This is d
 
     CM7 Fm GM7 Bdim
 
-Chords can take any note that you can write as the root: flats, sharps, and notes in different octaves.
+The root note can be flat or sharp, and in any octave.
 
     C4M F#5dim7 Gb2M B-1dim
 
@@ -69,7 +69,7 @@ The chords in a minor scale are:
 ### Velocity
 Velocity is how hard a note is played. Higher velocity usually means that the note sounds louder, but it can also change the character of the sound, e.g. making it sharper.
 
-Velocity is measured between 0 and 127, since that’s the MIDI standard. If you don’t write anything else Polyhymnia will assume that notes have the velocity 72, which is roughly in the middle. To change the velocity, just add a period (`.`) after the note, and put the velocity in numbers after that:
+Velocity is measured between 0 and 127, since that’s the MIDI standard. The default velocity is 72, which is roughly in the middle. To use another velocity, just add a period (`.`) after the note, and put the velocity after that:
 
     C.32 D.64 E.96 F.127
 
@@ -131,50 +131,50 @@ To create patterns that are longer than just one bar, use the pipe character (`|
 ## Sequences
 When your entire composition is just one pattern, it plays without any fuzz. But to actually make something more interesting, we usually want to create sequences of patterns. The first thing we have to do is to name our patterns. To do that, we use the equal sign (`=`).
 
-    P1 = C D E F
+    P1 = C D Eb F
 
 Now, we can refer to this pattern by its name in a sequence. Creating a sequence is just as simple as creating a pattern. Just write the name, an equal sign, and the sequence.
 
     Play = P1 P1
-    P1 = C D E F
+    P1 = C D Eb F
 
 Note that the sequence is named `Play`. This is a special name. When we have more than one pattern, we need to tell Polyhymnia where to start. `Play` does that. Now let’s make the sequence more interesting by adding another pattern:
 
     Play = P1 P1 P2
-    P1 = C D E F
-    P2 = F E D C
+    P1 = C D Eb F
+    P2 = G G Gm F F Fm
 
 ### Nested Sequences
 Just like you can name patterns, you can also name sequences. You can then refer to them in other sequences, just like you can with patterns.
 
     Play = P1 P1 P2 S1
     S1 = P3 P3
-    P1 = C D E F
-    P2 = F E D C
-    P3 = F F F F
+    P1 = C D Eb F
+    P2 = G G Gm F F Fm
+    P3 = Cm Fm
 
 Note that a sequence can only contain names, and a pattern can only contain pattern steps. If you try to mix the two in one definition you will get an error.
 
-    Play = Cm Bdim P1
-    P1 = C D E F
+    Play = Cm Fm P1
+    P1 = C D Eb F
 
 Also note that you cannot make recursive sequences, i.e. sequences that refer to themselves. Doing so will give you an error.
 
     Play = P1 Play
-    P1 = C D E F
+    P1 = C D Eb F
 
 ### Instruments
-So far all everything has been played on a piano. This is because we haven’t specified what instrument to play things on. To play a pattern on a specific instrument we write the name of the instrument and a colon (`:`) followed by the pattern.
+So far everything has been played on a piano. That’s because we haven’t specified an instrument. To play a pattern on a specific instrument we write the name of the instrument and a colon (`:`) followed by the pattern.
 
-    Play = Marimba: C D E F
+    Play = Bass: C2 D2 | Eb1 F1
 
 To play an entire sequence on a specific instrument, we just write the sequence after the instrument name instead.
 
-    Play = Marimba: P1 P2
-    P1 = C D E F
-    P2 = F E D C
+    Play = Lead: P1 P2
+    P1 = C D Eb F
+    P2 = G G Gm F F Fm
 
-You can set up which instruments are available when setting up Polyhymnia.
+Which instruments are available depends on how you’ve set up Polyhymnia.
 
 ## Rules
 Patterns and sequences are collectively called rules. On the left hand side is the name of the rule, and on the right hand side is its definition. A rule is simply a way of saying ”when you find this name, replace it with it’s definition.”
@@ -189,29 +189,30 @@ All rules we’ve looked at so far has only played one thing at a time. But you 
 
     Play =
       Kick:  x _ x _
-      Hihat: _ _ x _
+      Hihat: _ x _ x
 
 You can add any number of definitions you want to a rule, and you can even mix pattern definitions and sequence definitions.
 
     Play =
-      Kick:    K1 K2
-      Marimba: C D C G
-      Pad:     C _ _ _
+      Kick:  x _ x _
+      Hihat: _ x _ x
+      Lead:  P1 P2
 
-    K1 = x _ x _
-    K2 = x x x x
+    P1 = C D Eb F
+    P2 = G G Gm F F Fm
 
 If you have parallel definitions that are of different lengths, they will loop until they all end at the same time. For example, if one definition is two bars, and another is three bars, the entire rule will play 2 x 3 = 6 bars.
 
     Play = S1 S2
 
     S1 =
-      Kick:    x _ x _ | x _ x _ | x x x x
-      Marimba: C C C C | E E E E
+      Kick:  x _ x _ | x _ x _ | x _ _ x x x
+      Snare: _ x _ x | _ _ _ _ x x
 
     S2 =
-      Kick:    x x x x
-      Marimba: G G G G
+      Kick:  x _ _ x x x
+      Snare: _ _ _ _ x x
+      Hihat: X x x X x x
 
 ## Conditions
 To make the music react to inputs, you can write conditions that have to be true for a definition to be played. A condition consists of a named input and a comparison with one or two numbers:
@@ -233,5 +234,5 @@ You can comment your code with the `*` character.
 Comments won’t affect what is playing. But they’re great for structuring your composition, or making notes to yourself. Comments can either be on their own lines, or at the end of another line.
 
     Play = P1 P2
-    P1 = C D E F  * This is a comment at the end of a line.
-    P2 = C C C C
+    P1 = C D Eb F  * This is also a comment.
+    P2 = G G Gm F F Fm
