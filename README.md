@@ -1,36 +1,17 @@
 Polyhymnia
 ==========
 
-Polyhymnia is a programming language for composing generative, interactive music. It lets you write rules that evaluate to sequences and patterns of notes, chords and drums.
+Polyhymnia is a programming language for composing music. It lets you write rules that evaluate to sequences and patterns of notes, chords and drums.
 
 **Polyhymnia is still in the design stage. Some things will change. Some things won’t.**
-
-```
-Play =
-  Chords
-  Melody
-  Drums
-
-Chords = Marimba: I | vi | IV vi | I | vi | IV V
-
-Melody =
-  (x > 1) Marimba: 1 _ 5 _ | _ 5 | 6 _ 4 _
-  (x > 3) Marimba: _ 3 _ 3 | 3 _ | _ 4 _ 2
-
-Drums =
-  Kick:          x _ _ _ _ _ x _ _ _ _ _ _ _ x _
-  (x > 2) Snare: _ _ _ _ x _ _ _ _ _ x _ _ _ _ _
-  (x > 4) Clap:  _ _ _ _ _ _ _ _ _ _ _ _ x _ _ _
-  (x > 6) Hihat: x _ _ _ x _ X _ x _ X _ x X x X
-```
 
 ## Getting started
 
 The best way to try Polyhymnia is in the [online playgroud](http://polyhymnia.io).
 
-## Installation
+## Build from source
 
-To use Polyhymnia locally:
+To build Polyhymnia from source:
 
 1. Clone the repository and run `grunt` to build Polyhymnia.
 
