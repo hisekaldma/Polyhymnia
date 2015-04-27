@@ -32,6 +32,7 @@ Polyhymnia.Generator = function() {
   };
 
   this.reset = function() {
+    index = 0;
     resetState(ruleTree);
   };
 
