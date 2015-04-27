@@ -274,31 +274,31 @@ Polyhymnia.parse = function(tokensToParse, instruments) {
     switch (currentToken.type) {
       case tokenType.NOTE:
         note.type = noteType.NOTE;
-        note.note = currentToken.note;
-        note.octave = currentToken.octave;
-        note.velocity = currentToken.velocity;
+        note.note = currentToken.value.note;
+        note.octave = currentToken.value.octave;
+        note.velocity = currentToken.value.velocity;
         break;
       case tokenType.CHORD:
         note.type = noteType.CHORD;
-        note.note = currentToken.note;
-        note.octave = currentToken.octave;
-        note.chord = currentToken.chord;
-        note.velocity = currentToken.velocity;
+        note.note = currentToken.value.note;
+        note.octave = currentToken.value.octave;
+        note.chord = currentToken.value.chord;
+        note.velocity = currentToken.value.velocity;
         break;
       case tokenType.DEGREE_NOTE:
         note.type = noteType.DEGREE_NOTE;
-        note.value = currentToken.value;
-        note.velocity = currentToken.velocity;
+        note.value = currentToken.value.str;
+        note.velocity = currentToken.value.velocity;
         break;
       case tokenType.DEGREE_CHORD:
         note.type = noteType.DEGREE_CHORD;
-        note.value = currentToken.value;
-        note.velocity = currentToken.velocity;
+        note.value = currentToken.value.str;
+        note.velocity = currentToken.value.velocity;
         break;
       case tokenType.DRUM_HIT:
         note.type = noteType.DRUM;
-        note.value = currentToken.value;
-        note.velocity = currentToken.velocity;
+        note.value = currentToken.value.str;
+        note.velocity = currentToken.value.velocity;
         break;
       case tokenType.PAUSE:
         note.type = noteType.PAUSE;
