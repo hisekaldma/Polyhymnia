@@ -3,8 +3,9 @@ var Polyhymnia = Polyhymnia || {};
 Polyhymnia.validate = function(rules, instruments) {
   'use strict';
 
-  var noteType = Polyhymnia.noteType;
+  var noteType   = Polyhymnia.noteType;
   var symbolType = Polyhymnia.symbolType;
+  var Symbol     = Polyhymnia.Symbol;
 
   // Prepare for validation
   var ruleDict = {};
@@ -24,15 +25,7 @@ Polyhymnia.validate = function(rules, instruments) {
 
   return rules;
 
-  function symbol(type, start, end) {
-    rules.symbols.push({
-      type:  type,
-      start: start,
-      end:   end
-    });
-  }
-
-  function error(message, start, end) {
+  function createError(message, start, end) {
     // Remove symbols within error
     rules.symbols = rules.symbols.filter(function(symbol) {
       return !(symbol.start >= start && symbol.end <= end);
@@ -40,7 +33,7 @@ Polyhymnia.validate = function(rules, instruments) {
 
     // Add error
     rules.errors.push({ error: message, start: start, end: end });    
-    rules.symbols.push({ type: 'error', error: message, start: start, end: end });
+    rules.symbols.push(new Symbol(symbolType.ERROR, start, end, message));
   }
 
   function validateRule(rule, path) {
@@ -61,7 +54,7 @@ Polyhymnia.validate = function(rules, instruments) {
     if (!instrument.invalid) {
       // Check that instrument exists
       if (instruments && !instruments[instrument.name]) {
-        error('There is no instrument called ' + instrument.name, instrument.start, instrument.end);
+        createError('There is no instrument called ' + instrument.name, instrument.start, instrument.end);
         instrument.invalid = true;
       }
     }
@@ -74,13 +67,13 @@ Polyhymnia.validate = function(rules, instruments) {
       if (childRule) {
         // Check that reference isn't circular
         if (path.indexOf(reference.name) !== -1) {
-          error(reference.name + ' cannot reference itself', reference.start, reference.end);
+          createError(reference.name + ' cannot reference itself', reference.start, reference.end);
           reference.invalid = true;
         } else {
           validateRule(childRule, path + '/' + reference.name);
         }
       } else {
-        error('There is no rule called ' + reference.name, reference.start, reference.end);
+        createError('There is no rule called ' + reference.name, reference.start, reference.end);
         reference.invalid = true;
       }
     }

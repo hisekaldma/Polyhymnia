@@ -16,15 +16,25 @@ Polyhymnia.symbolType = {
   INSTRUMENT: 'instrument',
   NOTE:       'note',
   CONDITION:  'condition',
-  COMMENT:    'comment'
+  COMMENT:    'comment',
+  ERROR:      'error'
+};
+
+Polyhymnia.Symbol = function(type, start, end, message) {
+  'use strict';
+  this.type    = type;
+  this.start   = start;
+  this.end     = end;
+  this.message = message;
 };
 
 Polyhymnia.parse = function(tokensToParse, instruments) {
   'use strict';
 
-  var tokenType = Polyhymnia.tokenType;
-  var noteType = Polyhymnia.noteType;
+  var tokenType  = Polyhymnia.tokenType;
+  var noteType   = Polyhymnia.noteType;
   var symbolType = Polyhymnia.symbolType;
+  var Symbol     = Polyhymnia.Symbol;
 
   var currentToken;
   var lookaheadToken;
@@ -47,21 +57,19 @@ Polyhymnia.parse = function(tokensToParse, instruments) {
   return rules;
   
 
-  function symbol(type, start, end) {
-    symbols.push({
-      type:  type,
-      start: start || currentToken.start,
-      end:   end   || currentToken.end
-    });
+  function createSymbol(type, start, end) {
+    start = start || currentToken.start;
+    end   = end   || currentToken.end;
+    symbols.push(new Symbol(type, start, end, ''));
   }
 
-  function error(message, start, end) {
+  function createError(message, start, end) {
     start = start || currentToken.start;
     end   = end   || currentToken.end;
 
     errors.push({ error: message, start: start, end: end });
     if (start !== undefined && end !== undefined) {
-      symbols.push({ type: 'error', error: message, start: start, end: end });
+      symbols.push(new Symbol(symbolType.ERROR, start, end, message));
     }
   }
 
@@ -72,11 +80,7 @@ Polyhymnia.parse = function(tokensToParse, instruments) {
 
     // Skip over comments
     if (currentToken.type == tokenType.COMMENT) {
-      symbols.push({
-        type:  'comment',
-        start: currentToken.start,
-        end:   currentToken.end
-      });
+      createSymbol(symbolType.COMMENT);
       nextToken();
     }
   }
@@ -115,27 +119,27 @@ Polyhymnia.parse = function(tokensToParse, instruments) {
       // Named rule
       if (currentToken.type == tokenType.NAME) {
         name = currentToken.value;
-        symbol(symbolType.NAME);
+        createSymbol(symbolType.NAME);
       } else if (currentToken.type == tokenType.NOTE) {
         // ERROR: Name could be confused with note
-        error(currentToken.str + ' is not a valid name, since it\'s a note');
+        createError(currentToken.str + ' is not a valid name, since it\'s a note');
       } else if (currentToken.type == tokenType.CHORD) {
         // ERROR: Name could be confused with chord
-        error(currentToken.str + ' is not a valid name, since it\'s a chord');
+        createError(currentToken.str + ' is not a valid name, since it\'s a chord');
       } else if (currentToken.type == tokenType.DEGREE_CHORD) {
         // ERROR: Name could be confused with degree chord
-        error(currentToken.str + ' is not a valid name, since it\'s a degree chord');
+        createError(currentToken.str + ' is not a valid name, since it\'s a degree chord');
       } else if (currentToken.type == tokenType.DRUM_HIT) {
         // ERROR: Name could be confused with drum hit
-        error(currentToken.str + ' is not a valid name, since it\'s a drum hit');
+        createError(currentToken.str + ' is not a valid name, since it\'s a drum hit');
       } else {
         // ERROR: Expected rule name
-        error(currentToken.str + ' is not a valid name');
+        createError(currentToken.str + ' is not a valid name');
       }
       nextToken();
 
       // Equals
-      symbol(symbolType.EQUAL);
+      createSymbol(symbolType.EQUAL);
       nextToken();
 
       // Optional line break
@@ -182,7 +186,7 @@ Polyhymnia.parse = function(tokensToParse, instruments) {
         return { condition: condition, instrument: instrument, sequence: sequence };
       default:
         // ERROR: Expected a sequence or pattern
-        error('Expected a sequence or pattern');
+        createError('Expected a sequence or pattern');
         return {};
     }
   }
@@ -195,7 +199,7 @@ Polyhymnia.parse = function(tokensToParse, instruments) {
       end:   currentToken.end
     };
 
-    symbol(symbolType.INSTRUMENT);
+    createSymbol(symbolType.INSTRUMENT);
     nextToken();
 
     return instrument;
@@ -211,10 +215,10 @@ Polyhymnia.parse = function(tokensToParse, instruments) {
           start: currentToken.start,
           end:   currentToken.end
         });
-        symbol(symbolType.REFERENCE);
+        createSymbol(symbolType.REFERENCE);
       } else {
         // ERROR: Expected rule name
-        error('Expected a rule name');
+        createError('Expected a rule name');
         sequence.push({
           name:  '',
           start: currentToken.start,
@@ -286,13 +290,13 @@ Polyhymnia.parse = function(tokensToParse, instruments) {
         break;
       default:
         // ERROR: Expected note, chord, drum hit or pause
-        error('Expected a note, chord, drum hit or pause');
+        createError('Expected a note, chord, drum hit or pause');
         valid = false;
         note.type = noteType.PAUSE;
     }
 
     if (valid) {
-      symbol(symbolType.NOTE);
+      createSymbol(symbolType.NOTE);
     }
 
     nextToken();
@@ -379,11 +383,11 @@ Polyhymnia.parse = function(tokensToParse, instruments) {
     }
     else {
       // ERROR: Expected condition
-      error('Expected a condition', start, end);
+      createError('Expected a condition', start, end);
       return undefined;
     }
 
-    symbol(symbolType.CONDITION, start, end);
+    createSymbol(symbolType.CONDITION, start, end);
     return { param: param, min: min, max: max };
   }
 };
