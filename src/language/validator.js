@@ -1,40 +1,41 @@
 var Polyhymnia = Polyhymnia || {};
 
-Polyhymnia.validate = function(rules, instruments) {
+Polyhymnia.validate = function(result, instruments) {
   'use strict';
 
   var noteType   = Polyhymnia.noteType;
   var symbolType = Polyhymnia.symbolType;
   var Symbol     = Polyhymnia.Symbol;
   var Error      = Polyhymnia.Error;
+  var Result     = Polyhymnia.Result;
 
   // Prepare for validation
   var ruleDict = {};
-  rules.forEach(function(rule) {
+  result.rules.forEach(function(rule) {
     ruleDict[rule.name] = rule;
   });
 
   // Validate rules
-  rules.forEach(function(rule) {
+  result.rules.forEach(function(rule) {
     validateRule(rule, rule.name);
   });
 
   // Sort symbols
-  rules.symbols = rules.symbols.sort(function(a, b) {
+  result.symbols = result.symbols.sort(function(a, b) {
     return a.start - b.start;
   });
 
-  return rules;
+  return result;
 
   function createError(message, start, end) {
     // Remove symbols within error
-    rules.symbols = rules.symbols.filter(function(symbol) {
+    result.symbols = result.symbols.filter(function(symbol) {
       return !(symbol.start >= start && symbol.end <= end);
     });
 
     // Add error
-    rules.errors.push(new Error(start, end, message));
-    rules.symbols.push(new Symbol(symbolType.ERROR, start, end, message));
+    result.errors.push(new Error(start, end, message));
+    result.symbols.push(new Symbol(symbolType.ERROR, start, end, message));
   }
 
   function validateRule(rule, path) {
