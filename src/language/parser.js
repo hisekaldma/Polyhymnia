@@ -28,6 +28,13 @@ Polyhymnia.Symbol = function(type, start, end, message) {
   this.message = message;
 };
 
+Polyhymnia.Error = function(start, end, message) {
+  'use strict';
+  this.start   = start;
+  this.end     = end;
+  this.message = message;
+};
+
 Polyhymnia.parse = function(tokensToParse, instruments) {
   'use strict';
 
@@ -35,6 +42,7 @@ Polyhymnia.parse = function(tokensToParse, instruments) {
   var noteType   = Polyhymnia.noteType;
   var symbolType = Polyhymnia.symbolType;
   var Symbol     = Polyhymnia.Symbol;
+  var Error      = Polyhymnia.Error;
 
   var currentToken;
   var lookaheadToken;
@@ -67,7 +75,7 @@ Polyhymnia.parse = function(tokensToParse, instruments) {
     start = start || currentToken.start;
     end   = end   || currentToken.end;
 
-    errors.push({ error: message, start: start, end: end });
+    errors.push(new Error(start, end, message));
     if (start !== undefined && end !== undefined) {
       symbols.push(new Symbol(symbolType.ERROR, start, end, message));
     }

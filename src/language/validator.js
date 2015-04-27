@@ -6,6 +6,7 @@ Polyhymnia.validate = function(rules, instruments) {
   var noteType   = Polyhymnia.noteType;
   var symbolType = Polyhymnia.symbolType;
   var Symbol     = Polyhymnia.Symbol;
+  var Error      = Polyhymnia.Error;
 
   // Prepare for validation
   var ruleDict = {};
@@ -32,7 +33,7 @@ Polyhymnia.validate = function(rules, instruments) {
     });
 
     // Add error
-    rules.errors.push({ error: message, start: start, end: end });    
+    rules.errors.push(new Error(start, end, message));
     rules.symbols.push(new Symbol(symbolType.ERROR, start, end, message));
   }
 
