@@ -43,7 +43,7 @@ The root note can be flat or sharp, and in any octave.
     C4M F#5dim7 Gb2M B-1dim
 
 ### Scale Degrees
-Instead of writing notes in a specific scale, you can also write notes as relative to the current scale. You do this using regular numbers. For example, in the C major scale, `1` means `C`, `2` means `B`, etc.
+Instead of writing notes in a specific scale, you can also write notes as relative to the current scale. You do this using regular numbers. For example, in the C major scale, `1` means `C`, `2` means `D`, etc.
 
     1 2 3 4 5 6 7
 
