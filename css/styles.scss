@@ -110,12 +110,20 @@ body {
 p {
   color: rgba(255,255,255,0.8);
 }
-p + p {
+p + p,
+p + ul,
+ul + p {
   margin-top: 1rem;
 }
 em, strong {
   font-family: $bold;
   font-weight: bold;
+}
+
+/* Lists */
+
+li {
+  list-style-type: none;
 }
 
 /* Headings */
@@ -174,12 +182,14 @@ a {
 
 /* Navigation */
 
-ul {
-  margin: 0;
-  padding: 0;
-}
-li {
-  list-style-type: none;
+header, footer {
+  ul {
+    margin: 0;
+    padding: 0;
+  }
+  li {
+    list-style-type: none;
+  }
 }
 
 /* Code */
@@ -253,7 +263,7 @@ span.reference { color: $color-reference; }
 span.note      { color: $color-note; }
 span.condition { color: $color-condition; }
 span.comment   { color: $color-comment; }
-span.playing   { color: $color-playing; }
+span.playing   { color: $color-playing; border-bottom: 2px solid $color-playing; }
 pre span.playing { color: #000; border-bottom: 2px solid #000; }
 
 /* Tables */

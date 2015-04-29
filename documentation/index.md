@@ -174,7 +174,17 @@ To play an entire sequence on a specific instrument, we just write the sequence 
     P1 = C D Eb F
     P2 = G G Gm F F Fm
 
-Which instruments are available depends on how you’ve set up Polyhymnia.
+The online demo has the following instruments available:
+
+- `Piano`
+- `Marimba`
+- `Bass`
+- `Lead`
+- `Kick`
+- `Snare`
+- `Hihat`
+- `Clap`
+- `Shake`
 
 ## Rules
 Patterns and sequences are collectively called rules. On the left hand side is the name of the rule, and on the right hand side is its definition. A rule is simply a way of saying ”when you find this name, replace it with it’s definition.”
