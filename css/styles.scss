@@ -96,11 +96,8 @@ header, section, footer {
 
 /* Typography */
 
-$regular: "Apercu Regular", Apercu, "Helvetica Neue", Arial, sans-serif;
-$bold:    "Apercu Bold", Apercu, "Helvetica Neue", Arial, sans-serif;
-
 body {
-  font: 400 17px/1.4rem $regular;
+  font: 400 17px/1.4rem Karla, "Helvetica Neue", Arial, sans-serif;
   color: #fff;
   -webkit-text-size-adjust: none;
   -webkit-font-smoothing: antialiased;
@@ -116,7 +113,6 @@ ul + p {
   margin-top: 1rem;
 }
 em, strong {
-  font-family: $bold;
   font-weight: bold;
 }
 
@@ -130,14 +126,12 @@ li {
 
 h1 {
   font-size: 22px;
-  font-family: $bold;
   font-weight: bold;
   margin-top: 1.4rem;
   margin-bottom: 0.7rem;
 }
 h2 {
   font-size: 20px;
-  font-family: $bold;
   font-weight: bold;
   padding-bottom: 0.5rem;
   border-bottom: 3px solid rgba(255, 255, 255, 0.5);
@@ -146,7 +140,6 @@ h2 {
 }
 h3 {
   font-size: 17px;
-  font-family: $bold;
   font-weight: bold;
   margin-top: 2rem;
 }
@@ -434,7 +427,6 @@ body.text {
     }
     &.active {
       > a {
-        font-family: $bold;
         font-weight: bold;
       }
 
