@@ -41,7 +41,7 @@ Polyhymnia.Chords = (function() {
 
   // Gets the midi note numbers of a chord
   self.fromName = function(name, root, octave) {
-    if (!root)
+    if (root === undefined)
       root = 0; // If no root is provided, just use relative note numbers
     else
       root = Polyhymnia.Notes.fromName(root, octave);

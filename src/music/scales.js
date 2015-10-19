@@ -36,7 +36,7 @@ Polyhymnia.Scales = (function() {
 
   // Gets the midi note numbers in a scale
   self.fromName = function(name, tonic, octave) {
-    if (!tonic)
+    if (tonic === undefined)
       tonic = 60; // Default to middle C
     else
       tonic = Polyhymnia.Notes.fromName(tonic, octave);

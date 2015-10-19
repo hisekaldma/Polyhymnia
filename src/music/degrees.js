@@ -46,7 +46,7 @@ Polyhymnia.Degrees = (function() {
 
   // Gets the name of a scale degree chord
   self.toName = function(numbers, tonic, scale) {
-    if (!scale)
+    if (scale === undefined)
       scale = Polyhymnia.Scales.fromName('major', tonic);
     else
       scale = Polyhymnia.Scales.fromName(scale, tonic);
@@ -76,7 +76,7 @@ Polyhymnia.Degrees = (function() {
 
   // Gets the midi note numbers in a scale degree chord
   self.fromName = function(name, tonic, scale) {
-    if (!scale)
+    if (scale === undefined)
       scale = Polyhymnia.Scales.fromName('major', tonic); // Default to major
     else
       scale = Polyhymnia.Scales.fromName(scale, tonic);
