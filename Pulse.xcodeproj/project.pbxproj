@@ -7,11 +7,23 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		AB1FFE281C9CD5CF0073E31A /* MusicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB1FFE261C9CD5CF0073E31A /* MusicTests.swift */; };
+		AB1FFE311C9CD6610073E31A /* Chord.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB1FFE2B1C9CD6610073E31A /* Chord.swift */; };
+		AB1FFE321C9CD6610073E31A /* Chord.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB1FFE2B1C9CD6610073E31A /* Chord.swift */; };
+		AB1FFE331C9CD6610073E31A /* Degree.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB1FFE2C1C9CD6610073E31A /* Degree.swift */; };
+		AB1FFE341C9CD6610073E31A /* Degree.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB1FFE2C1C9CD6610073E31A /* Degree.swift */; };
+		AB1FFE351C9CD6610073E31A /* Note.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB1FFE2D1C9CD6610073E31A /* Note.swift */; };
+		AB1FFE361C9CD6610073E31A /* Note.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB1FFE2D1C9CD6610073E31A /* Note.swift */; };
+		AB1FFE371C9CD6610073E31A /* Octave.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB1FFE2E1C9CD6610073E31A /* Octave.swift */; };
+		AB1FFE381C9CD6610073E31A /* Octave.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB1FFE2E1C9CD6610073E31A /* Octave.swift */; };
+		AB1FFE391C9CD6610073E31A /* Scale.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB1FFE2F1C9CD6610073E31A /* Scale.swift */; };
+		AB1FFE3A1C9CD6610073E31A /* Scale.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB1FFE2F1C9CD6610073E31A /* Scale.swift */; };
+		AB1FFE3B1C9CD6610073E31A /* Velocity.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB1FFE301C9CD6610073E31A /* Velocity.swift */; };
+		AB1FFE3C1C9CD6610073E31A /* Velocity.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB1FFE301C9CD6610073E31A /* Velocity.swift */; };
 		ABFEBBFC1C9C5537008F4A20 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABFEBBFB1C9C5537008F4A20 /* AppDelegate.swift */; };
 		ABFEBBFE1C9C5537008F4A20 /* Document.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABFEBBFD1C9C5537008F4A20 /* Document.swift */; };
 		ABFEBC011C9C5537008F4A20 /* Document.xib in Resources */ = {isa = PBXBuildFile; fileRef = ABFEBBFF1C9C5537008F4A20 /* Document.xib */; };
 		ABFEBC061C9C5537008F4A20 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = ABFEBC041C9C5537008F4A20 /* MainMenu.xib */; };
-		ABFEBC111C9C5537008F4A20 /* PulseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABFEBC101C9C5537008F4A20 /* PulseTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -25,6 +37,13 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		AB1FFE261C9CD5CF0073E31A /* MusicTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MusicTests.swift; sourceTree = "<group>"; };
+		AB1FFE2B1C9CD6610073E31A /* Chord.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Chord.swift; sourceTree = "<group>"; };
+		AB1FFE2C1C9CD6610073E31A /* Degree.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Degree.swift; sourceTree = "<group>"; };
+		AB1FFE2D1C9CD6610073E31A /* Note.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Note.swift; sourceTree = "<group>"; };
+		AB1FFE2E1C9CD6610073E31A /* Octave.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Octave.swift; sourceTree = "<group>"; };
+		AB1FFE2F1C9CD6610073E31A /* Scale.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Scale.swift; sourceTree = "<group>"; };
+		AB1FFE301C9CD6610073E31A /* Velocity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Velocity.swift; sourceTree = "<group>"; };
 		ABFEBBF81C9C5537008F4A20 /* Pulse.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Pulse.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		ABFEBBFB1C9C5537008F4A20 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		ABFEBBFD1C9C5537008F4A20 /* Document.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Document.swift; sourceTree = "<group>"; };
@@ -32,7 +51,6 @@
 		ABFEBC051C9C5537008F4A20 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/MainMenu.xib; sourceTree = "<group>"; };
 		ABFEBC071C9C5537008F4A20 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		ABFEBC0C1C9C5537008F4A20 /* PulseTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PulseTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		ABFEBC101C9C5537008F4A20 /* PulseTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PulseTests.swift; sourceTree = "<group>"; };
 		ABFEBC121C9C5537008F4A20 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -54,9 +72,31 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		AB1FFE291C9CD6380073E31A /* Sources */ = {
+			isa = PBXGroup;
+			children = (
+				AB1FFE2A1C9CD6400073E31A /* Music */,
+			);
+			path = Sources;
+			sourceTree = "<group>";
+		};
+		AB1FFE2A1C9CD6400073E31A /* Music */ = {
+			isa = PBXGroup;
+			children = (
+				AB1FFE2B1C9CD6610073E31A /* Chord.swift */,
+				AB1FFE2C1C9CD6610073E31A /* Degree.swift */,
+				AB1FFE2D1C9CD6610073E31A /* Note.swift */,
+				AB1FFE2E1C9CD6610073E31A /* Octave.swift */,
+				AB1FFE2F1C9CD6610073E31A /* Scale.swift */,
+				AB1FFE301C9CD6610073E31A /* Velocity.swift */,
+			);
+			path = Music;
+			sourceTree = "<group>";
+		};
 		ABFEBBEF1C9C5537008F4A20 = {
 			isa = PBXGroup;
 			children = (
+				AB1FFE291C9CD6380073E31A /* Sources */,
 				ABFEBBFA1C9C5537008F4A20 /* Editor */,
 				ABFEBC0F1C9C5537008F4A20 /* Tests */,
 				ABFEBBF91C9C5537008F4A20 /* Products */,
@@ -87,7 +127,7 @@
 		ABFEBC0F1C9C5537008F4A20 /* Tests */ = {
 			isa = PBXGroup;
 			children = (
-				ABFEBC101C9C5537008F4A20 /* PulseTests.swift */,
+				AB1FFE261C9CD5CF0073E31A /* MusicTests.swift */,
 				ABFEBC121C9C5537008F4A20 /* Info.plist */,
 			);
 			path = Tests;
@@ -194,7 +234,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				ABFEBBFE1C9C5537008F4A20 /* Document.swift in Sources */,
+				AB1FFE331C9CD6610073E31A /* Degree.swift in Sources */,
+				AB1FFE371C9CD6610073E31A /* Octave.swift in Sources */,
+				AB1FFE311C9CD6610073E31A /* Chord.swift in Sources */,
 				ABFEBBFC1C9C5537008F4A20 /* AppDelegate.swift in Sources */,
+				AB1FFE391C9CD6610073E31A /* Scale.swift in Sources */,
+				AB1FFE351C9CD6610073E31A /* Note.swift in Sources */,
+				AB1FFE3B1C9CD6610073E31A /* Velocity.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -202,7 +248,13 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				ABFEBC111C9C5537008F4A20 /* PulseTests.swift in Sources */,
+				AB1FFE3C1C9CD6610073E31A /* Velocity.swift in Sources */,
+				AB1FFE361C9CD6610073E31A /* Note.swift in Sources */,
+				AB1FFE321C9CD6610073E31A /* Chord.swift in Sources */,
+				AB1FFE381C9CD6610073E31A /* Octave.swift in Sources */,
+				AB1FFE3A1C9CD6610073E31A /* Scale.swift in Sources */,
+				AB1FFE281C9CD5CF0073E31A /* MusicTests.swift in Sources */,
+				AB1FFE341C9CD6610073E31A /* Degree.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -320,7 +372,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COMBINE_HIDPI_IMAGES = YES;
-				INFOPLIST_FILE = "$(SRCROOT)/Editor/Info.plist";
+				INFOPLIST_FILE = Editor/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = io.pulselang.Pulse;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -331,7 +383,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COMBINE_HIDPI_IMAGES = YES;
-				INFOPLIST_FILE = "$(SRCROOT)/Editor/Info.plist";
+				INFOPLIST_FILE = Editor/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = io.pulselang.Pulse;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -343,7 +395,7 @@
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				COMBINE_HIDPI_IMAGES = YES;
-				INFOPLIST_FILE = PulseTests/Info.plist;
+				INFOPLIST_FILE = Tests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = io.pulselang.PulseTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -356,7 +408,7 @@
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				COMBINE_HIDPI_IMAGES = YES;
-				INFOPLIST_FILE = PulseTests/Info.plist;
+				INFOPLIST_FILE = Tests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = io.pulselang.PulseTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
