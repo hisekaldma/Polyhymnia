@@ -9,6 +9,8 @@ enum Velocity: Equatable {
     case F
     case FF
     case FFF
+    case Soft
+    case Hard
     case Number(Int)
 
     var numerical: Int {
@@ -22,6 +24,8 @@ enum Velocity: Equatable {
         case F:             return 96
         case FF:            return 112
         case FFF:           return 127
+        case Soft:          return 64
+        case Hard:          return 127
         case let Number(v): return v
         }
     }
@@ -38,6 +42,8 @@ func ==(lhs: Velocity, rhs: Velocity) -> Bool {
     case (.F,       .F):                 return true
     case (.FF,      .FF):                return true
     case (.FFF,     .FFF):               return true
+    case (.Soft,    .Soft):              return true
+    case (.Hard,    .Hard):              return true
     case let (.Number (l), .Number (r)): return l == r
     default:                             return false
     }
