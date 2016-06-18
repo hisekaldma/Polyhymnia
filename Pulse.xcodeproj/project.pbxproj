@@ -8,18 +8,12 @@
 
 /* Begin PBXBuildFile section */
 		AB1FFE281C9CD5CF0073E31A /* MusicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB1FFE261C9CD5CF0073E31A /* MusicTests.swift */; };
-		AB1FFE311C9CD6610073E31A /* Chord.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB1FFE2B1C9CD6610073E31A /* Chord.swift */; };
-		AB1FFE321C9CD6610073E31A /* Chord.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB1FFE2B1C9CD6610073E31A /* Chord.swift */; };
-		AB1FFE331C9CD6610073E31A /* Degree.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB1FFE2C1C9CD6610073E31A /* Degree.swift */; };
-		AB1FFE341C9CD6610073E31A /* Degree.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB1FFE2C1C9CD6610073E31A /* Degree.swift */; };
-		AB1FFE351C9CD6610073E31A /* Note.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB1FFE2D1C9CD6610073E31A /* Note.swift */; };
-		AB1FFE361C9CD6610073E31A /* Note.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB1FFE2D1C9CD6610073E31A /* Note.swift */; };
-		AB1FFE371C9CD6610073E31A /* Octave.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB1FFE2E1C9CD6610073E31A /* Octave.swift */; };
-		AB1FFE381C9CD6610073E31A /* Octave.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB1FFE2E1C9CD6610073E31A /* Octave.swift */; };
-		AB1FFE391C9CD6610073E31A /* Scale.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB1FFE2F1C9CD6610073E31A /* Scale.swift */; };
-		AB1FFE3A1C9CD6610073E31A /* Scale.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB1FFE2F1C9CD6610073E31A /* Scale.swift */; };
-		AB1FFE3B1C9CD6610073E31A /* Velocity.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB1FFE301C9CD6610073E31A /* Velocity.swift */; };
-		AB1FFE3C1C9CD6610073E31A /* Velocity.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB1FFE301C9CD6610073E31A /* Velocity.swift */; };
+		AB1FFE491C9CDC0D0073E31A /* Chord.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB1FFE2B1C9CD6610073E31A /* Chord.swift */; };
+		AB1FFE4A1C9CDC0D0073E31A /* Degree.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB1FFE2C1C9CD6610073E31A /* Degree.swift */; };
+		AB1FFE4B1C9CDC0D0073E31A /* Note.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB1FFE2D1C9CD6610073E31A /* Note.swift */; };
+		AB1FFE4C1C9CDC0D0073E31A /* Octave.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB1FFE2E1C9CD6610073E31A /* Octave.swift */; };
+		AB1FFE4D1C9CDC0D0073E31A /* Scale.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB1FFE2F1C9CD6610073E31A /* Scale.swift */; };
+		AB1FFE4E1C9CDC0D0073E31A /* Velocity.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB1FFE301C9CD6610073E31A /* Velocity.swift */; };
 		ABFEBBFC1C9C5537008F4A20 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABFEBBFB1C9C5537008F4A20 /* AppDelegate.swift */; };
 		ABFEBBFE1C9C5537008F4A20 /* Document.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABFEBBFD1C9C5537008F4A20 /* Document.swift */; };
 		ABFEBC011C9C5537008F4A20 /* Document.xib in Resources */ = {isa = PBXBuildFile; fileRef = ABFEBBFF1C9C5537008F4A20 /* Document.xib */; };
@@ -178,14 +172,16 @@
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 0720;
-				LastUpgradeCheck = 0720;
+				LastUpgradeCheck = 0800;
 				ORGANIZATIONNAME = "Jonathan Hise Kaldma";
 				TargetAttributes = {
 					ABFEBBF71C9C5537008F4A20 = {
 						CreatedOnToolsVersion = 7.2.1;
+						LastSwiftMigration = 0800;
 					};
 					ABFEBC0B1C9C5537008F4A20 = {
 						CreatedOnToolsVersion = 7.2.1;
+						LastSwiftMigration = 0800;
 						TestTargetID = ABFEBBF71C9C5537008F4A20;
 					};
 				};
@@ -234,13 +230,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				ABFEBBFE1C9C5537008F4A20 /* Document.swift in Sources */,
-				AB1FFE331C9CD6610073E31A /* Degree.swift in Sources */,
-				AB1FFE371C9CD6610073E31A /* Octave.swift in Sources */,
-				AB1FFE311C9CD6610073E31A /* Chord.swift in Sources */,
+				AB1FFE4C1C9CDC0D0073E31A /* Octave.swift in Sources */,
+				AB1FFE4A1C9CDC0D0073E31A /* Degree.swift in Sources */,
+				AB1FFE4B1C9CDC0D0073E31A /* Note.swift in Sources */,
+				AB1FFE491C9CDC0D0073E31A /* Chord.swift in Sources */,
 				ABFEBBFC1C9C5537008F4A20 /* AppDelegate.swift in Sources */,
-				AB1FFE391C9CD6610073E31A /* Scale.swift in Sources */,
-				AB1FFE351C9CD6610073E31A /* Note.swift in Sources */,
-				AB1FFE3B1C9CD6610073E31A /* Velocity.swift in Sources */,
+				AB1FFE4D1C9CDC0D0073E31A /* Scale.swift in Sources */,
+				AB1FFE4E1C9CDC0D0073E31A /* Velocity.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -248,13 +244,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				AB1FFE3C1C9CD6610073E31A /* Velocity.swift in Sources */,
-				AB1FFE361C9CD6610073E31A /* Note.swift in Sources */,
-				AB1FFE321C9CD6610073E31A /* Chord.swift in Sources */,
-				AB1FFE381C9CD6610073E31A /* Octave.swift in Sources */,
-				AB1FFE3A1C9CD6610073E31A /* Scale.swift in Sources */,
 				AB1FFE281C9CD5CF0073E31A /* MusicTests.swift in Sources */,
-				AB1FFE341C9CD6610073E31A /* Degree.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -376,6 +366,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = io.pulselang.Pulse;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 3.0;
 			};
 			name = Debug;
 		};
@@ -387,6 +378,8 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = io.pulselang.Pulse;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
+				SWIFT_VERSION = 3.0;
 			};
 			name = Release;
 		};
@@ -399,6 +392,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = io.pulselang.PulseTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 3.0;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Pulse.app/Contents/MacOS/Pulse";
 			};
 			name = Debug;
@@ -412,6 +406,8 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = io.pulselang.PulseTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
+				SWIFT_VERSION = 3.0;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Pulse.app/Contents/MacOS/Pulse";
 			};
 			name = Release;

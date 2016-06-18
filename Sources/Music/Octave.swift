@@ -1,20 +1,20 @@
 
 enum Octave: Equatable {
-    case Default
-    case Number(Int)
+    case standard
+    case number(Int)
     
     var numerical: Int {
         switch self {
-        case Default:       return 3 // Default to the middle octave
-        case let Number(o): return o
+        case .standard:     return 3 // Default to the middle octave
+        case let number(o): return o
         }
     }
 }
 
 func ==(lhs: Octave, rhs: Octave) -> Bool {
     switch (lhs, rhs) {
-    case (.Default, .Default):           return true
-    case let (.Number (l), .Number (r)): return l == r
+    case (.standard, .standard):         return true
+    case let (.number (l), .number (r)): return l == r
     default:                             return false
     }
 }

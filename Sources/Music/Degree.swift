@@ -1,22 +1,22 @@
 
 enum Degree: Equatable {
-    case I
-    case II
-    case III
-    case IV
-    case V
-    case VI
-    case VII
+    case i
+    case ii
+    case iii
+    case iv
+    case v
+    case vi
+    case vii
 
     var numerical: Int {
         switch self {
-        case I:   return 0
-        case II:  return 1
-        case III: return 2
-        case IV:  return 3
-        case V:   return 4
-        case VI:  return 5
-        case VII: return 6
+        case i:   return 0
+        case ii:  return 1
+        case iii: return 2
+        case iv:  return 3
+        case v:   return 4
+        case vi:  return 5
+        case vii: return 6
         }
     }
 }

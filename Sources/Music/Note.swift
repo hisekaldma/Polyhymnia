@@ -1,27 +1,27 @@
 
 enum Note: Equatable {
-    case C, Csharp, Cflat
-    case D, Dsharp, Dflat
-    case E, Esharp, Eflat
-    case F, Fsharp, Fflat
-    case G, Gsharp, Gflat
-    case A, Asharp, Aflat
-    case B, Bsharp, Bflat
+    case c, cSharp, cFlat
+    case d, dSharp, dFlat
+    case e, eSharp, eFlat
+    case f, fSharp, fFlat
+    case g, gSharp, gFlat
+    case a, aSharp, aFlat
+    case b, bSharp, bFlat
 
     var numerical: Int {
         switch self {
-        case C,      Bsharp: return 0
-        case Csharp, Dflat:  return 1
-        case D:              return 2
-        case Dsharp, Eflat:  return 3
-        case E,      Fflat:  return 4
-        case Esharp, F:      return 5
-        case Fsharp, Gflat:  return 6
-        case G:              return 7
-        case Gsharp, Aflat:  return 8
-        case A:              return 9
-        case Asharp, Bflat:  return 10
-        case B,      Cflat:  return 11
+        case c,      bSharp: return 0
+        case cSharp, dFlat:  return 1
+        case d:              return 2
+        case dSharp, eFlat:  return 3
+        case e,      fFlat:  return 4
+        case eSharp, f:      return 5
+        case fSharp, gFlat:  return 6
+        case g:              return 7
+        case gSharp, aFlat:  return 8
+        case a:              return 9
+        case aSharp, bFlat:  return 10
+        case b,      cFlat:  return 11
         }
     }
 }

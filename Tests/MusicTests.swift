@@ -5,32 +5,32 @@ import XCTest
 class MusicTests: XCTestCase {
     
     func testNotes() {
-        let note = Note.C.numerical
+        let note = Note.c.numerical
         XCTAssertEqual(note, 0)
     }
     
     func testChords() {
-        let chord = Chord.Maj.numerical
+        let chord = Chord.maj.numerical
         XCTAssertEqual(chord, [0, 4, 7])
     }
     
     func testDegree() {
-        let degree = Degree.II.numerical
+        let degree = Degree.ii.numerical
         XCTAssertEqual(degree, 1)
     }
     
     func testScale() {
-        let scale = Scale.Major.numerical
+        let scale = Scale.major.numerical
         XCTAssertEqual(scale, [0, 2, 4, 5, 7, 9, 11])
     }
     
-    func testDefaultOctave() {
-        let octave = Octave.Default.numerical
+    func testStandardOctave() {
+        let octave = Octave.standard.numerical
         XCTAssertEqual(octave, 3)
     }
     
-    func testDefaultVelocity() {
-        let velocity = Velocity.Default.numerical
+    func testStandardVelocity() {
+        let velocity = Velocity.standard.numerical
         XCTAssertEqual(velocity, 72)
     }
 }
