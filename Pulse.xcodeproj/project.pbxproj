@@ -15,6 +15,11 @@
 		AB1FFE4D1C9CDC0D0073E31A /* Scale.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB1FFE2F1C9CD6610073E31A /* Scale.swift */; };
 		AB1FFE4E1C9CDC0D0073E31A /* Velocity.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB1FFE301C9CD6610073E31A /* Velocity.swift */; };
 		AB2DA3331D15518C00CA928A /* Asserts.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB2DA3321D15518C00CA928A /* Asserts.swift */; };
+		AB2DA33D1D15552200CA928A /* Lexer.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB2DA3361D15550300CA928A /* Lexer.swift */; };
+		AB2DA33E1D15552600CA928A /* LexPatterns.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB2DA3351D15550300CA928A /* LexPatterns.swift */; };
+		AB2DA33F1D15552900CA928A /* LexFunctions.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB2DA3371D15550300CA928A /* LexFunctions.swift */; };
+		AB2DA3401D15552C00CA928A /* Token.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB2DA3381D15550300CA928A /* Token.swift */; };
+		AB2DA3421D15553A00CA928A /* LexerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB2DA3411D15553A00CA928A /* LexerTests.swift */; };
 		ABFEBBFC1C9C5537008F4A20 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABFEBBFB1C9C5537008F4A20 /* AppDelegate.swift */; };
 		ABFEBBFE1C9C5537008F4A20 /* Document.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABFEBBFD1C9C5537008F4A20 /* Document.swift */; };
 		ABFEBC011C9C5537008F4A20 /* Document.xib in Resources */ = {isa = PBXBuildFile; fileRef = ABFEBBFF1C9C5537008F4A20 /* Document.xib */; };
@@ -40,6 +45,11 @@
 		AB1FFE2F1C9CD6610073E31A /* Scale.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Scale.swift; sourceTree = "<group>"; };
 		AB1FFE301C9CD6610073E31A /* Velocity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Velocity.swift; sourceTree = "<group>"; };
 		AB2DA3321D15518C00CA928A /* Asserts.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Asserts.swift; sourceTree = "<group>"; };
+		AB2DA3351D15550300CA928A /* LexPatterns.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LexPatterns.swift; sourceTree = "<group>"; };
+		AB2DA3361D15550300CA928A /* Lexer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Lexer.swift; sourceTree = "<group>"; };
+		AB2DA3371D15550300CA928A /* LexFunctions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LexFunctions.swift; sourceTree = "<group>"; };
+		AB2DA3381D15550300CA928A /* Token.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Token.swift; sourceTree = "<group>"; };
+		AB2DA3411D15553A00CA928A /* LexerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LexerTests.swift; sourceTree = "<group>"; };
 		ABFEBBF81C9C5537008F4A20 /* Pulse.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Pulse.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		ABFEBBFB1C9C5537008F4A20 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		ABFEBBFD1C9C5537008F4A20 /* Document.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Document.swift; sourceTree = "<group>"; };
@@ -71,6 +81,7 @@
 		AB1FFE291C9CD6380073E31A /* Sources */ = {
 			isa = PBXGroup;
 			children = (
+				AB2DA3341D1554F300CA928A /* Language */,
 				AB1FFE2A1C9CD6400073E31A /* Music */,
 			);
 			path = Sources;
@@ -87,6 +98,17 @@
 				AB1FFE301C9CD6610073E31A /* Velocity.swift */,
 			);
 			path = Music;
+			sourceTree = "<group>";
+		};
+		AB2DA3341D1554F300CA928A /* Language */ = {
+			isa = PBXGroup;
+			children = (
+				AB2DA3361D15550300CA928A /* Lexer.swift */,
+				AB2DA3351D15550300CA928A /* LexPatterns.swift */,
+				AB2DA3371D15550300CA928A /* LexFunctions.swift */,
+				AB2DA3381D15550300CA928A /* Token.swift */,
+			);
+			path = Language;
 			sourceTree = "<group>";
 		};
 		ABFEBBEF1C9C5537008F4A20 = {
@@ -124,6 +146,7 @@
 			isa = PBXGroup;
 			children = (
 				AB2DA3321D15518C00CA928A /* Asserts.swift */,
+				AB2DA3411D15553A00CA928A /* LexerTests.swift */,
 				AB1FFE261C9CD5CF0073E31A /* MusicTests.swift */,
 				ABFEBC121C9C5537008F4A20 /* Info.plist */,
 			);
@@ -234,11 +257,15 @@
 			files = (
 				ABFEBBFE1C9C5537008F4A20 /* Document.swift in Sources */,
 				AB1FFE4C1C9CDC0D0073E31A /* Octave.swift in Sources */,
+				AB2DA33E1D15552600CA928A /* LexPatterns.swift in Sources */,
+				AB2DA3401D15552C00CA928A /* Token.swift in Sources */,
 				AB1FFE4A1C9CDC0D0073E31A /* Degree.swift in Sources */,
 				AB1FFE4B1C9CDC0D0073E31A /* Note.swift in Sources */,
+				AB2DA33F1D15552900CA928A /* LexFunctions.swift in Sources */,
 				AB1FFE491C9CDC0D0073E31A /* Chord.swift in Sources */,
 				ABFEBBFC1C9C5537008F4A20 /* AppDelegate.swift in Sources */,
 				AB1FFE4D1C9CDC0D0073E31A /* Scale.swift in Sources */,
+				AB2DA33D1D15552200CA928A /* Lexer.swift in Sources */,
 				AB1FFE4E1C9CDC0D0073E31A /* Velocity.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -248,6 +275,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				AB1FFE281C9CD5CF0073E31A /* MusicTests.swift in Sources */,
+				AB2DA3421D15553A00CA928A /* LexerTests.swift in Sources */,
 				AB2DA3331D15518C00CA928A /* Asserts.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
